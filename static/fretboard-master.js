@@ -470,7 +470,7 @@ async function analyzeQuizAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('http://localhost:5001/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
     document.getElementById('quizStatus').textContent = '';
     
     const feedback = document.getElementById('quizFeedback');
@@ -696,7 +696,7 @@ async function analyzeLearningAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('http://localhost:5001/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
     
     const feedback = document.getElementById('levelFeedback');
     
@@ -875,7 +875,7 @@ async function analyzeLevelQuizAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('http://localhost:5001/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
     
     if (result.result === 'perfect') {
         quizCorrect++;
@@ -976,7 +976,7 @@ async function fetchFreePlayChallenge() {
     document.getElementById('freeplayFeedback').classList.add('hidden');
     document.getElementById('freeplayStatus').textContent = '';
     
-    const response = await fetch('http://localhost:5001/get_challenge');
+    const response = await fetch('https://fretboard-master.onrender.com/get_challenge');
     currentChallenge = await response.json();
     
     document.getElementById('freeplayInstruction').textContent = currentChallenge.instruction;
@@ -1100,7 +1100,7 @@ async function analyzeFreePlayAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('http://localhost:5001/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
     document.getElementById('freeplayStatus').textContent = '';
     
     if (result.result === 'perfect') {

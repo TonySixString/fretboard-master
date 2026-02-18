@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fretboard Master - Tuner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .tuner-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+
+        .tuner-title {
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .strings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .string-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border-radius: 12px;
+            background: #f5f5f5;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .string-indicator.active {
+            background: #ede9ff;
+            border-color: #667eea;
+        }
+
+        .string-indicator.in-tune {
+            background: #d4edda;
+            border-color: #48bb78;
+        }
+
+        .string-number {
+            font-size: 0.75em;
+            color: #999;
+            margin-bottom: 2px;
+        }
+
+        .string-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .string-status {
+            font-size: 1em;
+            margin-top: 4px;
+        }
+
+        .meter-section {
+            margin-bottom: 20px;
+        }
+
+        .meter-label {
+            text-align: center;
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .meter-container {
+            position: relative;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 30px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .meter-zone-flat {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(to right, #fc8181, #fed7aa);
+        }
+
+        .meter-zone-sharp {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(to left, #fc8181, #fed7aa);
+        }
+
+        .meter-zone-intune {
+            position: absolute;
+            left: 37%;
+            top: 0;
+            width: 26%;
+            height: 100%;
+            background: #68d391;
+        }
+
+        .center-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: rgba(255,255,255,0.5);
+            z-index: 5;
+        }
+
+        .needle {
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            width: 4px;
+            background: #333;
+            border-radius: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.1s ease;
+            z-index: 10;
+        }
+
+        .needle::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #333;
+        }
+
+        .detected-note {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .tuner-feedback {
+            text-align: center;
+            font-size: 1em;
+            font-weight: 600;
+            color: #555;
+            min-height: 24px;
+            padding: 5px;
+        }
+
+        .tuner-feedback.in-tune { color: #2f855a; }
+        .tuner-feedback.sharp { color: #c05621; }
+        .tuner-feedback.flat { color: #c05621; }
+
+        .btn-start {
+            background: #48bb78;
+            color: white;
+            display: none;
+        }
+
+        .btn-start:hover { background: #38a169; }
+
+        .btn-skip {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.4);
+            font-size: 0.95em;
+            padding: 14px 30px;
+        }
+
+        .btn-skip:hover { background: rgba(255,255,255,0.3); }
+
+        .tuner-status {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        /* Start button to activate mic */
+        .btn-activate {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span>Six String</span> Country</h1>
+<p style="color:rgba(255,255,255,0.5); font-size:0.85em; text-transform:uppercase; letter-spacing:3px; margin-top:-10px; margin-bottom:5px;">Fretboard Master</p>
+        </header>
+
+        <div class="tuner-card">
+            <p class="tuner-title">Let's get in tune first!</p>
+
+            <div class="strings-grid">
+                <div class="string-indicator" id="str-6">
+                    <span class="string-number">6th</span>
+                    <span class="string-name">E</span>
+                    <span class="string-status">○</span>
+                </div>
+                <div class="string-indicator" id="str-5">
+                    <span class="string-number">5th</span>
+                    <span class="string-name">A</span>
+                    <span class="string-status">○</span>
+                </div>
+                <div class="string-indicator" id="str-4">
+                    <span class="string-number">4th</span>
+                    <span class="string-name">D</span>
+                    <span class="string-status">○</span>
+                </div>
+                <div class="string-indicator" id="str-3">
+                    <span class="string-number">3rd</span>
+                    <span class="string-name">G</span>
+                    <span class="string-status">○</span>
+                </div>
+                <div class="string-indicator" id="str-2">
+                    <span class="string-number">2nd</span>
+                    <span class="string-name">B</span>
+                    <span class="string-status">○</span>
+                </div>
+                <div class="string-indicator" id="str-1">
+                    <span class="string-number">1st</span>
+                    <span class="string-name">E</span>
+                    <span class="string-status">○</span>
+                </div>
+            </div>
+
+            <div class="detected-note" id="detectedNote">—</div>
+
+            <div class="meter-section">
+                <div class="meter-label">Flat ←&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ Sharp</div>
+                <div class="meter-container">
+                    <div class="meter-zone-flat"></div>
+                    <div class="meter-zone-intune"></div>
+                    <div class="meter-zone-sharp"></div>
+                    <div class="center-line"></div>
+                    <div class="needle" id="needle"></div>
+                </div>
+            </div>
+
+            <div class="tuner-feedback" id="tunerFeedback">Tap "Start Tuner" to begin</div>
+        </div>
+
+        <div class="controls">
+            <button id="activateBtn" class="btn btn-activate" onclick="startTuner()">🎤 Start Tuner</button>
+            <button id="startBtn" class="btn btn-start" onclick="window.location.href='/game'">Let's Play! 🎸</button>
+            <button class="btn btn-skip" onclick="window.location.href='/game'">Skip Tuning →</button>
+        </div>
+
+        <div class="tuner-status" id="tunerStatus"></div>
+    </div>
+
+    <script>
+        const STRING_FREQS = {
+            6: { freq: 82.41,  name: 'E', label: '6th string (Low E)' },
+            5: { freq: 110.00, name: 'A', label: '5th string (A)' },
+            4: { freq: 146.83, name: 'D', label: '4th string (D)' },
+            3: { freq: 196.00, name: 'G', label: '3rd string (G)' },
+            2: { freq: 246.94, name: 'B', label: '2nd string (B)' },
+            1: { freq: 329.63, name: 'E', label: '1st string (High E)' }
+        };
+
+        const NOTE_NAMES = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
+        const tunedStrings = new Set();
+        let audioContext = null;
+        let analyser = null;
+        let isRunning = false;
+
+        function detectClosestString(freq) {
+            let closest = null;
+            let minCents = Infinity;
+            for (const [strNum, strData] of Object.entries(STRING_FREQS)) {
+                for (let octave = -1; octave <= 1; octave++) {
+                    const checkFreq = strData.freq * Math.pow(2, octave);
+                    const cents = 1200 * Math.log2(freq / checkFreq);
+                    if (Math.abs(cents) < Math.abs(minCents)) {
+                        minCents = cents;
+                        closest = { strNum: parseInt(strNum), cents, strData };
+                    }
+                }
+            }
+            return closest;
+        }
+
+        function freqToNoteName(freq) {
+            const midi = 69 + 12 * Math.log2(freq / 440.0);
+            const noteIndex = Math.round(midi) % 12;
+            return NOTE_NAMES[(noteIndex + 12) % 12];
+        }
+
+        function updateNeedle(cents) {
+            const clamped = Math.max(-50, Math.min(50, cents));
+            const percent = ((clamped + 50) / 100) * 100;
+            document.getElementById('needle').style.left = `${percent}%`;
+        }
+
+        function updateStringIndicator(strNum, inTune) {
+            const el = document.getElementById(`str-${strNum}`);
+            const status = el.querySelector('.string-status');
+            document.querySelectorAll('.string-indicator').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+            if (inTune && !tunedStrings.has(strNum)) {
+                el.classList.add('in-tune');
+                status.textContent = '✅';
+                tunedStrings.add(strNum);
+                if (tunedStrings.size === 6) {
+                    document.getElementById('startBtn').style.display = 'block';
+                    document.getElementById('tunerStatus').textContent = '🎉 All strings in tune!';
+                }
+            }
+        }
+
+        function updateFeedback(cents, strData) {
+            const feedback = document.getElementById('tunerFeedback');
+            const absC = Math.abs(cents);
+            if (absC <= 10) {
+                feedback.textContent = `✅ ${strData.label}: In tune!`;
+                feedback.className = 'tuner-feedback in-tune';
+            } else if (cents < 0) {
+                const amount = absC > 30 ? 'quite flat' : 'a little flat';
+                feedback.textContent = `🔺 ${strData.label}: You're ${amount} — tune up`;
+                feedback.className = 'tuner-feedback flat';
+            } else {
+                const amount = absC > 30 ? 'quite sharp' : 'a little sharp';
+                feedback.textContent = `🔻 ${strData.label}: You're ${amount} — tune down`;
+                feedback.className = 'tuner-feedback sharp';
+            }
+        }
+
+        async function startTuner() {
+            try {
+                document.getElementById('activateBtn').style.display = 'none';
+                document.getElementById('tunerFeedback').textContent = 'Listening... play any string!';
+
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 4096;
+                source.connect(analyser);
+                isRunning = true;
+                detectPitch();
+            } catch (err) {
+                document.getElementById('tunerFeedback').textContent = '❌ Microphone access denied';
+                document.getElementById('activateBtn').style.display = 'block';
+            }
+        }
+
+        function detectPitch() {
+            if (!isRunning) return;
+            const buffer = new Float32Array(analyser.fftSize);
+            analyser.getFloatTimeDomainData(buffer);
+            const freq = autoCorrelate(buffer, audioContext.sampleRate);
+
+            if (freq > 60 && freq < 400) {
+                const note = freqToNoteName(freq);
+                document.getElementById('detectedNote').textContent = note;
+                const match = detectClosestString(freq);
+                if (match && Math.abs(match.cents) < 60) {
+                    updateNeedle(match.cents);
+                    updateStringIndicator(match.strNum, Math.abs(match.cents) <= 10);
+                    updateFeedback(match.cents, match.strData);
+                }
+            } else {
+                document.getElementById('needle').style.left = '50%';
+            }
+
+            requestAnimationFrame(detectPitch);
+        }
+
+        function autoCorrelate(buffer, sampleRate) {
+            let rms = 0;
+            for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+            rms = Math.sqrt(rms / buffer.length);
+            if (rms < 0.01) return -1;
+
+            const SIZE = buffer.length;
+            const correlations = new Array(SIZE).fill(0);
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE - i; j++) {
+                    correlations[i] += buffer[j] * buffer[j + i];
+                }
+            }
+
+            let d = 0;
+            while (correlations[d] > correlations[d + 1]) d++;
+
+            let maxVal = -1, maxPos = -1;
+            for (let i = d; i < SIZE; i++) {
+                if (correlations[i] > maxVal) {
+                    maxVal = correlations[i];
+                    maxPos = i;
+                }
+            }
+
+            if (maxPos <= 0) return -1;
+
+            const x1 = correlations[maxPos - 1];
+            const x2 = correlations[maxPos];
+            const x3 = correlations[maxPos + 1];
+            const a = (x1 + x3 - 2 * x2) / 2;
+            const b = (x3 - x1) / 2;
+            const shift = a ? -b / (2 * a) : 0;
+
+            return sampleRate / (maxPos + shift);
+        }
+    </script>
+</body>
+</html>

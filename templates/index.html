@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fretboard Master</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=102">
+    <style>
+        .mode-select-grid {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .mode-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .mode-card:hover {
+            background: rgba(232,87,42,0.1);
+            border-color: #e8572a;
+            transform: translateY(-2px);
+        }
+        
+        .mode-card-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #e8572a;
+            margin-bottom: 10px;
+        }
+        
+        .mode-card-desc {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .level-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .level-card.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .level-card.completed {
+            background: rgba(72,187,120,0.15);
+            border-color: #48bb78;
+        }
+        
+        .level-card.current {
+            background: rgba(232,87,42,0.15);
+            border-color: #e8572a;
+        }
+        
+        .level-card:hover:not(.locked) {
+            transform: translateY(-2px);
+            border-color: #e8572a;
+        }
+        
+        .level-number {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #e8572a;
+            margin-bottom: 5px;
+        }
+        
+        .level-desc {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85em;
+        }
+        
+        .level-score {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(232,87,42,0.8);
+            color: white;
+            border-radius: 12px;
+            padding: 3px 8px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        
+        .quiz-question {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
+            margin: 15px 0;
+        }
+        
+        .section-divider {
+            margin: 30px 0 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .result-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .result-score {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #e8572a;
+            margin: 10px 0;
+        }
+
+        .result-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .result-message {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .notes-list {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .skill-badge {
+            display: inline-block;
+            background: rgba(232,87,42,0.2);
+            border: 2px solid #e8572a;
+            color: #e8572a;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.9em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .skill-progress {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+            margin-top: 8px;
+        }
+
+        .fretboard-diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span>Six String</span> Country</h1>
+            <p style="color:rgba(255,255,255,0.5); font-size:0.85em; letter-spacing:3px; margin-top:-10px; margin-bottom:15px;">Fretboard Master</p>
+        </header>
+
+        <!-- SCREEN 1: Mode Selection -->
+        <div id="screen-mode-select">
+            <div class="content-card">
+                <div class="mode-select-grid">
+                    <div class="mode-card" onclick="startLearning()">
+                        <div class="mode-card-title">📚 Start Learning</div>
+                        <div class="mode-card-desc">Begin from the basics with guided lessons</div>
+                    </div>
+                    
+                    <div class="mode-card" onclick="startPlacementQuiz()">
+                        <div class="mode-card-title">🎯 Placement Quiz</div>
+                        <div class="mode-card-desc">Test your skills and start at the right level</div>
+                    </div>
+                    
+                    <div class="mode-card" onclick="startFreePlay()">
+                        <div class="mode-card-title">🎸 Free Play</div>
+                        <div class="mode-card-desc">Practice any note, any string</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <a href="/chords" class="btn btn-primary" style="text-align:center; text-decoration:none;">Chord Trainer →</a>
+                <a href="/" class="btn btn-skip" style="text-align:center; text-decoration:none;">← Back to Tuner</a>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Dashboard -->
+        <div id="screen-dashboard" class="hidden">
+            <div class="content-card">
+                <div class="stats" style="justify-content:center; margin-bottom:10px;">
+                    <div class="stat">
+                        <span class="stat-value" id="totalPoints">0</span>
+                        <span class="stat-label">Total Points</span>
+                    </div>
+                </div>
+                <div style="text-align:center; margin-bottom:5px;">
+                    <span class="skill-badge" id="skillLevel">Learning</span>
+                </div>
+                <div style="text-align:center; margin-bottom:20px;">
+                    <span class="skill-progress" id="skillProgress">0/420 to Apprentice</span>
+                </div>
+                
+                <div class="section-divider">
+                    <div class="section-title">Frets 0-5</div>
+                    <div class="level-grid" id="levelGrid1"></div>
+                </div>
+                
+                <div class="section-divider">
+                    <div class="section-title">Frets 6-12</div>
+                    <div class="level-grid" id="levelGrid2"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startFreePlay()">Free Play</button>
+                <button class="btn btn-skip" onclick="showScreen('screen-mode-select')">← Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Placement Quiz -->
+        <div id="screen-quiz" class="hidden">
+            <div class="content-card">
+                <p class="section-title">Placement Quiz</p>
+                <p class="quiz-question" id="quizProgress">Question 1 of 10</p>
+                <div class="instruction-text" id="quizInstruction">Get ready...</div>
+                
+                <div class="timer-container" id="quizTimer" style="display:none;">
+                    <svg class="timer-svg" viewBox="0 0 100 100">
+                        <circle class="timer-bg" cx="50" cy="50" r="45"/>
+                        <circle class="timer-progress" id="quizTimerCircle" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="0"/>
+                    </svg>
+                    <div class="timer-number" id="quizTimerNumber">5</div>
+                    <div class="timer-label" id="quizTimerLabel">Get Ready</div>
+                </div>
+                
+                <div id="quizFeedback" class="feedback hidden"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-skip" onclick="showScreen('screen-mode-select')">Cancel Quiz</button>
+            </div>
+            <div class="status" id="quizStatus"></div>
+        </div>
+
+        <!-- SCREEN 4: Quiz Results -->
+        <div id="screen-quiz-results" class="hidden">
+            <div class="content-card">
+                <p class="section-title">Quiz Complete!</p>
+                
+                <div class="result-card">
+                    <div class="result-label">Frets 0-5</div>
+                    <div class="result-score" id="quizResultScore05">0%</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-label">Frets 6-12</div>
+                    <div class="result-score" id="quizResultScore612">0%</div>
+                </div>
+                
+                <div class="result-message" id="quizRecommendation">
+                    You're all set!
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showScreen('screen-dashboard')">Go to Dashboard →</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: Level Intro -->
+        <div id="screen-level-intro" class="hidden">
+            <div class="content-card">
+                <p class="section-title" id="levelIntroTitle">String 1 • Frets 0-5</p>
+                
+                <p style="color:rgba(255,255,255,0.8); text-align:center; margin:20px 0; font-size:1.05em;">
+                    Let's learn the notes on this string!
+                </p>
+                
+                <div class="fretboard-diagram-container">
+                    <svg id="levelIntroDiagram"></svg>
+                </div>
+                
+                <div class="notes-list" id="levelIntroNotes"></div>
+                
+                <p style="color:rgba(255,255,255,0.6); text-align:center; margin-top:20px; font-size:0.95em;">
+                    You'll practice each note, then take a short quiz.
+                </p>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startLevelLearning()">Let's Go! →</button>
+                <button class="btn btn-skip" onclick="skipLevel()">Skip This Level →</button>
+                <button class="btn btn-skip" onclick="showScreen('screen-dashboard')">← Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: Level Play (Learning + Quiz) -->
+        <div id="screen-level" class="hidden">
+            <div class="content-card">
+                <p class="section-title" id="levelTitle">String 1 • Frets 0-5</p>
+                <div class="stats" style="justify-content:center; margin-bottom:15px;">
+                    <div class="stat">
+                        <span class="stat-value" id="levelPoints">0</span>
+                        <span class="stat-label">Points / 100</span>
+                    </div>
+                </div>
+                
+                <div class="fretboard-diagram-container">
+                    <svg id="levelDiagram"></svg>
+                </div>
+                
+                <div class="instruction-text" id="levelInstruction">Get ready...</div>
+                
+                <div class="timer-container" id="levelTimer" style="display:none;">
+                    <svg class="timer-svg" viewBox="0 0 100 100">
+                        <circle class="timer-bg" cx="50" cy="50" r="45"/>
+                        <circle class="timer-progress" id="levelTimerCircle" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="0"/>
+                    </svg>
+                    <div class="timer-number" id="levelTimerNumber">5</div>
+                    <div class="timer-label" id="levelTimerLabel">Get Ready</div>
+                </div>
+                
+                <div id="levelFeedback" class="feedback hidden"></div>
+            </div>
+            
+            <div class="settings-row" id="levelPrepTimeRow" style="display:none;">
+                <span class="settings-label">Prep Time:</span>
+                <button class="adj-btn" onclick="adjustPrepTime(-1)">−</button>
+                <span class="settings-value" id="levelPrepTime">7s</span>
+                <button class="adj-btn" onclick="adjustPrepTime(1)">+</button>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-skip" onclick="exitLevel()">← Back to Dashboard</button>
+            </div>
+            <div class="status" id="levelStatus"></div>
+        </div>
+
+        <!-- SCREEN 7: Level Complete -->
+        <div id="screen-level-complete" class="hidden">
+            <div class="content-card">
+                <p class="section-title" id="levelCompleteTitle">🎉 Level Complete!</p>
+                
+                <div class="result-card">
+                    <div class="result-score" id="levelCompleteScore">8 out of 10</div>
+                    <div class="result-message" id="levelCompleteMessage">Great job!</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="levelContinueBtn" onclick="continueFromLevel()">Next Level →</button>
+                <button class="btn btn-skip" id="levelRetakeBtn" onclick="retakeLevel()">🔄 Retake Level</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 8: Free Play -->
+        <div id="screen-freeplay" class="hidden">
+            <div class="content-card">
+                <div class="stats" style="margin-bottom:15px;">
+                    <div class="stat">
+                        <span class="stat-value" id="streak">0</span>
+                        <span class="stat-label">Streak</span>
+                    </div>
+                </div>
+
+                <div class="instruction-text" id="freeplayInstruction">Press Play to start!</div>
+
+                <div class="timer-container" id="freeplayTimer" style="display:none;">
+                    <svg class="timer-svg" viewBox="0 0 100 100">
+                        <circle class="timer-bg" cx="50" cy="50" r="45"/>
+                        <circle class="timer-progress" id="freeplayTimerCircle" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="0"/>
+                    </svg>
+                    <div class="timer-number" id="freeplayTimerNumber">7</div>
+                    <div class="timer-label" id="freeplayTimerLabel">Get Ready</div>
+                </div>
+
+                <div id="freeplayFeedback" class="feedback hidden"></div>
+            </div>
+
+            <div class="settings-row">
+                <span class="settings-label">Prep Time:</span>
+                <button class="adj-btn" onclick="adjustPrepTime(-1)">−</button>
+                <span class="settings-value" id="freeplayPrepTime">7s</span>
+                <button class="adj-btn" onclick="adjustPrepTime(1)">+</button>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="freeplayBtn" onclick="toggleFreePlay()">▶ Play</button>
+                <button class="btn btn-skip" onclick="showScreen('screen-mode-select')">← Back to Menu</button>
+            </div>
+            <div class="status" id="freeplayStatus"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='fretboard-master.js') }}?v=102"></script>
+</body>
+</html>

@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fretboard Master - Chord Trainer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
+    <script src="{{ url_for('static', filename='chords.js') }}?v=2"></script>
+    <style>
+        .key-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .key-btn {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 15px 5px;
+            border-radius: 12px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.5em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .key-btn:hover, .key-btn.selected {
+            background: rgba(232,87,42,0.3);
+            border-color: #e8572a;
+            color: #e8572a;
+        }
+
+        .key-description {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+
+        .progression-preview {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .prog-chord {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 8px 14px;
+            text-align: center;
+        }
+
+        .prog-chord-roman {
+            font-size: 0.7em;
+            color: #e8572a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prog-chord-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: white;
+        }
+
+        .content-card {
+            background: #243b44;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .chord-name-display {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.2em;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .chord-roman {
+            font-size: 0.9em;
+            color: #e8572a;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .chord-intro {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .chord-grid-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        svg.chord-svg { overflow: visible; }
+
+        .note-instruction {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .note-instruction .string-label {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .note-instruction .note-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #e8572a;
+            margin-bottom: 5px;
+        }
+
+        .note-instruction .interval-name {
+            font-size: 1em;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .note-instruction .interval-desc {
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.4;
+        }
+
+        .string-progress {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .string-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            transition: all 0.3s;
+        }
+
+        .string-dot.active {
+            background: #e8572a;
+            transform: scale(1.3);
+        }
+
+        .string-dot.done { background: #48bb78; }
+
+        .songs-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .songs-label {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .songs-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .song-tag {
+            background: rgba(232,87,42,0.15);
+            border: 1px solid rgba(232,87,42,0.3);
+            color: #f0845a;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+        }
+
+        .game-mode-card {
+            background: #243b44;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .game-chord-display {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 4em;
+            font-weight: 800;
+            color: white;
+            margin: 20px 0 5px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-roman-display {
+            font-size: 1em;
+            color: #e8572a;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            border-color: #e8572a;
+            background: rgba(232,87,42,0.15);
+            color: #e8572a;
+        }
+
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Active dot highlight on diagram */
+        .active-diagram-dot {
+            r: 12 !important;
+            filter: drop-shadow(0 0 8px #e8572a);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span>Six String</span> Country</h1>
+            <p style="color:rgba(255,255,255,0.5); font-size:0.85em; text-transform:uppercase; letter-spacing:3px; margin-top:-10px; margin-bottom:15px;">Chord Trainer</p>
+        </header>
+
+        <!-- SCREEN 1: Key Selection -->
+        <div id="screen-key-select">
+            <div class="content-card">
+                <p class="section-title">Choose a Key</p>
+                <div class="key-grid">
+                    <button class="key-btn" onclick="selectKey('G', this)">G</button>
+                    <button class="key-btn" onclick="selectKey('C', this)">C</button>
+                    <button class="key-btn" onclick="selectKey('D', this)">D</button>
+                    <button class="key-btn" onclick="selectKey('A', this)">A</button>
+                    <button class="key-btn" onclick="selectKey('E', this)">E</button>
+                </div>
+                <p class="key-description" id="keyDescription">Select a key to get started</p>
+                <div class="progression-preview" id="progressionPreview"></div>
+                <div id="songsPreview" class="songs-section hidden">
+                    <p class="songs-label">Songs that use these chords</p>
+                    <div class="songs-list" id="songsList"></div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" id="startKeyBtn" onclick="startLearning()" style="display:none;">
+                    Start Learning →
+                </button>
+                <a href="/" class="btn btn-skip" style="text-align:center; text-decoration:none;">← Back to Tuner</a>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Chord Intro -->
+        <div id="screen-chord-intro" class="hidden">
+            <div class="content-card">
+                <div class="chord-name-display" id="introChordName"></div>
+                <div class="chord-roman" id="introChordRoman"></div>
+                <p class="chord-intro" id="introChordText"></p>
+                <div class="chord-grid-container">
+                    <svg class="chord-svg" id="chordSvg" width="160" height="200"></svg>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startNoteByNote()">Learn This Chord →</button>
+                <button class="btn btn-skip" onclick="skipToNextChord()">Skip This Chord</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Note by Note -->
+        <div id="screen-note-by-note" class="hidden">
+            <div class="content-card">
+                <p class="section-title" id="noteByNoteChordName"></p>
+                <div class="string-progress" id="stringProgress"></div>
+                <div class="note-instruction">
+                    <div class="string-label" id="currentStringLabel"></div>
+                    <div class="note-name" id="currentNoteName"></div>
+                    <div class="interval-name" id="currentIntervalName"></div>
+                    <div class="interval-desc" id="currentIntervalDesc"></div>
+                </div>
+                <div class="chord-grid-container">
+                    <svg class="chord-svg" id="chordSvgNBN" width="160" height="200"></svg>
+                </div>
+                <div id="noteByNoteFeedback" class="feedback hidden"></div>
+            </div>
+
+<div class="controls">
+                <button class="btn btn-primary" id="nbnListenBtn" style="display:none;">
+                    🎤 Play This Note
+                </button>
+                <button class="btn btn-skip" onclick="skipToNextChord()">Skip This Chord</button>
+            </div>
+            <div class="status" id="nbnStatus"></div>
+        </div>
+
+        <!-- SCREEN 4: Strum Check -->
+        <div id="screen-strum" class="hidden">
+            <div class="content-card" style="text-align:center;">
+                <p class="section-title">All Notes Confirmed!</p>
+                <div class="chord-name-display" id="strumChordName"></div>
+                <p style="color:rgba(255,255,255,0.6); margin: 15px 0; font-size:1em; line-height:1.5;">
+                    Now strum all the strings together.<br>Make sure every finger is pressed firmly!
+                </p>
+                <div class="chord-grid-container">
+                    <svg class="chord-svg" id="chordSvgStrum" width="160" height="200"></svg>
+                </div>
+                <div id="strumFeedback" class="feedback hidden"></div>
+            </div>
+
+<div class="controls">
+                <button class="btn btn-primary" id="strumListenBtn" style="display:none;">
+                    🎸 Strum It!
+                </button>
+                <button class="btn btn-skip" onclick="skipToNextChord()">Skip This Chord</button>
+            </div>
+            <div class="status" id="strumStatus"></div>
+        </div>
+
+        <!-- SCREEN 5: Game Mode -->
+        <div id="screen-game" class="hidden">
+            <div class="game-mode-card">
+                <p class="section-title" id="gameKeyLabel"></p>
+                <div class="mode-selector">
+                    <button class="mode-btn active" id="modeRandom" onclick="setGameMode('random')">Random</button>
+                    <button class="mode-btn" id="modeProgression" onclick="setGameMode('progression')">Progression</button>
+                </div>
+                <div class="game-chord-display" id="gameChordDisplay">—</div>
+                <div class="game-roman-display" id="gameRomanDisplay"></div>
+                <div id="gameFeedback" class="feedback hidden"></div>
+            </div>
+            <div class="settings-row">
+                <span class="settings-label">Prep Time:</span>
+                <button class="adj-btn" onclick="adjustPrepTime(-1)">−</button>
+                <span class="settings-value" id="prepTimeDisplay2">7s</span>
+                <button class="adj-btn" onclick="adjustPrepTime(1)">+</button>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" id="gamePlayBtn" onclick="toggleGamePlay()">▶ Play</button>
+            </div>
+            <div class="status" id="gameStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedKey = null;
+        let currentKeyData = null;
+        let currentChordIndex = 0;
+        let currentChordKey = null;
+        let currentChordData = null;
+        let currentStringIndex = 0;
+        let playableStrings = [];
+        let prepTime = 7;
+        let gameMode = 'random';
+        let isGamePlaying = false;
+        let progressionIndex = 0;
+        let gameTimeout = null;
+        let countdownInterval = null;
+        let currentActiveDot = null;
+
+        function selectKey(key, btn) {
+            selectedKey = key;
+            currentKeyData = KEYS[key];
+            document.querySelectorAll('.key-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('keyDescription').textContent = currentKeyData.description;
+            const preview = document.getElementById('progressionPreview');
+            preview.innerHTML = currentKeyData.chords.map(chordKey => {
+                const chord = CHORD_DATA[chordKey];
+                return `<div class="prog-chord">
+                    <div class="prog-chord-roman">${chord.roman}</div>
+                    <div class="prog-chord-name">${chord.name}</div>
+                </div>`;
+            }).join('');
+            document.getElementById('songsList').innerHTML = currentKeyData.songs.map(s =>
+                `<span class="song-tag">🎵 ${s}</span>`
+            ).join('');
+            document.getElementById('songsPreview').classList.remove('hidden');
+            document.getElementById('startKeyBtn').style.display = 'block';
+        }
+
+        function startLearning() {
+            currentChordIndex = 0;
+            showChordIntro();
+        }
+
+        function showChordIntro() {
+            showScreen('screen-chord-intro');
+            currentChordKey = currentKeyData.chords[currentChordIndex];
+            currentChordData = CHORD_DATA[currentChordKey];
+            document.getElementById('introChordName').textContent = currentChordData.name;
+            document.getElementById('introChordRoman').textContent =
+                `${currentChordData.roman} chord in the key of ${selectedKey}`;
+            document.getElementById('introChordText').textContent = currentChordData.intro_text;
+            drawChordDiagram('chordSvg', currentChordData);
+        }
+
+        function startNoteByNote() {
+            showScreen('screen-note-by-note');
+            document.getElementById('noteByNoteChordName').textContent =
+                `${currentChordData.name} — Note by Note`;
+            playableStrings = [];
+            for (let s = 6; s >= 1; s--) {
+                if (currentChordData.strings[s].note !== null) {
+                    playableStrings.push(s);
+                }
+            }
+            currentStringIndex = 0;
+            buildStringProgressDots();
+            drawChordDiagram('chordSvgNBN', currentChordData);
+            showCurrentString();
+            // Auto-start listening immediately
+            setTimeout(() => startNBNListening(), 500);
+        }
+
+        function buildStringProgressDots() {
+            const container = document.getElementById('stringProgress');
+            container.innerHTML = playableStrings.map((s, i) =>
+                `<div class="string-dot${i === 0 ? ' active' : ''}" id="dot-${i}"></div>`
+            ).join('');
+        }
+
+        function showCurrentString() {
+            const strNum = playableStrings[currentStringIndex];
+            const strData = currentChordData.strings[strNum];
+            const fret = currentChordData.frets[6 - strNum];
+            const strLabel = strNum === 1 ? '1st' : strNum === 2 ? '2nd' :
+                             strNum === 3 ? '3rd' : `${strNum}th`;
+            document.getElementById('currentStringLabel').textContent =
+                `${strLabel} String${fret === 0 ? ' (Open)' : ` — Fret ${fret}`}`;
+            document.getElementById('currentNoteName').textContent = strData.note;
+            document.getElementById('currentIntervalName').textContent = strData.interval;
+            document.getElementById('currentIntervalDesc').textContent = strData.description;
+            document.getElementById('noteByNoteFeedback').classList.add('hidden');
+            document.getElementById('nbnStatus').textContent = '';
+            
+            // Highlight active string dot on diagram
+            highlightActiveDotOnDiagram(strNum);
+        }
+
+function highlightActiveDotOnDiagram(stringNum) {
+            // Remove previous highlight
+            if (currentActiveDot) {
+                currentActiveDot.classList.remove('active-diagram-dot');
+                
+                // If it was an open string, reset its attributes
+                if (currentActiveDot.getAttribute('fill') === 'none') {
+                    currentActiveDot.setAttribute('r', 5);
+                    currentActiveDot.setAttribute('stroke-width', '1.5');
+                    currentActiveDot.style.filter = '';
+                }
+            }            
+            const svg = document.getElementById('chordSvgNBN');
+            const fret = currentChordData.frets[6 - stringNum];
+            
+            // Calculate expected x position for this string
+            // startX = 30, stringSpacing = 22
+            const stringIndex = 6 - stringNum; // 0-indexed from left
+            const expectedX = 30 + (stringIndex * 22);
+            
+            if (fret === 0) {
+                // Open string - find white circle at this x position
+                const openCircles = svg.querySelectorAll('circle[fill="none"][stroke]');
+                for (let circle of openCircles) {
+                    const cx = parseFloat(circle.getAttribute('cx'));
+                    if (Math.abs(cx - expectedX) < 5) { // Within 5px tolerance
+                        // Make it bigger and add a glow
+                        circle.setAttribute('r', 8);
+                        circle.setAttribute('stroke-width', 3);
+                        circle.style.filter = 'drop-shadow(0 0 8px #e8572a)';
+                        currentActiveDot = circle;
+                        break;
+                    }
+                }
+            } else if (fret > 0) {
+                // Fretted note - find orange circle at this x position
+                const frettedCircles = svg.querySelectorAll('circle[fill="#e8572a"]');
+                for (let circle of frettedCircles) {
+                    const cx = parseFloat(circle.getAttribute('cx'));
+                    if (Math.abs(cx - expectedX) < 5) { // Within 5px tolerance
+                        circle.classList.add('active-diagram-dot');
+                        currentActiveDot = circle;
+                        break;
+                    }
+                }
+            }
+        }
+
+        async function startNBNListening() {
+            const strNum = playableStrings[currentStringIndex];
+            const strData = currentChordData.strings[strNum];
+            const STANDARD_TUNING = {6:82.41, 5:110.00, 4:146.83, 3:196.00, 2:246.94, 1:329.63};
+            const fret = currentChordData.frets[6 - strNum];
+            const expectedFreq = STANDARD_TUNING[strNum] * Math.pow(2, fret / 12);
+
+            document.getElementById('nbnStatus').textContent = '🎤 Listening...';
+
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: { channelCount: 1, sampleRate: 44100 }
+                });
+                const source = audioContext.createMediaStreamSource(stream);
+                const processor = audioContext.createScriptProcessor(4096, 1, 1);
+                const audioChunks = [];
+                const startTime = Date.now();
+
+                processor.onaudioprocess = async (e) => {
+                    audioChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+                    if (Date.now() - startTime >= 3000) {
+                        processor.disconnect();
+                        source.disconnect();
+                        stream.getTracks().forEach(t => t.stop());
+                        audioContext.close();
+
+                        document.getElementById('nbnStatus').textContent = '⏳ Analyzing...';
+
+                        const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
+                        const audioData = new Float32Array(totalLength);
+                        let offset = 0;
+                        for (const chunk of audioChunks) {
+                            audioData.set(chunk, offset);
+                            offset += chunk.length;
+                        }
+
+                        const wavBlob = createWavBlob(audioData, 44100);
+                        const formData = new FormData();
+                        formData.append('audio', wavBlob, 'recording.wav');
+                        formData.append('expected_freq', expectedFreq);
+                        formData.append('note_name', strData.note);
+                        formData.append('fret', fret);
+
+                        const result = await (await fetch('/check_note', {
+                            method: 'POST', body: formData
+                        })).json();
+
+                        const feedback = document.getElementById('noteByNoteFeedback');
+                        document.getElementById('nbnStatus').textContent = '';
+
+                        if (result.result === 'perfect') {
+                            feedback.innerHTML = `<p class="perfect">✅ ${strData.note} — ${strData.interval}!</p>`;
+                            feedback.classList.remove('hidden');
+                            document.getElementById(`dot-${currentStringIndex}`).classList.remove('active');
+                            document.getElementById(`dot-${currentStringIndex}`).classList.add('done');
+                            currentStringIndex++;
+
+                            if (currentStringIndex >= playableStrings.length) {
+                                setTimeout(() => showStrumScreen(), 1000);
+                            } else {
+                                document.getElementById(`dot-${currentStringIndex}`).classList.add('active');
+                                setTimeout(() => {
+                                    showCurrentString();
+                                    startNBNListening();
+                                }, 1000);
+                            }
+                        } else {
+                            feedback.innerHTML = `<p class="wrong">❌ ${result.message}</p>`;
+                            feedback.classList.remove('hidden');
+                            document.getElementById('nbnListenBtn').style.display = 'block';
+                            document.getElementById('nbnListenBtn').textContent = '🔄 Try Again';
+                            document.getElementById('nbnListenBtn').onclick = () => {
+                                document.getElementById('nbnListenBtn').style.display = 'none';
+                                startNBNListening();
+                            };
+                        }
+                    }
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+
+            } catch (err) {
+                document.getElementById('nbnStatus').textContent = '❌ Microphone access denied';
+            }
+        }
+
+function showStrumScreen() {
+            showScreen('screen-strum');
+            document.getElementById('strumChordName').textContent = currentChordData.name;
+            drawChordDiagram('chordSvgStrum', currentChordData);
+            document.getElementById('strumFeedback').classList.add('hidden');
+            document.getElementById('strumStatus').textContent = '';
+            
+            // Show a 3-second progress bar instead of listening
+            let timeLeft = 3;
+            document.getElementById('strumStatus').textContent = `Play the chord! (${timeLeft}s)`;
+            
+            const strumInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    document.getElementById('strumStatus').textContent = `Play the chord! (${timeLeft}s)`;
+                } else {
+                    clearInterval(strumInterval);
+                    document.getElementById('strumStatus').textContent = '';
+                    const feedback = document.getElementById('strumFeedback');
+                    feedback.innerHTML = `<p class="perfect">🎸 ${currentChordData.name} - Great job!</p>`;
+                    feedback.classList.remove('hidden');
+                    setTimeout(() => moveToNextChord(), 1500);
+                }
+            }, 1000);
+        }
+
+        function moveToNextChord() {
+            currentChordIndex++;
+            if (currentChordIndex >= currentKeyData.chords.length) {
+                showGameScreen();
+            } else {
+                showChordIntro();
+            }
+        }
+
+        function skipToNextChord() { moveToNextChord(); }
+
+        function showGameScreen() {
+            showScreen('screen-game');
+            document.getElementById('gameKeyLabel').textContent =
+                `${currentKeyData.name} — Game Mode`;
+            progressionIndex = 0;
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            document.getElementById('modeRandom').classList.toggle('active', mode === 'random');
+            document.getElementById('modeProgression').classList.toggle('active', mode === 'progression');
+        }
+
+        function toggleGamePlay() {
+            if (!isGamePlaying) {
+                isGamePlaying = true;
+                document.getElementById('gamePlayBtn').textContent = '⏸ Pause';
+                document.getElementById('gamePlayBtn').classList.remove('btn-primary');
+                document.getElementById('gamePlayBtn').classList.add('btn-pause');
+                showNextGameChord();
+            } else {
+                isGamePlaying = false;
+                document.getElementById('gamePlayBtn').textContent = '▶ Play';
+                document.getElementById('gamePlayBtn').classList.remove('btn-pause');
+                document.getElementById('gamePlayBtn').classList.add('btn-primary');
+                if (gameTimeout) clearTimeout(gameTimeout);
+                if (countdownInterval) clearInterval(countdownInterval);
+                document.getElementById('gameStatus').textContent = 'Paused';
+            }
+        }
+
+        function showNextGameChord() {
+            if (!isGamePlaying) return;
+            document.getElementById('gameFeedback').classList.add('hidden');
+            document.getElementById('gameStatus').textContent = '';
+
+            let chordKey;
+            if (gameMode === 'random') {
+                const chords = currentKeyData.chords;
+                chordKey = chords[Math.floor(Math.random() * chords.length)];
+            } else {
+                chordKey = currentKeyData.chords[progressionIndex % currentKeyData.chords.length];
+                progressionIndex++;
+            }
+
+            currentChordKey = chordKey;
+            currentChordData = CHORD_DATA[chordKey];
+            document.getElementById('gameChordDisplay').textContent = currentChordData.name;
+            document.getElementById('gameRomanDisplay').textContent = currentChordData.roman;
+            startGameCountdown();
+        }
+
+        function startGameCountdown() {
+            if (!isGamePlaying) return;
+            let timeLeft = prepTime;
+            document.getElementById('gameStatus').textContent = `${timeLeft}s to get ready...`;
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('gameStatus').textContent =
+                    timeLeft > 0 ? `${timeLeft}s to get ready...` : '🎤 Listening...';
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    startGameListening();
+                }
+            }, 1000);
+        }
+
+        async function startGameListening() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: { channelCount: 1, sampleRate: 44100 }
+                });
+                const source = audioContext.createMediaStreamSource(stream);
+                const processor = audioContext.createScriptProcessor(4096, 1, 1);
+                const audioChunks = [];
+                const startTime = Date.now();
+
+                processor.onaudioprocess = async (e) => {
+                    audioChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+                    if (Date.now() - startTime >= 3000) {
+                        processor.disconnect();
+                        source.disconnect();
+                        stream.getTracks().forEach(t => t.stop());
+                        audioContext.close();
+                        document.getElementById('gameStatus').textContent = '⏳ Analyzing...';
+
+                        const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
+                        const audioData = new Float32Array(totalLength);
+                        let offset = 0;
+                        for (const chunk of audioChunks) {
+                            audioData.set(chunk, offset);
+                            offset += chunk.length;
+                        }
+
+                        const wavBlob = createWavBlob(audioData, 44100);
+                        const formData = new FormData();
+                        formData.append('audio', wavBlob, 'recording.wav');
+                        formData.append('chord_notes', currentChordData.notes_in_chord.join(','));
+                        formData.append('chord_name', currentChordData.name);
+
+                        const result = await (await fetch('/check_strum', {
+                            method: 'POST', body: formData
+                        })).json();
+
+                        const feedback = document.getElementById('gameFeedback');
+                        document.getElementById('gameStatus').textContent = '';
+
+                        if (result.result === 'perfect') {
+                            feedback.innerHTML = `<p class="perfect">🎸 ${currentChordData.name}!</p>`;
+                            feedback.classList.remove('hidden');
+                            if (isGamePlaying) {
+                                gameTimeout = setTimeout(() => showNextGameChord(), 2000);
+                            }
+                        } else {
+                            feedback.innerHTML = `<p class="wrong">❌ ${result.message}</p>`;
+                            feedback.classList.remove('hidden');
+                            isGamePlaying = false;
+                            document.getElementById('gamePlayBtn').textContent = '▶ Play';
+                            document.getElementById('gamePlayBtn').classList.remove('btn-pause');
+                            document.getElementById('gamePlayBtn').classList.add('btn-primary');
+                        }
+                    }
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+
+            } catch (err) {
+                document.getElementById('gameStatus').textContent = '❌ Microphone access denied';
+            }
+        }
+
+        function drawChordDiagram(svgId, chordData) {
+            const svg = document.getElementById(svgId);
+            svg.innerHTML = '';
+            const strings = 6;
+            const frets = 4;
+            const startX = 30;
+            const startY = 35;
+            const stringSpacing = 22;
+            const fretSpacing = 32;
+            const width = (strings - 1) * stringSpacing;
+            const height = frets * fretSpacing;
+
+            const fretNums = chordData.frets.filter(f => f > 0);
+            const minFret = fretNums.length > 0 ? Math.min(...fretNums) : 1;
+            const startFret = minFret > 3 ? minFret - 1 : 1;
+
+            if (startFret === 1) {
+                const nut = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                nut.setAttribute('x', startX);
+                nut.setAttribute('y', startY - 5);
+                nut.setAttribute('width', width);
+                nut.setAttribute('height', 5);
+                nut.setAttribute('fill', 'rgba(255,255,255,0.8)');
+                svg.appendChild(nut);
+            } else {
+                const pos = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                pos.setAttribute('x', startX - 20);
+                pos.setAttribute('y', startY + fretSpacing * 0.7);
+                pos.setAttribute('fill', 'rgba(255,255,255,0.6)');
+                pos.setAttribute('font-size', '11');
+                pos.setAttribute('text-anchor', 'middle');
+                pos.textContent = `${startFret}fr`;
+                svg.appendChild(pos);
+            }
+
+            for (let f = 0; f <= frets; f++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', startY + f * fretSpacing);
+                line.setAttribute('x2', startX + width);
+                line.setAttribute('y2', startY + f * fretSpacing);
+                line.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+            }
+
+            for (let s = 0; s < strings; s++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', startX + s * stringSpacing);
+                line.setAttribute('y1', startY);
+                line.setAttribute('x2', startX + s * stringSpacing);
+                line.setAttribute('y2', startY + height);
+                line.setAttribute('stroke', 'rgba(255,255,255,0.3)');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+            }
+
+            const stringLabels = ['E', 'A', 'D', 'G', 'B', 'E'];
+            for (let s = 0; s < strings; s++) {
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', startX + s * stringSpacing);
+                label.setAttribute('y', startY + height + 18);
+                label.setAttribute('fill', 'rgba(255,255,255,0.4)');
+                label.setAttribute('font-size', '10');
+                label.setAttribute('text-anchor', 'middle');
+                label.textContent = stringLabels[s];
+                svg.appendChild(label);
+            }
+
+            chordData.frets.forEach((fret, i) => {
+                const x = startX + i * stringSpacing;
+                if (fret === -1) {
+                    const xMark = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    xMark.setAttribute('x', x);
+                    xMark.setAttribute('y', startY - 14);
+                    xMark.setAttribute('fill', 'rgba(255,100,100,0.8)');
+                    xMark.setAttribute('font-size', '12');
+                    xMark.setAttribute('text-anchor', 'middle');
+                    xMark.textContent = '✕';
+                    svg.appendChild(xMark);
+                } else if (fret === 0) {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', startY - 14);
+                    circle.setAttribute('r', 5);
+                    circle.setAttribute('fill', 'none');
+                    circle.setAttribute('stroke', 'rgba(255,255,255,0.6)');
+                    circle.setAttribute('stroke-width', '1.5');
+                    svg.appendChild(circle);
+                } else {
+                    const adjustedFret = fret - startFret + 1;
+                    const cy = startY + (adjustedFret - 0.5) * fretSpacing;
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', cy);
+                    circle.setAttribute('r', 9);
+                    circle.setAttribute('fill', '#e8572a');
+                    svg.appendChild(circle);
+                    const finger = chordData.fingers[i];
+                    if (finger > 0) {
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', x);
+                        text.setAttribute('y', cy + 4);
+                        text.setAttribute('fill', 'white');
+                        text.setAttribute('font-size', '10');
+                        text.setAttribute('font-weight', 'bold');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.textContent = finger;
+                        svg.appendChild(text);
+                    }
+                }
+            });
+        }
+
+        function createWavBlob(audioData, sampleRate) {
+            const buffer = new ArrayBuffer(44 + audioData.length * 2);
+            const view = new DataView(buffer);
+            const ws = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+            ws(0, 'RIFF');
+            view.setUint32(4, 36 + audioData.length * 2, true);
+            ws(8, 'WAVE'); ws(12, 'fmt ');
+            view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true); ws(36, 'data');
+            view.setUint32(40, audioData.length * 2, true);
+            let offset = 44;
+            for (let i = 0; i < audioData.length; i++) {
+                const s = Math.max(-1, Math.min(1, audioData[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                offset += 2;
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function adjustPrepTime(delta) {
+            prepTime = Math.max(2, Math.min(15, prepTime + delta));
+            const el = document.getElementById('prepTimeDisplay2');
+            if (el) el.textContent = `${prepTime}s`;
+        }
+
+        function showScreen(screenId) {
+            ['screen-key-select', 'screen-chord-intro', 'screen-note-by-note',
+             'screen-strum', 'screen-game'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

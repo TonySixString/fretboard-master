@@ -1,0 +1,521 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Barlow', sans-serif;
+    background: #1a2e35;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    max-width: 500px;
+    width: 100%;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    color: white;
+    font-size: 2.2em;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+}
+
+h1 span {
+    color: #e8572a;
+}
+
+.stats {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.stat {
+    background: rgba(255,255,255,0.08);
+    padding: 12px 25px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    color: #e8572a;
+    font-size: 2em;
+    font-weight: 700;
+    font-family: 'Barlow Condensed', sans-serif;
+}
+
+.stat-label {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 3px;
+}
+
+/* Main card */
+.challenge-card {
+    background: #243b44;
+    border-radius: 16px;
+    padding: 30px 25px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin-bottom: 15px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.07);
+}
+
+.instruction {
+    text-align: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.instruction-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.9em;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    letter-spacing: 1px;
+}
+
+/* Circular Timer */
+.timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 130px;
+    height: 130px;
+    margin: 10px auto;
+}
+
+.timer-svg {
+    width: 130px;
+    height: 130px;
+    transform: rotate(-90deg);
+}
+
+.timer-bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.1);
+    stroke-width: 8;
+}
+
+.timer-progress {
+    fill: none;
+    stroke: #e8572a;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.9s linear, stroke 0.3s ease;
+}
+
+.timer-number {
+    position: absolute;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.5em;
+    font-weight: 700;
+    color: white;
+}
+
+.timer-label {
+    font-size: 0.8em;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Feedback */
+.feedback {
+    text-align: center;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+    font-size: 1.05em;
+    font-weight: 600;
+    width: 100%;
+}
+
+.feedback.hidden {
+    display: none;
+}
+
+.perfect {
+    background: rgba(72, 187, 120, 0.2);
+    color: #68d391;
+    border: 1px solid rgba(72,187,120,0.3);
+}
+
+.wrong {
+    background: rgba(232, 87, 42, 0.2);
+    color: #f0845a;
+    border: 1px solid rgba(232,87,42,0.3);
+}
+
+/* Settings Row */
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.settings-label {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.settings-value {
+    color: white;
+    font-weight: 700;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2em;
+    min-width: 35px;
+    text-align: center;
+}
+
+.adj-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.3em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.adj-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Buttons */
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn {
+    padding: 18px 30px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.btn:active {
+    transform: translateY(2px);
+}
+
+.btn-primary {
+    background: #e8572a;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #d44820;
+}
+
+.btn-pause {
+    background: #2d5a6b;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.btn-pause:hover {
+    background: #366d82;
+}
+
+.btn-continue {
+    background: #48bb78;
+    color: white;
+}
+
+.btn-continue:hover {
+    background: #38a169;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.status {
+    text-align: center;
+    color: rgba(255,255,255,0.5);
+    margin-top: 12px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Tuner specific */
+.tuner-card {
+    background: #243b44;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,255,255,0.07);
+}
+
+.tuner-title {
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.strings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.string-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.string-indicator.active {
+    background: rgba(232,87,42,0.15);
+    border-color: #e8572a;
+}
+
+.string-indicator.in-tune {
+    background: rgba(72,187,120,0.15);
+    border-color: #48bb78;
+}
+
+.string-number {
+    font-size: 0.7em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.string-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: white;
+}
+
+.string-status {
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+
+.meter-section {
+    margin-bottom: 20px;
+}
+
+.meter-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    padding: 0 5px;
+}
+
+.meter-container {
+    position: relative;
+    height: 55px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 30px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.meter-zone-flat {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(232,87,42,0.6), rgba(232,87,42,0.1));
+}
+
+.meter-zone-sharp {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(to left, rgba(232,87,42,0.6), rgba(232,87,42,0.1));
+}
+
+.meter-zone-intune {
+    position: absolute;
+    left: 37%;
+    top: 0;
+    width: 26%;
+    height: 100%;
+    background: rgba(72,187,120,0.5);
+}
+
+.center-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: rgba(255,255,255,0.2);
+    z-index: 5;
+}
+
+.needle {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    width: 4px;
+    background: white;
+    border-radius: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: left 0.1s ease;
+    z-index: 10;
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
+}
+
+.needle::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid white;
+}
+
+.detected-note {
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.8em;
+    font-weight: 800;
+    color: #e8572a;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tuner-feedback {
+    text-align: center;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    min-height: 24px;
+    padding: 5px;
+}
+
+.tuner-feedback.in-tune { color: #68d391; }
+.tuner-feedback.sharp { color: #f0845a; }
+.tuner-feedback.flat { color: #f0845a; }
+
+.btn-activate {
+    background: #e8572a;
+    color: white;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.btn-activate:hover {
+    background: #d44820;
+}
+
+.btn-start {
+    background: #48bb78;
+    color: white;
+    display: none;
+}
+
+.btn-start:hover { background: #38a169; }
+
+.btn-skip {
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
+    font-size: 1em;
+    padding: 14px 30px;
+}
+
+.btn-skip:hover {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.8);
+}
+
+.tuner-status {
+    text-align: center;
+    color: #68d391;
+    font-size: 0.9em;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+@media (max-width: 400px) {
+    h1 { font-size: 1.7em; }
+    .instruction-text { font-size: 1.5em; }
+    .challenge-card { padding: 25px 15px; }
+}

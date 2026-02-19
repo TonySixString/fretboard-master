@@ -185,6 +185,35 @@ def check_note():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'})
 
+@app.route('/detect_pitch', methods=['POST'])
+def detect_pitch():
+    try:
+        audio_file = request.files['audio']
+        audio_bytes = io.BytesIO(audio_file.read())
+        sample_rate, audio_data = wavfile.read(audio_bytes)
+        
+        if len(audio_data.shape) > 1:
+            audio_data = audio_data[:, 0]
+        if audio_data.dtype == np.int16:
+            audio_data = audio_data.astype(np.float32) / 32768.0
+        elif audio_data.dtype != np.float32:
+            audio_data = audio_data.astype(np.float32)
+        
+        detected_freq = analyze_audio(audio_data, sample_rate)
+        
+        if detected_freq is None:
+            return jsonify({'success': True, 'freq': None})
+        
+        detected_note = freq_to_note_name_no_octave(detected_freq)
+        
+        return jsonify({
+            'success': True,
+            'freq': float(detected_freq),
+            'note': detected_note
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'freq': None, 'error': str(e)})
+
 @app.route('/check_strum', methods=['POST'])
 def check_strum():
     try:

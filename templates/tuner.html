@@ -290,11 +290,9 @@
         const NOTE_NAMES = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
         const tunedStrings = new Set();
         let audioContext = null;
+        let stream = null;
         let isRunning = false;
-        
-        // Smoothing: keep recent readings to stabilize display
-        let recentFreqs = [];
-        const SMOOTHING_WINDOW = 5;
+        let analyzing = false;
 
         function detectClosestString(freq) {
             let closest = null;
@@ -310,12 +308,6 @@
                 }
             }
             return closest;
-        }
-
-        function freqToNoteName(freq) {
-            const midi = 69 + 12 * Math.log2(freq / 440.0);
-            const noteIndex = Math.round(midi) % 12;
-            return NOTE_NAMES[(noteIndex + 12) % 12];
         }
 
         function updateNeedle(cents) {
@@ -357,121 +349,118 @@
             }
         }
 
+        function createWavBlob(audioData, sampleRate) {
+            const buffer = new ArrayBuffer(44 + audioData.length * 2);
+            const view = new DataView(buffer);
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+            };
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + audioData.length * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, audioData.length * 2, true);
+            let offset = 44;
+            for (let i = 0; i < audioData.length; i++) {
+                const s = Math.max(-1, Math.min(1, audioData[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                offset += 2;
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
         async function startTuner() {
             try {
                 document.getElementById('activateBtn').style.display = 'none';
                 document.getElementById('tunerFeedback').textContent = 'Listening... play any string!';
 
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const source = audioContext.createMediaStreamSource(stream);
-                
-                // Use ScriptProcessor instead of AnalyserNode for Safari compatibility
-                // AnalyserNode.getFloatTimeDomainData() returns zeros on desktop Safari
-                const bufferSize = 8192;
-                const processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
-                
-                processor.onaudioprocess = (e) => {
-                    if (!isRunning) return;
-                    const buffer = e.inputBuffer.getChannelData(0);
-                    const freq = autoCorrelate(buffer, audioContext.sampleRate);
-                    
-                    if (freq > 60 && freq < 400) {
-                        recentFreqs.push(freq);
-                        if (recentFreqs.length > SMOOTHING_WINDOW) recentFreqs.shift();
-                        
-                        const sorted = [...recentFreqs].sort((a, b) => a - b);
-                        const smoothedFreq = sorted[Math.floor(sorted.length / 2)];
-                        
-                        const note = freqToNoteName(smoothedFreq);
-                        document.getElementById('detectedNote').textContent = note;
-                        const match = detectClosestString(smoothedFreq);
-                        if (match && Math.abs(match.cents) < 60) {
-                            updateNeedle(match.cents);
-                            updateStringIndicator(match.strNum, Math.abs(match.cents) <= 10);
-                            updateFeedback(match.cents, match.strData);
-                        }
-                    } else {
-                        document.getElementById('needle').style.left = '50%';
-                    }
-                };
-                
-                source.connect(processor);
-                processor.connect(audioContext.destination);
+                stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
                 isRunning = true;
-                recentFreqs = [];
+                listenAndAnalyze();
             } catch (err) {
                 document.getElementById('tunerFeedback').textContent = '❌ Microphone access denied';
                 document.getElementById('activateBtn').style.display = 'block';
             }
         }
 
-        function autoCorrelate(buffer, sampleRate) {
-            // Check if signal is loud enough
-            let rms = 0;
-            for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
-            rms = Math.sqrt(rms / buffer.length);
-            if (rms < 0.008) return -1;
+        function listenAndAnalyze() {
+            if (!isRunning || analyzing) return;
+            analyzing = true;
 
-            const SIZE = buffer.length;
-            
-            // Guitar frequency range: E2 (82Hz) to E4 (330Hz)
-            // At 48kHz: period of 82Hz = 585 samples, period of 330Hz = 145 samples
-            // At 44.1kHz: period of 82Hz = 538 samples, period of 330Hz = 134 samples
-            const minPeriod = Math.floor(sampleRate / 400); // ~330Hz max
-            const maxPeriod = Math.ceil(sampleRate / 70);   // ~70Hz min (below low E with some margin)
-            
-            // Normalized Square Difference Function (NSDF)
-            // More robust than raw autocorrelation for pitch detection
-            const nsdf = new Float32Array(maxPeriod + 1);
-            
-            for (let tau = minPeriod; tau <= maxPeriod; tau++) {
-                let acf = 0;  // autocorrelation
-                let div = 0;  // normalizer
-                const len = SIZE - tau;
-                for (let j = 0; j < len; j++) {
-                    acf += buffer[j] * buffer[j + tau];
-                    div += buffer[j] * buffer[j] + buffer[j + tau] * buffer[j + tau];
-                }
-                nsdf[tau] = div > 0 ? 2 * acf / div : 0;
-            }
-            
-            // Find peaks in NSDF above threshold
-            // Use peak-picking: find all local maxima above 0.5
-            const peaks = [];
-            const threshold = 0.5;
-            
-            for (let i = minPeriod + 1; i < maxPeriod; i++) {
-                if (nsdf[i] > threshold && nsdf[i] > nsdf[i - 1] && nsdf[i] >= nsdf[i + 1]) {
-                    peaks.push({ pos: i, val: nsdf[i] });
-                }
-            }
-            
-            if (peaks.length === 0) return -1;
-            
-            // Pick the first peak that's at least 80% of the maximum peak
-            // This favors the fundamental over harmonics (shorter period = higher octave)
-            const maxPeakVal = Math.max(...peaks.map(p => p.val));
-            let bestPeak = peaks[0];
-            for (const peak of peaks) {
-                if (peak.val >= maxPeakVal * 0.8) {
-                    bestPeak = peak;
-                    break;
-                }
-            }
-            
-            // Parabolic interpolation for sub-sample accuracy
-            const pos = bestPeak.pos;
-            if (pos <= minPeriod || pos >= maxPeriod) return -1;
-            
-            const x1 = nsdf[pos - 1];
-            const x2 = nsdf[pos];
-            const x3 = nsdf[pos + 1];
-            const a = (x1 + x3 - 2 * x2) / 2;
-            const b = (x3 - x1) / 2;
-            const shift = a ? -b / (2 * a) : 0;
+            const source = audioContext.createMediaStreamSource(stream);
+            const processor = audioContext.createScriptProcessor(4096, 1, 1);
+            const audioChunks = [];
+            const startTime = Date.now();
+            const realSampleRate = audioContext.sampleRate;
 
-            return sampleRate / (pos + shift);
+            processor.onaudioprocess = (e) => {
+                const output = e.outputBuffer.getChannelData(0);
+                for (let i = 0; i < output.length; i++) output[i] = 0;
+
+                const input = e.inputBuffer.getChannelData(0);
+                audioChunks.push(new Float32Array(input));
+
+                // Record for 1 second then send to server
+                if (Date.now() - startTime >= 1000) {
+                    processor.disconnect();
+                    source.disconnect();
+
+                    const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
+                    const audioData = new Float32Array(totalLength);
+                    let offset = 0;
+                    for (const chunk of audioChunks) {
+                        audioData.set(chunk, offset);
+                        offset += chunk.length;
+                    }
+
+                    sendToServer(createWavBlob(audioData, realSampleRate));
+                }
+            };
+
+            source.connect(processor);
+            processor.connect(audioContext.destination);
+        }
+
+        async function sendToServer(wavBlob) {
+            try {
+                const formData = new FormData();
+                formData.append('audio', wavBlob, 'tuner.wav');
+
+                const response = await fetch('/detect_pitch', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.success && result.freq) {
+                    const freq = result.freq;
+                    const note = result.note;
+
+                    document.getElementById('detectedNote').textContent = note;
+                    const match = detectClosestString(freq);
+                    if (match && Math.abs(match.cents) < 60) {
+                        updateNeedle(match.cents);
+                        updateStringIndicator(match.strNum, Math.abs(match.cents) <= 10);
+                        updateFeedback(match.cents, match.strData);
+                    }
+                } else {
+                    document.getElementById('needle').style.left = '50%';
+                }
+            } catch (err) {
+                // Server error, just continue
+            }
+
+            // Start next listen cycle
+            analyzing = false;
+            if (isRunning) {
+                listenAndAnalyze();
+            }
         }
     </script>
 </body>

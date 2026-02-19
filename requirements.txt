@@ -1,4 +1,6 @@
-aubio==0.4.9
+librosa>=0.10.0
+numba
+soundfile
 blinker==1.9.0
 click==8.3.1
 Flask==3.1.2

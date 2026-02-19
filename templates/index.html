@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fretboard Master</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=102">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=103">
     <style>
         .mode-select-grid {
             display: grid;
@@ -201,6 +201,9 @@
 
         <!-- SCREEN 1: Mode Selection -->
         <div id="screen-mode-select">
+            <div style="text-align:center; margin-bottom:15px;">
+                <span style="color:rgba(255,255,255,0.7); font-size:0.9em;" id="menuPointsBadge"></span>
+            </div>
             <div class="content-card">
                 <div class="mode-select-grid">
                     <div class="mode-card" onclick="startLearning()">
@@ -331,6 +334,7 @@
             
             <div class="controls">
                 <button class="btn btn-primary" onclick="startLevelLearning()">Let's Go! →</button>
+                <button class="btn btn-continue" onclick="jumpToQuiz()">Jump to Quiz →</button>
                 <button class="btn btn-skip" onclick="skipLevel()">Skip This Level →</button>
                 <button class="btn btn-skip" onclick="showScreen('screen-dashboard')">← Back to Dashboard</button>
             </div>
@@ -392,6 +396,7 @@
             <div class="controls">
                 <button class="btn btn-primary" id="levelContinueBtn" onclick="continueFromLevel()">Next Level →</button>
                 <button class="btn btn-skip" id="levelRetakeBtn" onclick="retakeLevel()">🔄 Retake Level</button>
+                <button class="btn btn-skip" onclick="showScreen('screen-dashboard')">← Back to Dashboard</button>
             </div>
         </div>
 
@@ -428,12 +433,12 @@
 
             <div class="controls">
                 <button class="btn btn-primary" id="freeplayBtn" onclick="toggleFreePlay()">▶ Play</button>
-                <button class="btn btn-skip" onclick="showScreen('screen-mode-select')">← Back to Menu</button>
+                <button class="btn btn-skip" onclick="endFreePlay()">End Session</button>
             </div>
             <div class="status" id="freeplayStatus"></div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='fretboard-master.js') }}?v=102"></script>
+    <script src="{{ url_for('static', filename='fretboard-master.js') }}?v=103"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import numpy as np
-import aubio
+import librosa
 import random
 import io
 from scipy.io import wavfile
@@ -45,20 +45,17 @@ def cents_difference(freq1, freq2):
     return 1200 * np.log2(freq2 / freq1)
 
 def analyze_audio(audio_data, sample_rate):
-    pitch_detector = aubio.pitch("default", 2048, 1024, sample_rate)
-    pitch_detector.set_unit("Hz")
-    
-    pitches = []
-    hop_size = 1024
-    
-    for i in range(0, len(audio_data) - hop_size, hop_size):
-        frame = audio_data[i:i+hop_size]
-        pitch = pitch_detector(frame.astype(np.float32))[0]
-        if pitch > 50:
-            pitches.append(pitch)
-    
-    if pitches:
-        return np.median(pitches)
+    frame_length = 4096
+    f0, voiced_flag, voiced_probs = librosa.pyin(
+        audio_data,
+        fmin=librosa.note_to_hz('E2'),
+        fmax=librosa.note_to_hz('E6'),
+        sr=sample_rate,
+        frame_length=frame_length,
+    )
+    voiced_pitches = f0[voiced_flag & (voiced_probs > 0.5)]
+    if len(voiced_pitches) > 0:
+        return float(np.median(voiced_pitches))
     return None
 
 def note_name_to_semitone(note_name):

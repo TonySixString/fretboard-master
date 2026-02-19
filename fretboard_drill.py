@@ -1,6 +1,6 @@
 import sounddevice as sd
 import numpy as np
-import aubio
+import librosa
 import random
 
 # Guitar tuning (standard): string number -> open string note frequency (Hz)
@@ -43,22 +43,19 @@ def record_and_detect_pitch(duration=3):
     print("Recording finished!\n")
     
     audio_data = np.squeeze(audio)
-    
-    # Pitch detection
-    pitch_detector = aubio.pitch("default", 2048, 2048//2, SAMPLE_RATE)
-    pitch_detector.set_unit("Hz")
-    
-    pitches = []
-    hop_size = 2048 // 2
-    
-    for i in range(0, len(audio_data) - hop_size, hop_size):
-        frame = audio_data[i:i+hop_size]
-        pitch = pitch_detector(frame.astype(np.float32))[0]
-        if pitch > 50:  # Filter out very low frequencies (likely noise)
-            pitches.append(pitch)
-    
-    if pitches:
-        return np.median(pitches)
+
+    # Pitch detection using librosa pyin
+    frame_length = 4096
+    f0, voiced_flag, voiced_probs = librosa.pyin(
+        audio_data,
+        fmin=librosa.note_to_hz('E2'),
+        fmax=librosa.note_to_hz('E6'),
+        sr=SAMPLE_RATE,
+        frame_length=frame_length,
+    )
+    voiced_pitches = f0[voiced_flag & (voiced_probs > 0.5)]
+    if len(voiced_pitches) > 0:
+        return float(np.median(voiced_pitches))
     return None
 
 # Main drill loop

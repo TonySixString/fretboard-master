@@ -25,6 +25,9 @@ let quizTotal = 0;
 // Free play state
 let freePlayStreak = 0;
 let freePlayActive = false;
+let freePlayLongestStreak = 0;
+let freePlaySessionPoints = 0;
+let freePlaySessionAttempts = 0;
 
 // Level definitions
 const LEVELS = [
@@ -249,6 +252,13 @@ function showScreen(screenId) {
     if (screenId === 'screen-dashboard') {
         updateDashboard();
     }
+    
+    if (screenId === 'screen-mode-select') {
+        const badge = document.getElementById('menuPointsBadge');
+        if (badge && progress.totalPoints > 0) {
+            badge.textContent = `⭐ ${progress.totalPoints} pts • ${getSkillLevel(progress.totalPoints)}`;
+        }
+    }
 }
 
 function updateDashboard() {
@@ -264,7 +274,7 @@ function updateDashboard() {
     
     LEVELS.forEach(level => {
         const prog = getLevelProgress(level.id);
-        const isUnlocked = level.id === 1 || getLevelProgress(level.id - 1).completed;
+        const isUnlocked = level.id === 1 || getLevelProgress(level.id - 1).completed || getLevelProgress(level.id).points > 0 || getLevelProgress(level.id).visited;
         
         const card = document.createElement('div');
         card.className = 'level-card';
@@ -326,6 +336,9 @@ function startPlacementQuiz() {
 
 function startFreePlay() {
     freePlayStreak = 0;
+    freePlayLongestStreak = 0;
+    freePlaySessionPoints = 0;
+    freePlaySessionAttempts = 0;
     document.getElementById('streak').textContent = freePlayStreak;
     showScreen('screen-freeplay');
 }
@@ -452,25 +465,13 @@ async function analyzeQuizAudio(wavBlob) {
     document.getElementById('quizTimer').style.display = 'none';
     document.getElementById('quizStatus').textContent = '⏳ Analyzing...';
     
-    // Hardcode 6th string frets 1-3 to always be correct
-    if (currentChallenge.string === 6 && (currentChallenge.fret >= 1 && currentChallenge.fret <= 3)) {
-        document.getElementById('quizStatus').textContent = '';
-        const feedback = document.getElementById('quizFeedback');
-        quizScores[currentChallenge.group]++;
-        feedback.innerHTML = '<p class="perfect">✅ Correct!</p>';
-        feedback.classList.remove('hidden');
-        quizCurrentIndex++;
-        setTimeout(() => nextQuizQuestion(), 2000);
-        return;
-    }
-    
     const formData = new FormData();
     formData.append('audio', wavBlob, 'recording.wav');
     formData.append('expected_freq', currentChallenge.expected_freq);
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
     document.getElementById('quizStatus').textContent = '';
     
     const feedback = document.getElementById('quizFeedback');
@@ -531,6 +532,14 @@ function startLevel(levelId) {
     quizCorrect = 0;
     quizTotal = 0;
     
+    // Mark as visited so it stays unlocked
+    if (!progress.levels[levelId]) {
+        progress.levels[levelId] = { points: 0, completed: false, visited: true };
+    } else {
+        progress.levels[levelId].visited = true;
+    }
+    saveProgress();
+    
     for (let fret = currentLevel.minFret; fret <= currentLevel.maxFret; fret++) {
         const freq = calculateFretFreq(currentLevel.string, fret);
         const noteName = freqToNoteName(freq);
@@ -572,7 +581,7 @@ function startLevelLearning() {
 
 function nextLearningNote() {
     if (learningIndex >= learningNotes.length) {
-        startLevelQuiz();
+        showQuizInterstitial();
         return;
     }
     
@@ -680,23 +689,13 @@ async function startLearningRecording() {
 async function analyzeLearningAudio(wavBlob) {
     document.getElementById('levelTimer').style.display = 'none';
     
-    // Hardcode 6th string frets 1-3 to always be correct
-    if (currentChallenge.string === 6 && (currentChallenge.fret >= 1 && currentChallenge.fret <= 3)) {
-        const feedback = document.getElementById('levelFeedback');
-        feedback.innerHTML = '<p class="perfect">✅ Good!</p>';
-        feedback.classList.remove('hidden');
-        learningIndex++;
-        setTimeout(() => nextLearningNote(), 1500);
-        return;
-    }
-    
     const formData = new FormData();
     formData.append('audio', wavBlob, 'recording.wav');
     formData.append('expected_freq', currentChallenge.expected_freq);
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
     
     const feedback = document.getElementById('levelFeedback');
     
@@ -726,6 +725,32 @@ function skipLearningNote() {
     document.getElementById('levelFeedback').classList.add('hidden');
     learningIndex++;
     setTimeout(() => nextLearningNote(), 500);
+}
+
+function showQuizInterstitial() {
+    const stringNames = {6: '6th', 5: '5th', 4: '4th', 3: '3rd', 2: '2nd', 1: '1st'};
+    const feedback = document.getElementById('levelFeedback');
+    document.getElementById('levelTimer').style.display = 'none';
+    document.getElementById('levelInstruction').textContent = '';
+    
+    feedback.innerHTML = `
+        <div style="text-align:center; padding:20px 0;">
+            <p style="font-size:1.3em; font-weight:700; color:white; margin-bottom:10px;">Nice work! Ready for the quiz?</p>
+            <p style="color:rgba(255,255,255,0.6); margin-bottom:20px;">You'll be tested on 10 random notes from ${stringNames[currentLevel.string]} String, Frets ${currentLevel.minFret}-${currentLevel.maxFret}</p>
+            <button class="btn btn-primary" onclick="startLevelQuiz()" style="width:100%;">Start Quiz →</button>
+        </div>
+    `;
+    feedback.classList.remove('hidden');
+}
+
+function jumpToQuiz() {
+    levelPhase = 'quiz';
+    quizCorrect = 0;
+    quizTotal = 0;
+    showScreen('screen-level');
+    document.getElementById('levelPrepTimeRow').style.display = 'flex';
+    drawStringDiagram('levelDiagram', currentLevel.string, currentLevel.minFret, currentLevel.maxFret);
+    showQuizInterstitial();
 }
 
 function startLevelQuiz() {
@@ -857,25 +882,13 @@ async function analyzeLevelQuizAudio(wavBlob) {
     const feedback = document.getElementById('levelFeedback');
     quizTotal++;
     
-    // Hardcode 6th string frets 1-3 to always be correct
-    if (currentChallenge.string === 6 && (currentChallenge.fret >= 1 && currentChallenge.fret <= 3)) {
-        quizCorrect++;
-        addPoints(10);
-        addLevelPoints(currentLevel.id, 10);
-        document.getElementById('levelPoints').textContent = getLevelProgress(currentLevel.id).points;
-        feedback.innerHTML = '<p class="perfect">✅ Correct!</p>';
-        feedback.classList.remove('hidden');
-        setTimeout(() => nextLevelQuizQuestion(), 2000);
-        return;
-    }
-    
     const formData = new FormData();
     formData.append('audio', wavBlob, 'recording.wav');
     formData.append('expected_freq', currentChallenge.expected_freq);
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
     
     if (result.result === 'perfect') {
         quizCorrect++;
@@ -976,7 +989,7 @@ async function fetchFreePlayChallenge() {
     document.getElementById('freeplayFeedback').classList.add('hidden');
     document.getElementById('freeplayStatus').textContent = '';
     
-    const response = await fetch('https://fretboard-master.onrender.com/get_challenge');
+    const response = await fetch('/get_challenge');
     currentChallenge = await response.json();
     
     document.getElementById('freeplayInstruction').textContent = currentChallenge.instruction;
@@ -1079,20 +1092,7 @@ async function analyzeFreePlayAudio(wavBlob) {
     document.getElementById('freeplayStatus').textContent = '⏳ Analyzing...';
     
     const feedback = document.getElementById('freeplayFeedback');
-    
-    // Hardcode 6th string frets 1-3 to always be correct
-    if (currentChallenge.string === 6 && (currentChallenge.fret >= 1 && currentChallenge.fret <= 3)) {
-        document.getElementById('freeplayStatus').textContent = '';
-        freePlayStreak++;
-        addPoints(10);
-        document.getElementById('streak').textContent = freePlayStreak;
-        feedback.innerHTML = '<p class="perfect">✅ Correct!</p>';
-        feedback.classList.remove('hidden');
-        if (freePlayActive) {
-            autoNextTimeout = setTimeout(() => fetchFreePlayChallenge(), 3000);
-        }
-        return;
-    }
+    freePlaySessionAttempts++;
     
     const formData = new FormData();
     formData.append('audio', wavBlob, 'recording.wav');
@@ -1100,11 +1100,13 @@ async function analyzeFreePlayAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('https://fretboard-master.onrender.com/check_note', { method: 'POST', body: formData })).json();
+    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
     document.getElementById('freeplayStatus').textContent = '';
     
     if (result.result === 'perfect') {
         freePlayStreak++;
+        freePlaySessionPoints += 10;
+        if (freePlayStreak > freePlayLongestStreak) freePlayLongestStreak = freePlayStreak;
         addPoints(10);
         document.getElementById('streak').textContent = freePlayStreak;
         
@@ -1150,6 +1152,56 @@ function skipFreePlayNote() {
     document.getElementById('freeplayBtn').classList.remove('btn-primary');
     document.getElementById('freeplayBtn').classList.add('btn-pause');
     fetchFreePlayChallenge();
+}
+
+function endFreePlay() {
+    freePlayActive = false;
+    if (autoNextTimeout) clearTimeout(autoNextTimeout);
+    if (countdownInterval) clearInterval(countdownInterval);
+    
+    // Track final streak
+    if (freePlayStreak > freePlayLongestStreak) freePlayLongestStreak = freePlayStreak;
+    
+    // Show session summary
+    const feedback = document.getElementById('freeplayFeedback');
+    document.getElementById('freeplayTimer').style.display = 'none';
+    document.getElementById('freeplayInstruction').textContent = '';
+    document.getElementById('freeplayStatus').textContent = '';
+    document.getElementById('freeplayBtn').style.display = 'none';
+    
+    feedback.innerHTML = `
+        <div style="text-align:center; padding:20px 0;">
+            <p style="font-size:1.5em; font-weight:700; color:white; margin-bottom:15px;">🎸 Session Complete!</p>
+            <div style="display:flex; justify-content:center; gap:20px; margin-bottom:20px;">
+                <div style="text-align:center;">
+                    <div style="font-size:2em; font-weight:700; color:#e8572a;">${freePlayLongestStreak}</div>
+                    <div style="font-size:0.8em; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1px;">Longest Streak</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:2em; font-weight:700; color:#e8572a;">${freePlaySessionAttempts}</div>
+                    <div style="font-size:0.8em; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1px;">Notes Attempted</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:2em; font-weight:700; color:#e8572a;">${freePlaySessionPoints}</div>
+                    <div style="font-size:0.8em; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1px;">Points Earned</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="restartFreePlay()" style="width:100%; margin-bottom:10px;">Play Again</button>
+            <button class="btn btn-skip" onclick="showScreen('screen-dashboard')" style="width:100%;">← Back to Dashboard</button>
+        </div>
+    `;
+    feedback.classList.remove('hidden');
+}
+
+function restartFreePlay() {
+    document.getElementById('freeplayBtn').style.display = 'block';
+    document.getElementById('freeplayBtn').textContent = '▶ Play';
+    document.getElementById('freeplayBtn').classList.remove('btn-pause');
+    document.getElementById('freeplayBtn').classList.add('btn-primary');
+    document.getElementById('freeplayFeedback').classList.add('hidden');
+    document.getElementById('freeplayInstruction').textContent = 'Press Play to start!';
+    currentChallenge = null;
+    startFreePlay();
 }
 
 // ========================================

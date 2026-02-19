@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Six String Country — Chord Trainer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+    <script src="{{ url_for('static', filename='chord-trainer.js') }}?v=1"></script>
+    <style>
+        /* ===== CHORD TRAINER STYLES ===== */
+        .ct-card {
+            background: #243b44;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .ct-section-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .ct-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2em;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .ct-subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .ct-body {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .ct-body strong {
+            color: #e8572a;
+            font-weight: 600;
+        }
+
+        .ct-highlight {
+            background: rgba(232,87,42,0.12);
+            border: 1px solid rgba(232,87,42,0.25);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin: 15px 0;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .ct-highlight-icon {
+            color: #e8572a;
+            margin-right: 6px;
+        }
+
+        /* Progress bar */
+        .ct-progress {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .ct-progress-step {
+            height: 4px;
+            flex: 1;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.1);
+            transition: background 0.3s;
+            max-width: 60px;
+        }
+
+        .ct-progress-step.done {
+            background: #48bb78;
+        }
+
+        .ct-progress-step.active {
+            background: #e8572a;
+        }
+
+        /* Chord diagram area */
+        .ct-diagram-area {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        svg.ct-chord-svg {
+            overflow: visible;
+        }
+
+        /* Variation cards */
+        .ct-variation-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ct-variation-card:hover, .ct-variation-card.active {
+            border-color: rgba(232,87,42,0.4);
+            background: rgba(232,87,42,0.08);
+        }
+
+        .ct-variation-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 6px;
+        }
+
+        .ct-variation-desc {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.88em;
+            line-height: 1.5;
+        }
+
+        /* Song list */
+        .ct-song-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ct-song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .ct-song-item:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .ct-song-title {
+            font-weight: 600;
+            color: white;
+            font-size: 0.95em;
+        }
+
+        .ct-song-artist {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.8em;
+            margin-top: 2px;
+        }
+
+        .ct-song-chords {
+            color: #e8572a;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.85em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* Ear training */
+        .ct-ear-options {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .ct-ear-btn {
+            flex: 1;
+            max-width: 150px;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            color: white;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .ct-ear-btn:hover {
+            border-color: rgba(232,87,42,0.5);
+            background: rgba(232,87,42,0.1);
+        }
+
+        .ct-ear-btn.correct {
+            border-color: #48bb78;
+            background: rgba(72,187,120,0.2);
+            color: #68d391;
+        }
+
+        .ct-ear-btn.wrong {
+            border-color: #e8572a;
+            background: rgba(232,87,42,0.2);
+            color: #f0845a;
+        }
+
+        .ct-ear-counter {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+
+        .ct-ear-hint {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85em;
+            font-style: italic;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        /* Metronome / rhythm */
+        .ct-metro-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .ct-beat-indicator {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: rgba(255,255,255,0.3);
+            transition: all 0.15s;
+        }
+
+        .ct-beat-indicator.active {
+            border-color: #e8572a;
+            background: rgba(232,87,42,0.3);
+            color: white;
+            transform: scale(1.15);
+        }
+
+        .ct-beat-indicator.hit {
+            border-color: #48bb78;
+            background: rgba(72,187,120,0.3);
+            color: white;
+        }
+
+        .ct-beat-indicator.miss {
+            border-color: #e8572a;
+            background: rgba(232,87,42,0.15);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .ct-tempo-display {
+            text-align: center;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: white;
+            margin: 10px 0;
+        }
+
+        .ct-tempo-label {
+            text-align: center;
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ct-rhythm-feedback {
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 12px;
+            min-height: 40px;
+        }
+
+        .ct-rhythm-feedback.good {
+            color: #68d391;
+            background: rgba(72,187,120,0.12);
+        }
+
+        .ct-rhythm-feedback.off {
+            color: #f0845a;
+            background: rgba(232,87,42,0.12);
+        }
+
+        /* Strum detection visual */
+        .ct-strum-visual {
+            height: 60px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ct-strum-playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #e8572a;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(232,87,42,0.6);
+            transition: left 0.05s linear;
+        }
+
+        .ct-strum-marker {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .ct-strum-marker.hit {
+            background: rgba(72,187,120,0.4);
+            border-color: #48bb78;
+        }
+
+        .ct-strum-marker.miss {
+            background: rgba(232,87,42,0.2);
+            border-color: rgba(232,87,42,0.5);
+        }
+
+        /* Chord change indicator for rhythm section */
+        .ct-chord-queue {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .ct-queue-chord {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+
+        .ct-queue-chord.current {
+            color: white;
+            background: rgba(232,87,42,0.2);
+            border-color: #e8572a;
+            transform: scale(1.1);
+        }
+
+        .ct-queue-chord.done {
+            color: rgba(72,187,120,0.6);
+            border-color: rgba(72,187,120,0.3);
+        }
+
+        /* Capo diagram */
+        .ct-capo-examples {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .ct-capo-example {
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .ct-capo-shape {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .ct-capo-arrow {
+            color: #e8572a;
+            margin: 4px 0;
+            font-size: 0.9em;
+        }
+
+        .ct-capo-actual {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* Badge / completion */
+        .ct-badge {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .ct-badge-icon {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+
+        .ct-badge-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2em;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .ct-badge-subtitle {
+            color: #e8572a;
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .ct-songs-unlocked {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #48bb78;
+            margin-bottom: 15px;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+
+        .ct-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin: 20px 0;
+        }
+
+        /* Play audio button */
+        .ct-play-audio {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(232,87,42,0.3);
+            background: rgba(232,87,42,0.1);
+            color: #e8572a;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ct-play-audio:hover {
+            background: rgba(232,87,42,0.2);
+        }
+
+        /* Settings row (reuse from main style) */
+        .ct-settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        @media (max-width: 400px) {
+            .ct-title { font-size: 1.6em; }
+            .ct-song-chords { font-size: 0.75em; }
+            .ct-beat-indicator { width: 40px; height: 40px; font-size: 1.1em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span>Six String</span> Country</h1>
+            <p style="color:rgba(255,255,255,0.5); font-size:0.85em; text-transform:uppercase; letter-spacing:3px; margin-top:-10px; margin-bottom:15px;">Chord Trainer</p>
+        </header>
+
+        <!-- ==================== SCREEN: Welcome / Module Select ==================== -->
+        <div id="screen-welcome">
+            <div class="ct-card">
+                <div class="ct-section-label">Module 1</div>
+                <div class="ct-title">Key of G</div>
+                <div class="ct-subtitle">The most popular key in country music</div>
+                <div class="ct-body">
+                    You're going to learn <strong>4 chord families</strong> — the core shapes plus the
+                    variations that country players actually use. By the end, you'll know every chord
+                    you need to play <strong>10 songs</strong>.
+                </div>
+                <div class="ct-highlight">
+                    <span class="ct-highlight-icon">💡</span>
+                    You'll learn why these chords work together, not just where to put your fingers.
+                    That understanding is what separates someone who plays guitar from someone who
+                    reads chord charts.
+                </div>
+            </div>
+
+            <div class="ct-card">
+                <div class="ct-section-label">Songs You'll Unlock</div>
+                <ul class="ct-song-list" id="welcomeSongList"></ul>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startModule('G')">Let's Go →</button>
+                <a href="/" class="btn btn-skip" style="text-align:center; text-decoration:none;">← Back to Home</a>
+            </div>
+        </div>
+
+        <!-- ==================== SCREEN: Chord Family Intro ==================== -->
+        <div id="screen-chord-family" class="hidden">
+            <div class="ct-progress" id="familyProgress"></div>
+            <div class="ct-card">
+                <div class="ct-section-label" id="familyStepLabel"></div>
+                <div class="ct-title" id="familyChordName"></div>
+                <div class="ct-subtitle" id="familyChordNotes"></div>
+                <div class="ct-diagram-area">
+                    <svg class="ct-chord-svg" id="familySvg" width="170" height="210"></svg>
+                </div>
+                <div class="ct-body" id="familyIntroText"></div>
+                <button class="ct-play-audio" id="familyPlayBtn" onclick="playChordAudio()">
+                    🔊 Hear this chord
+                </button>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="familyStrumBtn" onclick="startFamilyStrum()">🎸 Play It — I'll Listen</button>
+                <button class="btn btn-skip" onclick="skipFamilyStrum()">I've got it, move on →</button>
+            </div>
+            <div class="status" id="familyStatus"></div>
+        </div>
+
+        <!-- ==================== SCREEN: Strum Check (for core chord) ==================== -->
+        <div id="screen-strum-check" class="hidden">
+            <div class="ct-progress" id="strumProgress"></div>
+            <div class="ct-card" style="text-align:center;">
+                <div class="ct-section-label">Strum Check</div>
+                <div class="ct-title" id="strumChordName"></div>
+                <div class="ct-diagram-area">
+                    <svg class="ct-chord-svg" id="strumSvg" width="170" height="210"></svg>
+                </div>
+                <p class="ct-body" style="text-align:center;">
+                    Strum the chord now. Make sure every note rings clearly — no buzzing or muted strings!
+                </p>
+                <div id="strumFeedback" class="feedback hidden"></div>
+            </div>
+            <div class="status" id="strumStatus"></div>
+        </div>
+
+        <!-- ==================== SCREEN: Variations ==================== -->
+        <div id="screen-variations" class="hidden">
+            <div class="ct-progress" id="variationProgress"></div>
+            <div class="ct-card">
+                <div class="ct-section-label" id="variationStepLabel"></div>
+                <div class="ct-title" id="variationName"></div>
+                <div class="ct-diagram-area">
+                    <svg class="ct-chord-svg" id="variationSvg" width="170" height="210"></svg>
+                </div>
+                <div class="ct-body" id="variationDesc"></div>
+                <div class="ct-highlight" id="variationWhy"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startVariationStrum()">🎸 Try It</button>
+                <button class="btn btn-skip" id="variationNextBtn" onclick="nextVariation()">Next →</button>
+            </div>
+            <div class="status" id="variationStatus"></div>
+        </div>
+
+        <!-- ==================== SCREEN: Theory Note (between chord families) ==================== -->
+        <div id="screen-theory" class="hidden">
+            <div class="ct-progress" id="theoryProgress"></div>
+            <div class="ct-card">
+                <div class="ct-section-label">Did You Notice?</div>
+                <div class="ct-body" id="theoryText" style="font-size:1.05em; text-align:center;"></div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="nextChordFamily()">Next Chord →</button>
+            </div>
+        </div>
+
+        <!-- ==================== SCREEN: Ear Training ==================== -->
+        <div id="screen-ear" class="hidden">
+            <div class="ct-card">
+                <div class="ct-section-label">Ear Training</div>
+                <div class="ct-title">Can You Hear the Difference?</div>
+                <div class="ct-subtitle">Listen to the chord, then pick which one it is.</div>
+                <div class="ct-ear-counter" id="earCounter"></div>
+                <div style="text-align:center; margin: 20px 0;">
+                    <button class="ct-play-audio" id="earPlayBtn" onclick="playEarChord()" style="font-size:1em; padding: 12px 24px;">
+                        🔊 Play Chord
+                    </button>
+                </div>
+                <div class="ct-ear-options" id="earOptions"></div>
+                <div class="ct-ear-hint" id="earHint"></div>
+                <div id="earFeedback" class="feedback hidden" style="margin-top:15px;"></div>
+            </div>
+        </div>
+
+        <!-- ==================== SCREEN: Rhythm / Metronome ==================== -->
+        <div id="screen-rhythm" class="hidden">
+            <div class="ct-card">
+                <div class="ct-section-label">Rhythm Practice</div>
+                <div class="ct-title">Play in Time</div>
+                <div class="ct-subtitle">Strum once per measure when the beat lights up. The app is listening for your timing.</div>
+
+                <div class="ct-chord-queue" id="rhythmChordQueue"></div>
+
+                <div class="ct-metro-display" id="metroBeats">
+                    <div class="ct-beat-indicator" id="beat-1">1</div>
+                    <div class="ct-beat-indicator" id="beat-2">2</div>
+                    <div class="ct-beat-indicator" id="beat-3">3</div>
+                    <div class="ct-beat-indicator" id="beat-4">4</div>
+                </div>
+
+                <div class="ct-settings-row">
+                    <span class="settings-label">BPM:</span>
+                    <button class="adj-btn" onclick="adjustBPM(-5)">−</button>
+                    <span class="settings-value" id="bpmDisplay">70</span>
+                    <button class="adj-btn" onclick="adjustBPM(5)">+</button>
+                </div>
+
+                <div class="ct-rhythm-feedback" id="rhythmFeedback"></div>
+                <div style="text-align:center; margin-top:10px;">
+                    <span style="color:rgba(255,255,255,0.35); font-size:0.8em;" id="rhythmScore"></span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="rhythmStartBtn" onclick="toggleRhythm()">▶ Start</button>
+                <button class="btn btn-skip" onclick="finishRhythm()">Done — Move On →</button>
+            </div>
+        </div>
+
+        <!-- ==================== SCREEN: Capo Check ==================== -->
+        <div id="screen-capo" class="hidden">
+            <div class="ct-card">
+                <div class="ct-section-label">One More Thing</div>
+                <div class="ct-title">Do You Know How to Use a Capo?</div>
+                <div class="ct-subtitle">A capo is essential for country guitar. If you already know, skip ahead!</div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showCapoExplainer()">No — Show Me</button>
+                <button class="btn btn-skip" onclick="showCompletion()">Yes, I'm Good →</button>
+            </div>
+        </div>
+
+        <!-- ==================== SCREEN: Capo Explainer ==================== -->
+        <div id="screen-capo-explain" class="hidden">
+            <div class="ct-card">
+                <div class="ct-section-label">Capo 101</div>
+                <div class="ct-title">What's a Capo?</div>
+                <div class="ct-body">
+                    A capo is a clamp that goes across all the strings at a specific fret. It raises
+                    the pitch of all strings equally, so you can play the same chord <em>shapes</em> in
+                    a different key.
+                </div>
+                <div class="ct-highlight">
+                    <span class="ct-highlight-icon">💡</span>
+                    <strong>Example:</strong> Put a capo on fret 2 and play a G shape — you're actually
+                    playing an A chord. Same fingers, different key!
+                </div>
+                <div class="ct-body">
+                    This is huge for country guitar. Instead of learning complicated barre chord shapes
+                    for every key, you use a capo and keep playing your comfortable open chords.
+                </div>
+
+                <hr class="ct-divider">
+                <div class="ct-section-label">Capo on Fret 2 — Your Shapes Become:</div>
+                <div class="ct-capo-examples" id="capoExamples"></div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showCompletion()">Got It →</button>
+            </div>
+        </div>
+
+        <!-- ==================== SCREEN: Completion / Songs Unlocked ==================== -->
+        <div id="screen-complete" class="hidden">
+            <div class="ct-card">
+                <div class="ct-badge">
+                    <div class="ct-badge-icon">🏆</div>
+                    <div class="ct-badge-title">Key of G Complete</div>
+                    <div class="ct-badge-subtitle">You learned 4 chord families + variations</div>
+                    <div class="ct-songs-unlocked">🎵 10 Songs Unlocked</div>
+                </div>
+            </div>
+
+            <div class="ct-card">
+                <div class="ct-section-label">Your Songs — Start with these</div>
+                <ul class="ct-song-list" id="completeSongList"></ul>
+                <hr class="ct-divider">
+                <div class="ct-body" style="text-align:center; font-size:0.88em; color:rgba(255,255,255,0.45);">
+                    Look these up on the Six String Country lessons page, or search for the chord charts and play along!
+                </div>
+            </div>
+
+            <div class="controls">
+                <a href="/" class="btn btn-primary" style="text-align:center; text-decoration:none;">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== STATE =====
+        let currentModule = null;
+        let currentFamilyIndex = 0;
+        let currentVariationIndex = 0;
+        let currentEarQuestion = 0;
+        let earScore = 0;
+
+        // Rhythm state
+        let rhythmBPM = 70;
+        let rhythmPlaying = false;
+        let rhythmInterval = null;
+        let currentBeat = 0;
+        let rhythmMeasure = 0;
+        let rhythmHits = 0;
+        let rhythmMisses = 0;
+        let rhythmChordIndex = 0;
+
+        // Audio context for chord playback and strum detection
+        let audioCtx = null;
+        let micStream = null;
+
+        function getAudioContext() {
+            if (!audioCtx || audioCtx.state === 'closed') {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        // ===== INITIALIZATION =====
+        function init() {
+            const module = MODULES['G'];
+            const songList = document.getElementById('welcomeSongList');
+            songList.innerHTML = module.songs.map(s => `
+                <li class="ct-song-item">
+                    <div>
+                        <div class="ct-song-title">${s.title}</div>
+                        <div class="ct-song-artist">${s.artist}</div>
+                    </div>
+                    <div class="ct-song-chords">${s.chords}</div>
+                </li>
+            `).join('');
+        }
+
+        // ===== SCREEN MANAGEMENT =====
+        function showScreen(id) {
+            document.querySelectorAll('[id^="screen-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function buildProgressBar(containerId, total, current) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = Array.from({ length: total }, (_, i) => {
+                let cls = 'ct-progress-step';
+                if (i < current) cls += ' done';
+                else if (i === current) cls += ' active';
+                return `<div class="${cls}"></div>`;
+            }).join('');
+        }
+
+        // ===== MODULE START =====
+        function startModule(key) {
+            currentModule = key;
+            currentFamilyIndex = 0;
+            showChordFamily();
+        }
+
+        // ===== CHORD FAMILY INTRO =====
+        function showChordFamily() {
+            const module = MODULES[currentModule];
+            const familyKey = module.chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+            const core = family.core;
+            const total = module.chordFamilies.length;
+
+            showScreen('screen-chord-family');
+            buildProgressBar('familyProgress', total, currentFamilyIndex);
+
+            document.getElementById('familyStepLabel').textContent =
+                `Chord ${currentFamilyIndex + 1} of ${total}`;
+            document.getElementById('familyChordName').textContent = core.fullName;
+            document.getElementById('familyChordNotes').textContent =
+                `Built from: ${core.notes.join(', ')}`;
+
+            // Build intro text
+            let introHTML = '';
+            if (currentFamilyIndex === 0) {
+                introHTML = `The ${core.name} chord is built from three notes: the <strong>Root (${core.notes[0]})</strong>, the <strong>Major 3rd (${core.notes[1]})</strong>, and the <strong>Perfect 5th (${core.notes[2]})</strong>. Every version of a ${core.name} chord uses these same three notes — just in different arrangements on the fretboard.`;
+            } else if (core.name === 'C') {
+                introHTML = `The C chord uses three notes: <strong>C, E, and G</strong>. Notice that G is in here — you already know that note from the G chord! These shared notes are why G and C sound so good together.`;
+            } else if (core.name === 'D') {
+                introHTML = `D Major is built from <strong>D, F#, and A</strong>. This chord only uses 4 strings — don't strum the 6th or 5th strings. It has a bright, cutting sound that sits perfectly between G and C.`;
+            } else if (core.name === 'Em') {
+                introHTML = `E minor uses <strong>E, G, and B</strong>. See those notes? G and B are also in your G chord. That's why Em sounds like it belongs with G — they share two out of three notes. The <strong>minor 3rd (G)</strong> is what gives it that sadder, moodier feeling compared to major chords.`;
+            }
+            document.getElementById('familyIntroText').innerHTML = introHTML;
+
+            drawChordDiagram('familySvg', core);
+            document.getElementById('familyStatus').textContent = '';
+        }
+
+        // ===== STRUM CHECK =====
+        function startFamilyStrum() {
+            showScreen('screen-strum-check');
+            const module = MODULES[currentModule];
+            const familyKey = module.chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+            const core = family.core;
+
+            buildProgressBar('strumProgress', module.chordFamilies.length, currentFamilyIndex);
+            document.getElementById('strumChordName').textContent = core.fullName;
+            drawChordDiagram('strumSvg', core);
+            document.getElementById('strumFeedback').classList.add('hidden');
+
+            startStrumListening(core);
+        }
+
+        function skipFamilyStrum() {
+            showVariations();
+        }
+
+        async function startStrumListening(chordData) {
+            document.getElementById('strumStatus').textContent = '🎤 Listening... strum now!';
+
+            try {
+                const ac = getAudioContext();
+                if (ac.state === 'suspended') await ac.resume();
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: { channelCount: 1 }
+                });
+                const source = ac.createMediaStreamSource(stream);
+                const analyser = ac.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
+
+                const dataArray = new Float32Array(analyser.fftSize);
+                let detectCount = 0;
+                const maxChecks = 60; // ~3 seconds at 50ms intervals
+
+                const checkStrum = setInterval(() => {
+                    analyser.getFloatTimeDomainData(dataArray);
+
+                    // Calculate RMS to detect if sound is present
+                    let rms = 0;
+                    for (let i = 0; i < dataArray.length; i++) {
+                        rms += dataArray[i] * dataArray[i];
+                    }
+                    rms = Math.sqrt(rms / dataArray.length);
+
+                    detectCount++;
+
+                    if (rms > 0.02) {
+                        // Sound detected — check if it's clean
+                        clearInterval(checkStrum);
+                        stream.getTracks().forEach(t => t.stop());
+                        source.disconnect();
+
+                        const feedback = document.getElementById('strumFeedback');
+                        if (rms > 0.05) {
+                            feedback.innerHTML = '<p class="perfect">✅ Great sound! That chord is ringing nicely.</p>';
+                        } else {
+                            feedback.innerHTML = '<p class="perfect">✅ Sound detected — make sure all strings ring clearly!</p>';
+                        }
+                        feedback.classList.remove('hidden');
+                        document.getElementById('strumStatus').textContent = '';
+
+                        setTimeout(() => showVariations(), 1500);
+                    }
+
+                    if (detectCount >= maxChecks) {
+                        clearInterval(checkStrum);
+                        stream.getTracks().forEach(t => t.stop());
+                        source.disconnect();
+                        document.getElementById('strumStatus').textContent = '';
+
+                        const feedback = document.getElementById('strumFeedback');
+                        feedback.innerHTML = '<p class="wrong">No sound detected — try strumming louder!</p>';
+                        feedback.classList.remove('hidden');
+
+                        setTimeout(() => {
+                            feedback.classList.add('hidden');
+                            startStrumListening(chordData);
+                        }, 2000);
+                    }
+                }, 50);
+
+            } catch (err) {
+                document.getElementById('strumStatus').textContent = '❌ Microphone access needed';
+            }
+        }
+
+        // ===== VARIATIONS =====
+        function showVariations() {
+            const module = MODULES[currentModule];
+            const familyKey = module.chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+
+            if (!family.variations || family.variations.length === 0) {
+                showTheoryNote();
+                return;
+            }
+
+            currentVariationIndex = 0;
+            showVariation();
+        }
+
+        function showVariation() {
+            const module = MODULES[currentModule];
+            const familyKey = module.chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+            const variation = family.variations[currentVariationIndex];
+
+            showScreen('screen-variations');
+            buildProgressBar('variationProgress', module.chordFamilies.length, currentFamilyIndex);
+
+            document.getElementById('variationStepLabel').textContent =
+                `${family.core.name} Variation ${currentVariationIndex + 1} of ${family.variations.length}`;
+            document.getElementById('variationName').textContent = variation.fullName;
+            document.getElementById('variationDesc').innerHTML = variation.description;
+            document.getElementById('variationWhy').innerHTML =
+                `<span class="ct-highlight-icon">💡</span> <strong>Why it works:</strong> ${variation.whyItWorks}`;
+
+            drawChordDiagram('variationSvg', variation);
+
+            // Update next button text
+            const isLast = currentVariationIndex >= family.variations.length - 1;
+            document.getElementById('variationNextBtn').textContent = isLast ? 'Continue →' : 'Next Variation →';
+            document.getElementById('variationStatus').textContent = '';
+        }
+
+        function startVariationStrum() {
+            const module = MODULES[currentModule];
+            const familyKey = module.chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+            const variation = family.variations[currentVariationIndex];
+
+            document.getElementById('variationStatus').textContent = '🎤 Listening... strum now!';
+
+            // Simple strum detection (same as core chord)
+            navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } })
+                .then(stream => {
+                    const ac = getAudioContext();
+                    const source = ac.createMediaStreamSource(stream);
+                    const analyser = ac.createAnalyser();
+                    analyser.fftSize = 2048;
+                    source.connect(analyser);
+                    const dataArray = new Float32Array(analyser.fftSize);
+                    let count = 0;
+
+                    const check = setInterval(() => {
+                        analyser.getFloatTimeDomainData(dataArray);
+                        let rms = 0;
+                        for (let i = 0; i < dataArray.length; i++) rms += dataArray[i] * dataArray[i];
+                        rms = Math.sqrt(rms / dataArray.length);
+                        count++;
+
+                        if (rms > 0.02) {
+                            clearInterval(check);
+                            stream.getTracks().forEach(t => t.stop());
+                            source.disconnect();
+                            document.getElementById('variationStatus').textContent = '✅ Nice!';
+                            setTimeout(() => {
+                                document.getElementById('variationStatus').textContent = '';
+                            }, 1500);
+                        }
+                        if (count >= 60) {
+                            clearInterval(check);
+                            stream.getTracks().forEach(t => t.stop());
+                            source.disconnect();
+                            document.getElementById('variationStatus').textContent = 'No sound detected — try again!';
+                        }
+                    }, 50);
+                })
+                .catch(() => {
+                    document.getElementById('variationStatus').textContent = '❌ Microphone access needed';
+                });
+        }
+
+        function nextVariation() {
+            const familyKey = MODULES[currentModule].chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+
+            currentVariationIndex++;
+            if (currentVariationIndex >= family.variations.length) {
+                showTheoryNote();
+            } else {
+                showVariation();
+            }
+        }
+
+        // ===== THEORY NOTE =====
+        function showTheoryNote() {
+            const familyKey = MODULES[currentModule].chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+            const module = MODULES[currentModule];
+
+            showScreen('screen-theory');
+            buildProgressBar('theoryProgress', module.chordFamilies.length, currentFamilyIndex);
+            document.getElementById('theoryText').innerHTML = family.theoryNote;
+        }
+
+        function nextChordFamily() {
+            currentFamilyIndex++;
+            const module = MODULES[currentModule];
+            if (currentFamilyIndex >= module.chordFamilies.length) {
+                showEarTraining();
+            } else {
+                showChordFamily();
+            }
+        }
+
+        // ===== EAR TRAINING =====
+        function showEarTraining() {
+            currentEarQuestion = 0;
+            earScore = 0;
+            showScreen('screen-ear');
+            showEarQuestion();
+        }
+
+        function showEarQuestion() {
+            const questions = EAR_TRAINING[currentModule].questions;
+            if (currentEarQuestion >= questions.length) {
+                showRhythmPractice();
+                return;
+            }
+
+            const q = questions[currentEarQuestion];
+            document.getElementById('earCounter').textContent =
+                `Question ${currentEarQuestion + 1} of ${questions.length}`;
+            document.getElementById('earHint').textContent = '';
+            document.getElementById('earFeedback').classList.add('hidden');
+
+            const optionsHTML = q.options.map(opt => `
+                <button class="ct-ear-btn" onclick="answerEar('${opt}', this)">${opt}</button>
+            `).join('');
+            document.getElementById('earOptions').innerHTML = optionsHTML;
+        }
+
+        function playEarChord() {
+            const questions = EAR_TRAINING[currentModule].questions;
+            const q = questions[currentEarQuestion];
+            playChordTones(q.play);
+        }
+
+        function answerEar(answer, btn) {
+            const questions = EAR_TRAINING[currentModule].questions;
+            const q = questions[currentEarQuestion];
+            const feedback = document.getElementById('earFeedback');
+            const buttons = document.querySelectorAll('.ct-ear-btn');
+
+            // Disable all buttons
+            buttons.forEach(b => b.style.pointerEvents = 'none');
+
+            if (answer === q.play) {
+                btn.classList.add('correct');
+                earScore++;
+                feedback.innerHTML = `<p class="perfect">✅ That's right — ${q.play}!</p>`;
+            } else {
+                btn.classList.add('wrong');
+                // Highlight correct answer
+                buttons.forEach(b => {
+                    if (b.textContent.trim() === q.play) b.classList.add('correct');
+                });
+                feedback.innerHTML = `<p class="wrong">That was ${q.play}. ${q.hint}</p>`;
+            }
+            feedback.classList.remove('hidden');
+
+            currentEarQuestion++;
+            setTimeout(() => showEarQuestion(), 2000);
+        }
+
+        // ===== RHYTHM PRACTICE =====
+        function showRhythmPractice() {
+            showScreen('screen-rhythm');
+            rhythmMeasure = 0;
+            rhythmHits = 0;
+            rhythmMisses = 0;
+            rhythmChordIndex = 0;
+            currentBeat = 0;
+
+            // Build chord queue display
+            const chords = ['G', 'C', 'D', 'Em'];
+            document.getElementById('rhythmChordQueue').innerHTML = chords.map((c, i) => `
+                <div class="ct-queue-chord${i === 0 ? ' current' : ''}" id="qchord-${i}">${c}</div>
+            `).join('');
+
+            document.getElementById('rhythmFeedback').textContent = '';
+            document.getElementById('rhythmFeedback').className = 'ct-rhythm-feedback';
+            document.getElementById('rhythmScore').textContent = '';
+            document.getElementById('bpmDisplay').textContent = rhythmBPM;
+            document.getElementById('rhythmStartBtn').textContent = '▶ Start';
+            resetBeats();
+        }
+
+        function resetBeats() {
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById(`beat-${i}`);
+                el.className = 'ct-beat-indicator';
+            }
+        }
+
+        function adjustBPM(delta) {
+            rhythmBPM = Math.max(40, Math.min(120, rhythmBPM + delta));
+            document.getElementById('bpmDisplay').textContent = rhythmBPM;
+        }
+
+        function toggleRhythm() {
+            if (rhythmPlaying) {
+                stopRhythm();
+            } else {
+                startRhythm();
+            }
+        }
+
+        async function startRhythm() {
+            rhythmPlaying = true;
+            document.getElementById('rhythmStartBtn').textContent = '⏸ Stop';
+            document.getElementById('rhythmStartBtn').classList.remove('btn-primary');
+            document.getElementById('rhythmStartBtn').classList.add('btn-pause');
+
+            const ac = getAudioContext();
+            if (ac.state === 'suspended') await ac.resume();
+
+            // Start microphone for strum detection
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
+            } catch (e) {
+                document.getElementById('rhythmFeedback').textContent = 'Microphone access needed';
+                stopRhythm();
+                return;
+            }
+
+            const source = ac.createMediaStreamSource(micStream);
+            const analyser = ac.createAnalyser();
+            analyser.fftSize = 2048;
+            source.connect(analyser);
+            const dataArray = new Float32Array(analyser.fftSize);
+
+            currentBeat = 0;
+            let strumDetectedThisMeasure = false;
+            let beatOneTime = 0;
+            const msPerBeat = 60000 / rhythmBPM;
+
+            rhythmInterval = setInterval(() => {
+                if (!rhythmPlaying) return;
+
+                currentBeat++;
+                if (currentBeat > 4) {
+                    currentBeat = 1;
+                    // Check if they strummed during the previous measure
+                    if (!strumDetectedThisMeasure && rhythmMeasure > 0) {
+                        rhythmMisses++;
+                        document.getElementById('rhythmFeedback').textContent = 'Missed! Strum on beat 1.';
+                        document.getElementById('rhythmFeedback').className = 'ct-rhythm-feedback off';
+                    }
+                    strumDetectedThisMeasure = false;
+                    rhythmMeasure++;
+
+                    // Advance chord every 2 measures
+                    if (rhythmMeasure > 0 && rhythmMeasure % 2 === 0) {
+                        const prevIdx = rhythmChordIndex;
+                        rhythmChordIndex = (rhythmChordIndex + 1) % 4;
+                        const prevEl = document.getElementById(`qchord-${prevIdx}`);
+                        const nextEl = document.getElementById(`qchord-${rhythmChordIndex}`);
+                        if (prevEl) { prevEl.classList.remove('current'); prevEl.classList.add('done'); }
+                        if (nextEl) nextEl.classList.add('current');
+                    }
+                }
+
+                // Update beat indicators
+                resetBeats();
+                const beatEl = document.getElementById(`beat-${currentBeat}`);
+                if (beatEl) beatEl.classList.add('active');
+
+                // Play metronome click
+                playClick(currentBeat === 1);
+
+                // On beat 1, mark the time
+                if (currentBeat === 1) {
+                    beatOneTime = Date.now();
+                }
+
+                // Check for strum around beat 1
+                if (currentBeat === 1 || currentBeat === 2) {
+                    analyser.getFloatTimeDomainData(dataArray);
+                    let rms = 0;
+                    for (let i = 0; i < dataArray.length; i++) rms += dataArray[i] * dataArray[i];
+                    rms = Math.sqrt(rms / dataArray.length);
+
+                    if (rms > 0.03 && !strumDetectedThisMeasure) {
+                        strumDetectedThisMeasure = true;
+                        const timeDiff = Date.now() - beatOneTime;
+
+                        if (timeDiff < msPerBeat * 0.75) {
+                            rhythmHits++;
+                            document.getElementById('rhythmFeedback').textContent = '✅ Right on time!';
+                            document.getElementById('rhythmFeedback').className = 'ct-rhythm-feedback good';
+                            document.getElementById(`beat-1`).classList.add('hit');
+                        } else {
+                            rhythmHits++;
+                            document.getElementById('rhythmFeedback').textContent = '✅ A little late, but close!';
+                            document.getElementById('rhythmFeedback').className = 'ct-rhythm-feedback good';
+                        }
+
+                        document.getElementById('rhythmScore').textContent =
+                            `${rhythmHits} on time / ${rhythmHits + rhythmMisses} measures`;
+                    }
+                }
+            }, msPerBeat);
+        }
+
+        function stopRhythm() {
+            rhythmPlaying = false;
+            if (rhythmInterval) clearInterval(rhythmInterval);
+            if (micStream) micStream.getTracks().forEach(t => t.stop());
+            document.getElementById('rhythmStartBtn').textContent = '▶ Start';
+            document.getElementById('rhythmStartBtn').classList.remove('btn-pause');
+            document.getElementById('rhythmStartBtn').classList.add('btn-primary');
+            resetBeats();
+        }
+
+        function finishRhythm() {
+            stopRhythm();
+            showScreen('screen-capo');
+        }
+
+        function playClick(isDownbeat) {
+            const ac = getAudioContext();
+            const osc = ac.createOscillator();
+            const gain = ac.createGain();
+            osc.connect(gain);
+            gain.connect(ac.destination);
+            osc.frequency.value = isDownbeat ? 1000 : 800;
+            gain.gain.value = isDownbeat ? 0.15 : 0.08;
+            gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.08);
+            osc.start(ac.currentTime);
+            osc.stop(ac.currentTime + 0.08);
+        }
+
+        // ===== CAPO =====
+        function showCapoExplainer() {
+            showScreen('screen-capo-explain');
+            const examples = CAPO_CONTENT.diagram.examples;
+            document.getElementById('capoExamples').innerHTML = examples.map(ex => `
+                <div class="ct-capo-example">
+                    <div class="ct-capo-shape">${ex.shape}</div>
+                    <div class="ct-capo-arrow">↓ becomes ↓</div>
+                    <div class="ct-capo-actual">${ex.actual}</div>
+                </div>
+            `).join('');
+        }
+
+        // ===== COMPLETION =====
+        function showCompletion() {
+            showScreen('screen-complete');
+            const module = MODULES[currentModule];
+            document.getElementById('completeSongList').innerHTML = module.songs.map((s, i) => `
+                <li class="ct-song-item">
+                    <div>
+                        <div class="ct-song-title">${i === 0 ? '⭐ ' : ''}${s.title}</div>
+                        <div class="ct-song-artist">${s.artist}</div>
+                    </div>
+                    <div class="ct-song-chords">${s.chords}</div>
+                </li>
+            `).join('');
+        }
+
+        // ===== AUDIO PLAYBACK =====
+        function playChordTones(chordName) {
+            // Find the chord data
+            let chordData = null;
+            for (const key of Object.keys(CHORD_FAMILIES)) {
+                if (CHORD_FAMILIES[key].core.name === chordName) {
+                    chordData = CHORD_FAMILIES[key].core;
+                    break;
+                }
+            }
+            if (!chordData) return;
+
+            const ac = getAudioContext();
+            if (ac.state === 'suspended') ac.resume();
+
+            // Play each string with a slight strum delay
+            const frets = chordData.frets;
+            let strumDelay = 0;
+
+            for (let i = 0; i < 6; i++) {
+                const fret = frets[i];
+                if (fret === -1) continue;
+
+                const stringNum = 6 - i;
+                const openFreq = STANDARD_TUNING[stringNum];
+                const freq = openFreq * Math.pow(2, fret / 12);
+
+                const osc = ac.createOscillator();
+                const gain = ac.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                osc.connect(gain);
+                gain.connect(ac.destination);
+
+                const startTime = ac.currentTime + strumDelay;
+                gain.gain.setValueAtTime(0.08, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5);
+
+                osc.start(startTime);
+                osc.stop(startTime + 1.5);
+
+                strumDelay += 0.03;
+            }
+        }
+
+        function playChordAudio() {
+            const module = MODULES[currentModule];
+            const familyKey = module.chordFamilies[currentFamilyIndex];
+            const family = CHORD_FAMILIES[familyKey];
+            playChordTones(family.core.name);
+        }
+
+        // ===== CHORD DIAGRAM DRAWING =====
+        function drawChordDiagram(svgId, chordData) {
+            const svg = document.getElementById(svgId);
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            const strings = 6;
+            const fretCount = 4;
+            const startX = 35;
+            const startY = 38;
+            const stringSpacing = 22;
+            const fretSpacing = 32;
+            const width = (strings - 1) * stringSpacing;
+            const height = fretCount * fretSpacing;
+
+            const frets = chordData.frets;
+            const fingers = chordData.fingers;
+
+            const fretNums = frets.filter(f => f > 0);
+            const minFret = fretNums.length > 0 ? Math.min(...fretNums) : 1;
+            const startFret = minFret > 3 ? minFret - 1 : 1;
+
+            // Nut or position marker
+            if (startFret === 1) {
+                const nut = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                nut.setAttribute('x', startX);
+                nut.setAttribute('y', startY - 5);
+                nut.setAttribute('width', width);
+                nut.setAttribute('height', 5);
+                nut.setAttribute('fill', 'rgba(255,255,255,0.8)');
+                svg.appendChild(nut);
+            } else {
+                const pos = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                pos.setAttribute('x', startX - 18);
+                pos.setAttribute('y', startY + fretSpacing * 0.7);
+                pos.setAttribute('fill', 'rgba(255,255,255,0.6)');
+                pos.setAttribute('font-size', '11');
+                pos.setAttribute('text-anchor', 'middle');
+                pos.textContent = `${startFret}fr`;
+                svg.appendChild(pos);
+            }
+
+            // Fret lines
+            for (let f = 0; f <= fretCount; f++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', startY + f * fretSpacing);
+                line.setAttribute('x2', startX + width);
+                line.setAttribute('y2', startY + f * fretSpacing);
+                line.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+            }
+
+            // String lines
+            for (let s = 0; s < strings; s++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', startX + s * stringSpacing);
+                line.setAttribute('y1', startY);
+                line.setAttribute('x2', startX + s * stringSpacing);
+                line.setAttribute('y2', startY + height);
+                line.setAttribute('stroke', 'rgba(255,255,255,0.3)');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+            }
+
+            // String labels
+            const stringLabels = ['E', 'A', 'D', 'G', 'B', 'E'];
+            for (let s = 0; s < strings; s++) {
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', startX + s * stringSpacing);
+                label.setAttribute('y', startY + height + 18);
+                label.setAttribute('fill', 'rgba(255,255,255,0.4)');
+                label.setAttribute('font-size', '10');
+                label.setAttribute('text-anchor', 'middle');
+                label.textContent = stringLabels[s];
+                svg.appendChild(label);
+            }
+
+            // Fret markers
+            frets.forEach((fret, i) => {
+                const x = startX + i * stringSpacing;
+                if (fret === -1) {
+                    const xMark = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    xMark.setAttribute('x', x);
+                    xMark.setAttribute('y', startY - 14);
+                    xMark.setAttribute('fill', 'rgba(255,100,100,0.8)');
+                    xMark.setAttribute('font-size', '12');
+                    xMark.setAttribute('text-anchor', 'middle');
+                    xMark.textContent = '✕';
+                    svg.appendChild(xMark);
+                } else if (fret === 0) {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', startY - 14);
+                    circle.setAttribute('r', 5);
+                    circle.setAttribute('fill', 'none');
+                    circle.setAttribute('stroke', 'rgba(255,255,255,0.6)');
+                    circle.setAttribute('stroke-width', '1.5');
+                    svg.appendChild(circle);
+                } else {
+                    const adjustedFret = fret - startFret + 1;
+                    const cy = startY + (adjustedFret - 0.5) * fretSpacing;
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', cy);
+                    circle.setAttribute('r', 9);
+                    circle.setAttribute('fill', '#e8572a');
+                    svg.appendChild(circle);
+
+                    if (fingers && fingers[i] > 0) {
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', x);
+                        text.setAttribute('y', cy + 4);
+                        text.setAttribute('fill', 'white');
+                        text.setAttribute('font-size', '10');
+                        text.setAttribute('font-weight', 'bold');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.textContent = fingers[i];
+                        svg.appendChild(text);
+                    }
+                }
+            });
+        }
+
+        // Init on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

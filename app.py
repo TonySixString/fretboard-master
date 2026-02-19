@@ -80,6 +80,10 @@ def game():
 def chords():
     return render_template('chords.html')
 
+@app.route('/chord-trainer')
+def chord_trainer():
+    return render_template('chord-trainer.html')
+
 @app.route('/get_challenge', methods=['GET'])
 def get_challenge():
     string_num = random.randint(1, 6)

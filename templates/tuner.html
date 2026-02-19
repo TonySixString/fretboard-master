@@ -292,6 +292,10 @@
         let audioContext = null;
         let analyser = null;
         let isRunning = false;
+        
+        // Smoothing: keep recent readings to stabilize display
+        let recentFreqs = [];
+        const SMOOTHING_WINDOW = 5;
 
         function detectClosestString(freq) {
             let closest = null;
@@ -363,9 +367,15 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const source = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
-                analyser.fftSize = 4096;
+                
+                // Use larger FFT for better low-frequency resolution
+                // At 48kHz: 8192 samples = 170ms window, captures ~14 cycles of E2 (82Hz)
+                analyser.fftSize = 8192;
+                analyser.smoothingTimeConstant = 0;
+                
                 source.connect(analyser);
                 isRunning = true;
+                recentFreqs = [];
                 detectPitch();
             } catch (err) {
                 document.getElementById('tunerFeedback').textContent = '❌ Microphone access denied';
@@ -380,9 +390,17 @@
             const freq = autoCorrelate(buffer, audioContext.sampleRate);
 
             if (freq > 60 && freq < 400) {
-                const note = freqToNoteName(freq);
+                // Add to smoothing window
+                recentFreqs.push(freq);
+                if (recentFreqs.length > SMOOTHING_WINDOW) recentFreqs.shift();
+                
+                // Use median of recent readings for stability
+                const sorted = [...recentFreqs].sort((a, b) => a - b);
+                const smoothedFreq = sorted[Math.floor(sorted.length / 2)];
+                
+                const note = freqToNoteName(smoothedFreq);
                 document.getElementById('detectedNote').textContent = note;
-                const match = detectClosestString(freq);
+                const match = detectClosestString(smoothedFreq);
                 if (match && Math.abs(match.cents) < 60) {
                     updateNeedle(match.cents);
                     updateStringIndicator(match.strNum, Math.abs(match.cents) <= 10);
@@ -396,40 +414,71 @@
         }
 
         function autoCorrelate(buffer, sampleRate) {
+            // Check if signal is loud enough
             let rms = 0;
             for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
             rms = Math.sqrt(rms / buffer.length);
-            if (rms < 0.01) return -1;
+            if (rms < 0.008) return -1;
 
             const SIZE = buffer.length;
-            const correlations = new Array(SIZE).fill(0);
-            for (let i = 0; i < SIZE; i++) {
-                for (let j = 0; j < SIZE - i; j++) {
-                    correlations[i] += buffer[j] * buffer[j + i];
+            
+            // Guitar frequency range: E2 (82Hz) to E4 (330Hz)
+            // At 48kHz: period of 82Hz = 585 samples, period of 330Hz = 145 samples
+            // At 44.1kHz: period of 82Hz = 538 samples, period of 330Hz = 134 samples
+            const minPeriod = Math.floor(sampleRate / 400); // ~330Hz max
+            const maxPeriod = Math.ceil(sampleRate / 70);   // ~70Hz min (below low E with some margin)
+            
+            // Normalized Square Difference Function (NSDF)
+            // More robust than raw autocorrelation for pitch detection
+            const nsdf = new Float32Array(maxPeriod + 1);
+            
+            for (let tau = minPeriod; tau <= maxPeriod; tau++) {
+                let acf = 0;  // autocorrelation
+                let div = 0;  // normalizer
+                const len = SIZE - tau;
+                for (let j = 0; j < len; j++) {
+                    acf += buffer[j] * buffer[j + tau];
+                    div += buffer[j] * buffer[j] + buffer[j + tau] * buffer[j + tau];
+                }
+                nsdf[tau] = div > 0 ? 2 * acf / div : 0;
+            }
+            
+            // Find peaks in NSDF above threshold
+            // Use peak-picking: find all local maxima above 0.5
+            const peaks = [];
+            const threshold = 0.5;
+            
+            for (let i = minPeriod + 1; i < maxPeriod; i++) {
+                if (nsdf[i] > threshold && nsdf[i] > nsdf[i - 1] && nsdf[i] >= nsdf[i + 1]) {
+                    peaks.push({ pos: i, val: nsdf[i] });
                 }
             }
-
-            let d = 0;
-            while (correlations[d] > correlations[d + 1]) d++;
-
-            let maxVal = -1, maxPos = -1;
-            for (let i = d; i < SIZE; i++) {
-                if (correlations[i] > maxVal) {
-                    maxVal = correlations[i];
-                    maxPos = i;
+            
+            if (peaks.length === 0) return -1;
+            
+            // Pick the first peak that's at least 80% of the maximum peak
+            // This favors the fundamental over harmonics (shorter period = higher octave)
+            const maxPeakVal = Math.max(...peaks.map(p => p.val));
+            let bestPeak = peaks[0];
+            for (const peak of peaks) {
+                if (peak.val >= maxPeakVal * 0.8) {
+                    bestPeak = peak;
+                    break;
                 }
             }
-
-            if (maxPos <= 0) return -1;
-
-            const x1 = correlations[maxPos - 1];
-            const x2 = correlations[maxPos];
-            const x3 = correlations[maxPos + 1];
+            
+            // Parabolic interpolation for sub-sample accuracy
+            const pos = bestPeak.pos;
+            if (pos <= minPeriod || pos >= maxPeriod) return -1;
+            
+            const x1 = nsdf[pos - 1];
+            const x2 = nsdf[pos];
+            const x3 = nsdf[pos + 1];
             const a = (x1 + x3 - 2 * x2) / 2;
             const b = (x3 - x1) / 2;
             const shift = a ? -b / (2 * a) : 0;
 
-            return sampleRate / (maxPos + shift);
+            return sampleRate / (pos + shift);
         }
     </script>
 </body>

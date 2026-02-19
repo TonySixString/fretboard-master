@@ -10,6 +10,59 @@ let isPlaying = false;
 let countdownInterval = null;
 let autoNextTimeout = null;
 
+// Persistent audio session — opened once, reused for all recordings
+let sharedAudioContext = null;
+let sharedStream = null;
+let micReady = false;
+
+async function ensureMic() {
+    if (micReady && sharedAudioContext && sharedAudioContext.state !== 'closed') {
+        // Resume if suspended (e.g. after backgrounding on iOS)
+        if (sharedAudioContext.state === 'suspended') {
+            await sharedAudioContext.resume();
+        }
+        return true;
+    }
+    try {
+        sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        sharedStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
+        micReady = true;
+        return true;
+    } catch (err) {
+        micReady = false;
+        return false;
+    }
+}
+
+function recordFromSharedMic(durationMs, callback) {
+    const source = sharedAudioContext.createMediaStreamSource(sharedStream);
+    const processor = sharedAudioContext.createScriptProcessor(4096, 1, 1);
+    const audioChunks = [];
+    const startTime = Date.now();
+    const realSampleRate = sharedAudioContext.sampleRate;
+
+    processor.onaudioprocess = (e) => {
+        audioChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+        if (Date.now() - startTime >= durationMs) {
+            processor.disconnect();
+            source.disconnect();
+
+            const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
+            const audioData = new Float32Array(totalLength);
+            let offset = 0;
+            for (const chunk of audioChunks) {
+                audioData.set(chunk, offset);
+                offset += chunk.length;
+            }
+
+            callback(createWavBlob(audioData, realSampleRate));
+        }
+    };
+
+    source.connect(processor);
+    processor.connect(sharedAudioContext.destination);
+}
+
 // Quiz state
 let quizQuestions = [];
 let quizCurrentIndex = 0;
@@ -424,42 +477,16 @@ async function startQuizRecording() {
         circle.style.strokeDashoffset = circumference * progress;
     }, 1000);
     
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
-        const source = audioContext.createMediaStreamSource(stream);
-        const processor = audioContext.createScriptProcessor(4096, 1, 1);
-        const audioChunks = [];
-        const startTime = Date.now();
-        
-        processor.onaudioprocess = (e) => {
-            audioChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-            if (Date.now() - startTime >= 3000) {
-                clearInterval(recordInterval);
-                processor.disconnect();
-                source.disconnect();
-                stream.getTracks().forEach(t => t.stop());
-                const realSampleRate = audioContext.sampleRate;
-                audioContext.close();
-                
-                const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
-                const audioData = new Float32Array(totalLength);
-                let offset = 0;
-                for (const chunk of audioChunks) {
-                    audioData.set(chunk, offset);
-                    offset += chunk.length;
-                }
-                
-                analyzeQuizAudio(createWavBlob(audioData, realSampleRate));
-            }
-        };
-        
-        source.connect(processor);
-        processor.connect(audioContext.destination);
-        
-    } catch (err) {
+    if (!(await ensureMic())) {
+        clearInterval(recordInterval);
         document.getElementById('quizStatus').textContent = '❌ Microphone access denied';
+        return;
     }
+    
+    recordFromSharedMic(3000, (wavBlob) => {
+        clearInterval(recordInterval);
+        analyzeQuizAudio(wavBlob);
+    });
 }
 
 async function analyzeQuizAudio(wavBlob) {
@@ -650,42 +677,16 @@ async function startLearningRecording() {
         circle.style.strokeDashoffset = circumference * progress;
     }, 1000);
     
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
-        const source = audioContext.createMediaStreamSource(stream);
-        const processor = audioContext.createScriptProcessor(4096, 1, 1);
-        const audioChunks = [];
-        const startTime = Date.now();
-        
-        processor.onaudioprocess = (e) => {
-            audioChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-            if (Date.now() - startTime >= 3000) {
-                clearInterval(recordInterval);
-                processor.disconnect();
-                source.disconnect();
-                stream.getTracks().forEach(t => t.stop());
-                const realSampleRate = audioContext.sampleRate;
-                audioContext.close();
-                
-                const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
-                const audioData = new Float32Array(totalLength);
-                let offset = 0;
-                for (const chunk of audioChunks) {
-                    audioData.set(chunk, offset);
-                    offset += chunk.length;
-                }
-                
-                analyzeLearningAudio(createWavBlob(audioData, realSampleRate));
-            }
-        };
-        
-        source.connect(processor);
-        processor.connect(audioContext.destination);
-        
-    } catch (err) {
+    if (!(await ensureMic())) {
+        clearInterval(recordInterval);
         document.getElementById('levelStatus').textContent = '❌ Microphone access denied';
+        return;
     }
+    
+    recordFromSharedMic(3000, (wavBlob) => {
+        clearInterval(recordInterval);
+        analyzeLearningAudio(wavBlob);
+    });
 }
 
 async function analyzeLearningAudio(wavBlob) {
@@ -841,42 +842,16 @@ async function startLevelQuizRecording() {
         circle.style.strokeDashoffset = circumference * progress;
     }, 1000);
     
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
-        const source = audioContext.createMediaStreamSource(stream);
-        const processor = audioContext.createScriptProcessor(4096, 1, 1);
-        const audioChunks = [];
-        const startTime = Date.now();
-        
-        processor.onaudioprocess = (e) => {
-            audioChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-            if (Date.now() - startTime >= 3000) {
-                clearInterval(recordInterval);
-                processor.disconnect();
-                source.disconnect();
-                stream.getTracks().forEach(t => t.stop());
-                const realSampleRate = audioContext.sampleRate;
-                audioContext.close();
-                
-                const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
-                const audioData = new Float32Array(totalLength);
-                let offset = 0;
-                for (const chunk of audioChunks) {
-                    audioData.set(chunk, offset);
-                    offset += chunk.length;
-                }
-                
-                analyzeLevelQuizAudio(createWavBlob(audioData, realSampleRate));
-            }
-        };
-        
-        source.connect(processor);
-        processor.connect(audioContext.destination);
-        
-    } catch (err) {
+    if (!(await ensureMic())) {
+        clearInterval(recordInterval);
         document.getElementById('levelStatus').textContent = '❌ Microphone access denied';
+        return;
     }
+    
+    recordFromSharedMic(3000, (wavBlob) => {
+        clearInterval(recordInterval);
+        analyzeLevelQuizAudio(wavBlob);
+    });
 }
 
 async function analyzeLevelQuizAudio(wavBlob) {
@@ -1049,46 +1024,20 @@ async function startFreePlayRecording() {
         circle.style.strokeDashoffset = circumference * progress;
     }, 1000);
     
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
-        const source = audioContext.createMediaStreamSource(stream);
-        const processor = audioContext.createScriptProcessor(4096, 1, 1);
-        const audioChunks = [];
-        const startTime = Date.now();
-        
-        processor.onaudioprocess = (e) => {
-            audioChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-            if (Date.now() - startTime >= 3000) {
-                clearInterval(recordInterval);
-                processor.disconnect();
-                source.disconnect();
-                stream.getTracks().forEach(t => t.stop());
-                const realSampleRate = audioContext.sampleRate;
-                audioContext.close();
-                
-                const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
-                const audioData = new Float32Array(totalLength);
-                let offset = 0;
-                for (const chunk of audioChunks) {
-                    audioData.set(chunk, offset);
-                    offset += chunk.length;
-                }
-                
-                analyzeFreePlayAudio(createWavBlob(audioData, realSampleRate));
-            }
-        };
-        
-        source.connect(processor);
-        processor.connect(audioContext.destination);
-        
-    } catch (err) {
+    if (!(await ensureMic())) {
+        clearInterval(recordInterval);
         document.getElementById('freeplayStatus').textContent = '❌ Microphone access denied';
         freePlayActive = false;
         document.getElementById('freeplayBtn').textContent = '▶ Play';
         document.getElementById('freeplayBtn').classList.remove('btn-pause');
         document.getElementById('freeplayBtn').classList.add('btn-primary');
+        return;
     }
+    
+    recordFromSharedMic(3000, (wavBlob) => {
+        clearInterval(recordInterval);
+        analyzeFreePlayAudio(wavBlob);
+    });
 }
 
 async function analyzeFreePlayAudio(wavBlob) {

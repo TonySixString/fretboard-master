@@ -290,7 +290,6 @@
         const NOTE_NAMES = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
         const tunedStrings = new Set();
         let audioContext = null;
-        let analyser = null;
         let isRunning = false;
         
         // Smoothing: keep recent readings to stabilize display
@@ -366,51 +365,45 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const source = audioContext.createMediaStreamSource(stream);
-                analyser = audioContext.createAnalyser();
                 
-                // Use larger FFT for better low-frequency resolution
-                // At 48kHz: 8192 samples = 170ms window, captures ~14 cycles of E2 (82Hz)
-                analyser.fftSize = 8192;
-                analyser.smoothingTimeConstant = 0;
+                // Use ScriptProcessor instead of AnalyserNode for Safari compatibility
+                // AnalyserNode.getFloatTimeDomainData() returns zeros on desktop Safari
+                const bufferSize = 8192;
+                const processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
                 
-                source.connect(analyser);
+                processor.onaudioprocess = (e) => {
+                    if (!isRunning) return;
+                    const buffer = e.inputBuffer.getChannelData(0);
+                    const freq = autoCorrelate(buffer, audioContext.sampleRate);
+                    
+                    if (freq > 60 && freq < 400) {
+                        recentFreqs.push(freq);
+                        if (recentFreqs.length > SMOOTHING_WINDOW) recentFreqs.shift();
+                        
+                        const sorted = [...recentFreqs].sort((a, b) => a - b);
+                        const smoothedFreq = sorted[Math.floor(sorted.length / 2)];
+                        
+                        const note = freqToNoteName(smoothedFreq);
+                        document.getElementById('detectedNote').textContent = note;
+                        const match = detectClosestString(smoothedFreq);
+                        if (match && Math.abs(match.cents) < 60) {
+                            updateNeedle(match.cents);
+                            updateStringIndicator(match.strNum, Math.abs(match.cents) <= 10);
+                            updateFeedback(match.cents, match.strData);
+                        }
+                    } else {
+                        document.getElementById('needle').style.left = '50%';
+                    }
+                };
+                
+                source.connect(processor);
+                processor.connect(audioContext.destination);
                 isRunning = true;
                 recentFreqs = [];
-                detectPitch();
             } catch (err) {
                 document.getElementById('tunerFeedback').textContent = '❌ Microphone access denied';
                 document.getElementById('activateBtn').style.display = 'block';
             }
-        }
-
-        function detectPitch() {
-            if (!isRunning) return;
-            const buffer = new Float32Array(analyser.fftSize);
-            analyser.getFloatTimeDomainData(buffer);
-            const freq = autoCorrelate(buffer, audioContext.sampleRate);
-
-            if (freq > 60 && freq < 400) {
-                // Add to smoothing window
-                recentFreqs.push(freq);
-                if (recentFreqs.length > SMOOTHING_WINDOW) recentFreqs.shift();
-                
-                // Use median of recent readings for stability
-                const sorted = [...recentFreqs].sort((a, b) => a - b);
-                const smoothedFreq = sorted[Math.floor(sorted.length / 2)];
-                
-                const note = freqToNoteName(smoothedFreq);
-                document.getElementById('detectedNote').textContent = note;
-                const match = detectClosestString(smoothedFreq);
-                if (match && Math.abs(match.cents) < 60) {
-                    updateNeedle(match.cents);
-                    updateStringIndicator(match.strNum, Math.abs(match.cents) <= 10);
-                    updateFeedback(match.cents, match.strData);
-                }
-            } else {
-                document.getElementById('needle').style.left = '50%';
-            }
-
-            requestAnimationFrame(detectPitch);
         }
 
         function autoCorrelate(buffer, sampleRate) {

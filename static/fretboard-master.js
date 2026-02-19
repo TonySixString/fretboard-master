@@ -426,7 +426,7 @@ async function startQuizRecording() {
     
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 44100 } });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
         const source = audioContext.createMediaStreamSource(stream);
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
         const audioChunks = [];
@@ -439,6 +439,7 @@ async function startQuizRecording() {
                 processor.disconnect();
                 source.disconnect();
                 stream.getTracks().forEach(t => t.stop());
+                const realSampleRate = audioContext.sampleRate;
                 audioContext.close();
                 
                 const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
@@ -449,7 +450,7 @@ async function startQuizRecording() {
                     offset += chunk.length;
                 }
                 
-                analyzeQuizAudio(createWavBlob(audioData, 44100));
+                analyzeQuizAudio(createWavBlob(audioData, realSampleRate));
             }
         };
         
@@ -651,7 +652,7 @@ async function startLearningRecording() {
     
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 44100 } });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
         const source = audioContext.createMediaStreamSource(stream);
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
         const audioChunks = [];
@@ -664,6 +665,7 @@ async function startLearningRecording() {
                 processor.disconnect();
                 source.disconnect();
                 stream.getTracks().forEach(t => t.stop());
+                const realSampleRate = audioContext.sampleRate;
                 audioContext.close();
                 
                 const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
@@ -674,7 +676,7 @@ async function startLearningRecording() {
                     offset += chunk.length;
                 }
                 
-                analyzeLearningAudio(createWavBlob(audioData, 44100));
+                analyzeLearningAudio(createWavBlob(audioData, realSampleRate));
             }
         };
         
@@ -841,7 +843,7 @@ async function startLevelQuizRecording() {
     
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 44100 } });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
         const source = audioContext.createMediaStreamSource(stream);
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
         const audioChunks = [];
@@ -854,6 +856,7 @@ async function startLevelQuizRecording() {
                 processor.disconnect();
                 source.disconnect();
                 stream.getTracks().forEach(t => t.stop());
+                const realSampleRate = audioContext.sampleRate;
                 audioContext.close();
                 
                 const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
@@ -864,7 +867,7 @@ async function startLevelQuizRecording() {
                     offset += chunk.length;
                 }
                 
-                analyzeLevelQuizAudio(createWavBlob(audioData, 44100));
+                analyzeLevelQuizAudio(createWavBlob(audioData, realSampleRate));
             }
         };
         
@@ -1048,7 +1051,7 @@ async function startFreePlayRecording() {
     
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 44100 } });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
         const source = audioContext.createMediaStreamSource(stream);
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
         const audioChunks = [];
@@ -1061,6 +1064,7 @@ async function startFreePlayRecording() {
                 processor.disconnect();
                 source.disconnect();
                 stream.getTracks().forEach(t => t.stop());
+                const realSampleRate = audioContext.sampleRate;
                 audioContext.close();
                 
                 const totalLength = audioChunks.reduce((a, c) => a + c.length, 0);
@@ -1071,7 +1075,7 @@ async function startFreePlayRecording() {
                     offset += chunk.length;
                 }
                 
-                analyzeFreePlayAudio(createWavBlob(audioData, 44100));
+                analyzeFreePlayAudio(createWavBlob(audioData, realSampleRate));
             }
         };
         

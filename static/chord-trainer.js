@@ -2,9 +2,6 @@
 // CHORD TRAINER DATA — Song-First, Variation-Inclusive Approach
 // ============================================================
 
-// Each chord family includes the core shape + variations
-// Variations are taught alongside the core chord, not as separate levels
-
 const CHORD_FAMILIES = {
     'G': {
         core: {
@@ -13,6 +10,7 @@ const CHORD_FAMILIES = {
             notes: ['G', 'B', 'D'],
             frets: [3, 2, 0, 0, 0, 3],
             fingers: [2, 1, 0, 0, 0, 3],
+            noteNames: ['G', 'B', 'D', 'G', 'B', 'G'],
             strings: {
                 6: { note: 'G', interval: 'Root' },
                 5: { note: 'B', interval: 'Major 3rd' },
@@ -30,33 +28,28 @@ const CHORD_FAMILIES = {
                 whyItWorks: 'It\'s still G, B, and D — just with a stronger G note on top.',
                 frets: [3, 2, 0, 0, 3, 3],
                 fingers: [2, 1, 0, 0, 3, 4],
-                strings: {
-                    6: { note: 'G', interval: 'Root' },
-                    5: { note: 'B', interval: 'Major 3rd' },
-                    4: { note: 'D', interval: 'Perfect 5th' },
-                    3: { note: 'G', interval: 'Root' },
-                    2: { note: 'D', interval: 'Perfect 5th' },
-                    1: { note: 'G', interval: 'Root' }
-                }
+                noteNames: ['G', 'B', 'D', 'G', 'D', 'G']
             },
             {
                 name: 'G (folk)',
                 fullName: 'G Major (folk voicing)',
-                description: 'Use your ring and pinky fingers on the bottom two strings instead. This frees up your index and middle fingers, making some chord transitions smoother.',
+                description: 'Same chord, just a slight variation on finger placement which can be useful depending on what chord is coming next.',
                 whyItWorks: 'Still the same three notes: G, B, and D.',
                 frets: [3, 2, 0, 0, 0, 3],
                 fingers: [3, 2, 0, 0, 0, 4],
-                strings: {
-                    6: { note: 'G', interval: 'Root' },
-                    5: { note: 'B', interval: 'Major 3rd' },
-                    4: { note: 'D', interval: 'Perfect 5th' },
-                    3: { note: 'G', interval: 'Root' },
-                    2: { note: 'B', interval: 'Major 3rd' },
-                    1: { note: 'G', interval: 'Root' }
-                }
+                noteNames: ['G', 'B', 'D', 'G', 'B', 'G']
+            },
+            {
+                name: 'G (no 3rd)',
+                fullName: 'G (no 3rd)',
+                description: 'Same chord, just easier! This takes some of the "muddiness" out of the chord and is frequently used in country songs.',
+                whyItWorks: 'Removing the B (3rd) gives it a more open, powerful sound. Works great for big strumming parts.',
+                frets: [3, -1, 0, 0, 3, 3],
+                fingers: [2, 0, 0, 0, 3, 4],
+                noteNames: ['G', null, 'D', 'G', 'D', 'G']
             }
         ],
-        theoryNote: 'Every G chord — no matter the shape — is built from three notes: G, B, and D. When you see "G" on a chord chart, any of these voicings will work.'
+        theoryNote: 'Every G chord — no matter the shape — is built from three notes: G, B, and D. You probably noticed, though, that the variations all sound a little bit different. This is part of what gives each song its flavor! Now onto the C chords.'
     },
 
     'Cadd9': {
@@ -66,6 +59,7 @@ const CHORD_FAMILIES = {
             notes: ['C', 'E', 'G'],
             frets: [-1, 3, 2, 0, 1, 0],
             fingers: [0, 3, 2, 0, 1, 0],
+            noteNames: [null, 'C', 'E', 'G', 'C', 'E'],
             strings: {
                 6: { note: null, interval: 'Mute' },
                 5: { note: 'C', interval: 'Root' },
@@ -78,22 +72,24 @@ const CHORD_FAMILIES = {
         variations: [
             {
                 name: 'Cadd9',
-                fullName: 'C add 9 (also called C2)',
-                description: 'Keep your standard C shape, but move your index finger off the B string and let it ring open. That open B string gives you a D note, which adds a beautiful shimmer. This is one of the most used chords in modern country.',
+                fullName: 'Cadd9 (also called C2)',
+                description: 'You\'ll notice that this is a similar shape to some of those G chords. It\'s an easy transition from one to the other. That\'s partly why it\'s used all the time in country music!',
                 whyItWorks: 'We\'re adding a D note (the 9th/2nd) to the C chord. Guitar players often call this a "C2" — same thing. You\'ll hear it everywhere.',
-                frets: [-1, 3, 2, 0, 3, 0],
-                fingers: [0, 2, 1, 0, 3, 0],
-                strings: {
-                    6: { note: null, interval: 'Mute' },
-                    5: { note: 'C', interval: 'Root' },
-                    4: { note: 'E', interval: 'Major 3rd' },
-                    3: { note: 'G', interval: 'Perfect 5th' },
-                    2: { note: 'D', interval: '9th (add9)' },
-                    1: { note: 'E', interval: 'Major 3rd' }
-                }
+                frets: [-1, 3, 2, 0, 3, 3],
+                fingers: [0, 2, 1, 0, 3, 4],
+                noteNames: [null, 'C', 'E', 'G', 'D', 'G']
+            },
+            {
+                name: 'C/G',
+                fullName: 'C/G',
+                description: 'This chord is used a lot in combination with G chord. It\'s technically a C chord with a G in the bass. It shows up all the time on country chord charts.',
+                whyItWorks: 'The G bass note makes the transition to and from G chords seamless — your lowest note stays the same.',
+                frets: [3, -1, 2, 0, 1, 3],
+                fingers: [3, 0, 2, 0, 1, 4],
+                noteNames: ['G', null, 'E', 'G', 'C', 'G']
             }
         ],
-        theoryNote: 'A Cadd9 is just a C chord (C, E, G) with an added D note. Guitar players call it "C2" because D is the 2nd note in the C scale. When a chord chart says "C" in a country song, try the Cadd9 — it almost always sounds better.'
+        theoryNote: 'A Cadd9 is just a C chord (C, E, G) with an added D note. Guitar players call it "C2" because D is the 2nd note in the C scale. The C/G puts a G note in the bass, which makes for a smooth transition to and from G chords. When you see "C" or "Cadd9" or "C/G" on a chord chart, now you know what to play.'
     },
 
     'Dsus2': {
@@ -103,6 +99,7 @@ const CHORD_FAMILIES = {
             notes: ['D', 'F#', 'A'],
             frets: [-1, -1, 0, 2, 3, 2],
             fingers: [0, 0, 0, 1, 3, 2],
+            noteNames: [null, null, 'D', 'A', 'D', 'F#'],
             strings: {
                 6: { note: null, interval: 'Mute' },
                 5: { note: null, interval: 'Mute' },
@@ -115,38 +112,33 @@ const CHORD_FAMILIES = {
         variations: [
             {
                 name: 'Dsus2',
-                fullName: 'D suspended 2 (also called D2 or Dadd9)',
+                fullName: 'Dsus2 (also called D2 or Dadd9)',
                 description: 'Start with your standard D chord, then lift your finger off the high E string and let it ring open. That open E note replaces the F# and gives the chord a bright, open sound. You\'ll hear this all over country music.',
                 whyItWorks: 'We\'re adding an E note (the 2nd/9th) to the D chord. Just like how we added D to the C chord — same concept, different key.',
                 frets: [-1, -1, 0, 2, 3, 0],
                 fingers: [0, 0, 0, 1, 3, 0],
-                strings: {
-                    6: { note: null, interval: 'Mute' },
-                    5: { note: null, interval: 'Mute' },
-                    4: { note: 'D', interval: 'Root' },
-                    3: { note: 'A', interval: 'Perfect 5th' },
-                    2: { note: 'D', interval: 'Root' },
-                    1: { note: 'E', interval: '2nd (sus2)' }
-                }
+                noteNames: [null, null, 'D', 'A', 'D', 'E']
             },
             {
                 name: 'Dsus4',
-                fullName: 'D suspended 4',
-                description: 'From your D chord, add your pinky to the 3rd fret of the high E string. This gives you a G note instead of F#, creating tension that wants to resolve back to D. Try strumming Dsus4 → D — hear that?',
+                fullName: 'Dsus4 (also called Dsus)',
+                description: 'From your D chord, add your pinky to the 3rd fret of the high E string. This gives you a G note instead of F#, creating tension that wants to resolve back to D. Try strumming Dsus4 \u2192 D — hear that? If you just see "Dsus" by itself on a chord chart, this is the chord.',
                 whyItWorks: 'Replacing the 3rd (F#) with the 4th (G). This creates a "pull" back to the regular D chord — a classic move.',
                 frets: [-1, -1, 0, 2, 3, 3],
                 fingers: [0, 0, 0, 1, 2, 3],
-                strings: {
-                    6: { note: null, interval: 'Mute' },
-                    5: { note: null, interval: 'Mute' },
-                    4: { note: 'D', interval: 'Root' },
-                    3: { note: 'A', interval: 'Perfect 5th' },
-                    2: { note: 'D', interval: 'Root' },
-                    1: { note: 'G', interval: '4th (sus4)' }
-                }
+                noteNames: [null, null, 'D', 'A', 'D', 'G']
+            },
+            {
+                name: 'D7',
+                fullName: 'D7',
+                description: 'This variation introduces the "flat 7", or "dominant 7". Country music uses this variation regularly for the V chord of the progression.',
+                whyItWorks: 'The C note (flat 7th) adds a bluesy tension that wants to resolve — that\'s why it\'s called "dominant."',
+                frets: [-1, -1, 0, 2, 1, 2],
+                fingers: [0, 0, 0, 2, 1, 3],
+                noteNames: [null, null, 'D', 'A', 'C', 'F#']
             }
         ],
-        theoryNote: 'Notice a pattern? With C, we added a D note. With D, we added an E note. In both cases, we\'re adding the 2nd note of that chord\'s scale. These "add9" and "sus2" sounds are everywhere in country music.'
+        theoryNote: 'Notice a pattern? With C, we added a D note. With D, we added an E note. In both cases, we\'re adding the 2nd note of that chord\'s scale. These "add9" and "sus2" sounds are everywhere in country music. We also introduced the D7 — that "flat 7" or "dominant 7" sound adds a bluesy tension that\'s a staple of country progressions.'
     },
 
     'Em7': {
@@ -156,6 +148,7 @@ const CHORD_FAMILIES = {
             notes: ['E', 'G', 'B'],
             frets: [0, 2, 2, 0, 0, 0],
             fingers: [0, 2, 3, 0, 0, 0],
+            noteNames: ['E', 'B', 'E', 'G', 'B', 'E'],
             strings: {
                 6: { note: 'E', interval: 'Root' },
                 5: { note: 'B', interval: 'Perfect 5th' },
@@ -168,65 +161,46 @@ const CHORD_FAMILIES = {
         variations: [
             {
                 name: 'Em7',
-                fullName: 'E Minor 7',
-                description: 'This is the easiest chord on the guitar. From your Em shape, just lift your finger off the A string. That open A string gives you a D note — which turns Em into Em7. One finger removed, richer sound.',
-                whyItWorks: 'We\'re adding a D note (the minor 7th) to the Em chord. Notice that D keeps showing up? It\'s in the G chord, we added it to C, and now it\'s in Em7. That\'s why these chords all sound great together — they share notes.',
-                frets: [0, 0, 2, 0, 0, 0],
-                fingers: [0, 0, 1, 0, 0, 0],
-                strings: {
-                    6: { note: 'E', interval: 'Root' },
-                    5: { note: 'A', interval: 'Minor 7th' },  // changed!
-                    4: { note: 'E', interval: 'Root' },
-                    3: { note: 'G', interval: 'Minor 3rd' },
-                    2: { note: 'B', interval: 'Perfect 5th' },
-                    1: { note: 'E', interval: 'Root' }
-                }
-            },
-            {
-                name: 'Em7 (alt)',
-                fullName: 'E Minor 7 (two-finger version)',
-                description: 'Put your middle finger on the 2nd fret of the A string and your ring finger on the 2nd fret of the D string. This is the "standard" Em with the 7th added — you get both the B and D notes ringing.',
-                whyItWorks: 'Same Em7 chord, but this voicing has a fuller low end because you\'re fretting the A string for a B note (the 5th) instead of letting the open A ring.',
-                frets: [0, 2, 2, 0, 0, 0],
-                fingers: [0, 2, 3, 0, 0, 0],
-                strings: {
-                    6: { note: 'E', interval: 'Root' },
-                    5: { note: 'B', interval: 'Perfect 5th' },
-                    4: { note: 'E', interval: 'Root' },
-                    3: { note: 'G', interval: 'Minor 3rd' },
-                    2: { note: 'B', interval: 'Perfect 5th' },
-                    1: { note: 'E', interval: 'Root' }
-                }
+                fullName: 'Em7 (E Minor 7)',
+                description: 'Notice how similar this shape is to your G and Cadd9? The ring and pinky fingers stay in the same place — only the lower fingers change. These shared fingerings are why switching between G, Cadd9, and Em7 feels so natural.',
+                whyItWorks: 'We\'re adding a D note (the minor 7th) to the Em chord. That D note keeps showing up — it\'s in the G chord, we added it to C, and now it\'s in Em7. That\'s why these chords all sound great together.',
+                frets: [0, 2, 2, 0, 3, 3],
+                fingers: [0, 1, 2, 0, 3, 3],
+                noteNames: ['E', 'B', 'E', 'G', 'D', 'G']
             }
         ],
         theoryNote: 'Adding a D note to Em creates Em7. A D note added to C creates Cadd9. See how connected these chords are? In the key of G, the note D is everywhere — it\'s the glue that makes everything sound like it belongs together.'
     }
 };
 
-// Module structure: Key of G
 const MODULES = {
     'G': {
         name: 'Key of G',
         subtitle: 'The most popular key in country music',
         chordFamilies: ['G', 'Cadd9', 'Dsus2', 'Em7'],
+        romanNumerals: {
+            'G': 'I',
+            'Cadd9': 'IV',
+            'Dsus2': 'V',
+            'Em7': 'vi'
+        },
         description: 'Learn 4 chord families that unlock dozens of songs. You\'ll learn the core shapes, the variations you\'ll actually use, and why they all work together.',
         songs: [
-            { title: 'Wagon Wheel', artist: 'Darius Rucker', chords: 'G - D - Em - C', difficulty: 'Easy' },
-            { title: 'Take Me Home, Country Roads', artist: 'John Denver', chords: 'G - Em - D - C', difficulty: 'Easy' },
-            { title: 'Ring of Fire', artist: 'Johnny Cash', chords: 'G - C - D', difficulty: 'Easy' },
-            { title: 'Knockin\' on Heaven\'s Door', artist: 'Bob Dylan', chords: 'G - D - C', difficulty: 'Easy' },
-            { title: 'You Are My Sunshine', artist: 'Traditional', chords: 'G - C - D', difficulty: 'Easy' },
-            { title: 'Sweet Home Alabama', artist: 'Lynyrd Skynyrd', chords: 'D - C - G', difficulty: 'Easy' },
-            { title: 'Brown Eyed Girl', artist: 'Van Morrison', chords: 'G - C - D - Em', difficulty: 'Easy' },
-            { title: 'Jambalaya', artist: 'Hank Williams', chords: 'G - D', difficulty: 'Easy' },
-            { title: 'Bad Moon Rising', artist: 'CCR', chords: 'G - C - D', difficulty: 'Easy' },
-            { title: 'Cruise', artist: 'Florida Georgia Line', chords: 'G - D - Em - C', difficulty: 'Easy' }
+            { title: 'Cruise', artist: 'Florida Georgia Line', chords: 'G - D - Em - C', url: 'https://www.sixstringcountry.com/lessons/4-easy-country-songs-in-g-with-tabscroll' },
+            { title: 'Wagon Wheel', artist: 'Darius Rucker', chords: 'G - D - Em - C', url: 'https://www.sixstringcountry.com/lessons/4-easy-country-songs-in-g-with-tabscroll' },
+            { title: 'You Make It Easy', artist: 'Jason Aldean', chords: 'G - D - Em - C', url: 'https://www.sixstringcountry.com/lessons/4-easy-country-songs-in-g-with-tabscroll' },
+            { title: 'Hope You Get Lonely Tonight', artist: 'Cole Swindell', chords: 'G - D - Em - C', url: 'https://www.sixstringcountry.com/lessons/4-easy-country-songs-in-g-with-tabscroll' },
+            { title: 'Ring of Fire', artist: 'Johnny Cash', chords: 'G - C - D', url: 'https://www.sixstringcountry.com/lessons/ring-of-fire---simplified-easy-strum-version' },
+            { title: 'The Lucky One', artist: 'Alison Krauss and Union Station', chords: 'G - C - D - Em', url: 'https://www.sixstringcountry.com/lessons/the-lucky-one' },
+            { title: 'Brand New Man', artist: 'Brooks & Dunn', chords: 'G - C - D', url: 'https://www.sixstringcountry.com/lessons/brand-new-man' },
+            { title: 'Here\'s a Quarter', artist: 'Travis Tritt', chords: 'G - C - D', url: 'https://www.sixstringcountry.com/lessons/heres-a-quarter.3233135' },
+            { title: 'Wanna Be Loved', artist: 'Red Clay Strays', chords: 'G - C - D - Em', url: 'https://www.sixstringcountry.com/lessons/wanna-be-loved' },
+            { title: 'Drink in My Hand', artist: 'Eric Church', chords: 'G - C - D', url: 'https://www.sixstringcountry.com/lessons/drink-in-my-hand.610932' }
         ],
         capoNote: 'With a capo, these same 4 chord shapes can play songs in ANY key. That\'s why the capo is every country guitarist\'s best friend.'
     }
 };
 
-// Ear training quiz data — audio clips described by chord
 const EAR_TRAINING = {
     'G': {
         questions: [
@@ -240,24 +214,14 @@ const EAR_TRAINING = {
     }
 };
 
-// Reference frequencies for generating chord audio
 const STANDARD_TUNING = {
-    6: 82.41,  // E2
-    5: 110.00, // A2
-    4: 146.83, // D3
-    3: 196.00, // G3
-    2: 246.94, // B3
-    1: 329.63  // E4
+    6: 82.41, 5: 110.00, 4: 146.83,
+    3: 196.00, 2: 246.94, 1: 329.63
 };
 
-// Capo explainer content
 const CAPO_CONTENT = {
     title: 'What\'s a Capo?',
-    explanation: 'A capo is a clamp that goes across all the strings at a specific fret. It raises the pitch of all the strings equally, letting you play the same chord shapes in a different key.',
-    example: 'For example, if you put a capo on fret 2 and play a G shape, you\'re actually playing an A chord. Same fingers, different key.',
-    whyItMatters: 'This is huge for country guitar. Instead of learning complicated barre chord shapes for every key, you can use a capo and keep playing your comfortable open chords. Many country songs are written specifically with a capo in mind.',
     diagram: {
-        // Capo on fret 2 example
         fret: 2,
         examples: [
             { shape: 'G shape', actual: 'A chord' },

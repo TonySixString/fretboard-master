@@ -290,8 +290,10 @@
         const NOTE_NAMES = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
         const tunedStrings = new Set();
         let audioContext = null;
-        let analyser = null;
         let isRunning = false;
+        let scriptProcessor = null;
+        let captureBuffer = [];
+        let captureSize = 8192;
         
         // Smoothing: keep recent readings to stabilize display
         let recentFreqs = [];
@@ -358,6 +360,9 @@
             }
         }
 
+        let captureReady = false;
+        let writePos = 0;
+
         async function startTuner() {
             try {
                 document.getElementById('activateBtn').style.display = 'none';
@@ -366,14 +371,28 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const source = audioContext.createMediaStreamSource(stream);
-                analyser = audioContext.createAnalyser();
                 
-                // Use larger FFT for better low-frequency resolution
-                // At 48kHz: 8192 samples = 170ms window, captures ~14 cycles of E2 (82Hz)
-                analyser.fftSize = 8192;
-                analyser.smoothingTimeConstant = 0;
+                const bufferSize = 4096;
+                scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+                captureBuffer = new Float32Array(captureSize);
+                writePos = 0;
+                captureReady = false;
+                let samplesWritten = 0;
                 
-                source.connect(analyser);
+                scriptProcessor.onaudioprocess = function(e) {
+                    if (!isRunning) return;
+                    const input = e.inputBuffer.getChannelData(0);
+                    for (let i = 0; i < input.length; i++) {
+                        captureBuffer[writePos] = input[i];
+                        writePos = (writePos + 1) % captureSize;
+                    }
+                    samplesWritten += input.length;
+                    if (samplesWritten >= captureSize) captureReady = true;
+                };
+                
+                source.connect(scriptProcessor);
+                scriptProcessor.connect(audioContext.destination);
+                
                 isRunning = true;
                 recentFreqs = [];
                 detectPitch();
@@ -385,8 +404,17 @@
 
         function detectPitch() {
             if (!isRunning) return;
-            const buffer = new Float32Array(analyser.fftSize);
-            analyser.getFloatTimeDomainData(buffer);
+            if (!captureReady) {
+                requestAnimationFrame(detectPitch);
+                return;
+            }
+            
+            // Read ring buffer in correct order: oldest to newest
+            const buffer = new Float32Array(captureSize);
+            for (let i = 0; i < captureSize; i++) {
+                buffer[i] = captureBuffer[(writePos + i) % captureSize];
+            }
+            
             const freq = autoCorrelate(buffer, audioContext.sampleRate);
 
             if (freq > 60 && freq < 400) {
@@ -418,7 +446,7 @@
             let rms = 0;
             for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
             rms = Math.sqrt(rms / buffer.length);
-            if (rms < 0.008) return -1;
+            if (rms < 0.0005) return -1;
 
             const SIZE = buffer.length;
             

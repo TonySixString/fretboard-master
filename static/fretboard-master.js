@@ -156,10 +156,10 @@ function drawStringDiagram(svgId, stringNum, minFret, maxFret) {
     
     const fretCount = maxFret - minFret;
     const width = 380;
-    const height = 280;
+    const height = 340;
     const startX = 60;
-    const startY = 75;
-    const fretHeight = (height - startY - 50) / fretCount;
+    const startY = 85;
+    const fretHeight = (height - startY - 30) / fretCount;
     const stringSpacing = (width - startX - 50) / 5;
     
     svg.setAttribute('width', width);
@@ -272,13 +272,13 @@ function drawStringDiagram(svgId, stringNum, minFret, maxFret) {
         const noteName = freqToNoteName(freq);
         
         // Position dot between frets (or above nut for open string)
-        const dotY = i === 0 ? y - 18 : y - (fretHeight / 2);
+        const dotY = i === 0 ? y - 20 : y - (fretHeight / 2);
         
-        // Larger circles for better fit
+        // Larger circles with dynamic font for long note names
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', activeStringX);
         circle.setAttribute('cy', dotY);
-        circle.setAttribute('r', '17');
+        circle.setAttribute('r', '19');
         circle.setAttribute('fill', '#e8572a');
         svg.appendChild(circle);
         
@@ -286,7 +286,7 @@ function drawStringDiagram(svgId, stringNum, minFret, maxFret) {
         text.setAttribute('x', activeStringX);
         text.setAttribute('y', dotY + 5);
         text.setAttribute('fill', 'white');
-        text.setAttribute('font-size', '12');
+        text.setAttribute('font-size', noteName.length > 2 ? '10' : '13');
         text.setAttribute('font-weight', 'bold');
         text.setAttribute('text-anchor', 'middle');
         text.textContent = noteName;
@@ -305,14 +305,14 @@ function drawStringDiagram(svgId, stringNum, minFret, maxFret) {
         }
     }
     
-    // Add "Open" label for fret 0
+    // "Open" label - to the left of the nut, clear of headstock
     if (minFret === 0) {
         const openLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        openLabel.setAttribute('x', startX - 25);
-        openLabel.setAttribute('y', startY - 10);
+        openLabel.setAttribute('x', startX - 30);
+        openLabel.setAttribute('y', startY + 4);
         openLabel.setAttribute('fill', 'rgba(255,255,255,0.5)');
-        openLabel.setAttribute('font-size', '11');
-        openLabel.setAttribute('text-anchor', 'middle');
+        openLabel.setAttribute('font-size', '10');
+        openLabel.setAttribute('text-anchor', 'end');
         openLabel.textContent = 'Open';
         svg.appendChild(openLabel);
     }
@@ -669,13 +669,7 @@ function showLevelIntro() {
     document.getElementById('levelIntroTitle').textContent = 
         `${stringNames[currentLevel.string]} String • Frets ${currentLevel.minFret}-${currentLevel.maxFret}`;
     
-    let notesList = '';
-    learningNotes.forEach(n => {
-        const fretText = n.fret === 0 ? 'Open' : `Fret ${n.fret}`;
-        notesList += `<div style="margin:8px 0; font-size:1.1em;"><strong>${fretText}:</strong> ${n.noteName}</div>`;
-    });
-    
-    document.getElementById('levelIntroNotes').innerHTML = notesList;
+    document.getElementById('levelIntroNotes').innerHTML = '';
     drawStringDiagram('levelIntroDiagram', currentLevel.string, currentLevel.minFret, currentLevel.maxFret);
     
     showScreen('screen-level-intro');

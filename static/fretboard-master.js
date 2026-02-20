@@ -156,9 +156,9 @@ function drawStringDiagram(svgId, stringNum, minFret, maxFret) {
     
     const fretCount = maxFret - minFret;
     const width = 380;
-    const height = 240;
+    const height = 280;
     const startX = 60;
-    const startY = 35;
+    const startY = 75;
     const fretHeight = (height - startY - 50) / fretCount;
     const stringSpacing = (width - startX - 50) / 5;
     
@@ -167,6 +167,60 @@ function drawStringDiagram(svgId, stringNum, minFret, maxFret) {
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     
     const stringNames = ['E', 'A', 'D', 'G', 'B', 'E'];
+    const fretboardWidth = 5 * stringSpacing;
+    const centerX = startX + fretboardWidth / 2;
+    
+    // --- HEADSTOCK ---
+    const headW = fretboardWidth + 40;
+    const headL = centerX - headW / 2;
+    const headR = centerX + headW / 2;
+    const headBottom = startY - 2;
+    
+    const hp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    hp.setAttribute('d', `M${headL},${headBottom - 18} L${headL},12 Q${headL},3 ${headL+16},2 L${centerX-25},0 Q${centerX},0 ${centerX+25},0 L${headR-16},2 Q${headR},3 ${headR},12 L${headR},${headBottom - 18} Q${headR - 6},${headBottom - 4} ${startX + fretboardWidth},${headBottom} L${startX},${headBottom} Q${headL + 6},${headBottom - 4} ${headL},${headBottom - 18} Z`);
+    hp.setAttribute('fill', 'rgba(255,255,255,0.06)');
+    hp.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+    hp.setAttribute('stroke-width', '1');
+    svg.appendChild(hp);
+    
+    // SSC pick logo
+    const logo = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    logo.setAttribute('transform', `translate(${centerX}, 14) scale(0.32)`);
+    const pickPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pickPath.setAttribute('d', 'M0,-28 Q-34,-26 -40,-6 Q-44,14 -22,34 L0,50 L22,34 Q44,14 40,-6 Q34,-26 0,-28 Z');
+    pickPath.setAttribute('fill', 'none');
+    pickPath.setAttribute('stroke', 'rgba(255,255,255,0.15)');
+    pickPath.setAttribute('stroke-width', '4');
+    pickPath.setAttribute('stroke-linejoin', 'round');
+    logo.appendChild(pickPath);
+    [[-22,-10,24,-12],[-24,-1,26,-4],[-24,8,24,4],[-22,17,20,12],[-16,25,14,20],[-8,32,6,28]].forEach(([x1,y1,x2,y2]) => {
+        const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+        l.setAttribute('stroke','rgba(255,255,255,0.1)'); l.setAttribute('stroke-width','2.5'); l.setAttribute('stroke-linecap','round');
+        logo.appendChild(l);
+    });
+    svg.appendChild(logo);
+    
+    // Tuning pegs
+    for (let i = 0; i < 3; i++) {
+        const py = 8 + i * 16;
+        const rl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rl.setAttribute('x', headL - 18); rl.setAttribute('y', py); rl.setAttribute('width', 18); rl.setAttribute('height', 8); rl.setAttribute('rx', 2);
+        rl.setAttribute('fill','rgba(255,255,255,0.08)'); rl.setAttribute('stroke','rgba(255,255,255,0.18)'); rl.setAttribute('stroke-width', '0.7');
+        svg.appendChild(rl);
+        const cl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        cl.setAttribute('cx', headL - 1); cl.setAttribute('cy', py + 4); cl.setAttribute('r', 3.5);
+        cl.setAttribute('fill','rgba(255,255,255,0.06)'); cl.setAttribute('stroke','rgba(255,255,255,0.18)'); cl.setAttribute('stroke-width', '0.7');
+        svg.appendChild(cl);
+        const rr = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rr.setAttribute('x', headR); rr.setAttribute('y', py); rr.setAttribute('width', 18); rr.setAttribute('height', 8); rr.setAttribute('rx', 2);
+        rr.setAttribute('fill','rgba(255,255,255,0.08)'); rr.setAttribute('stroke','rgba(255,255,255,0.18)'); rr.setAttribute('stroke-width', '0.7');
+        svg.appendChild(rr);
+        const cr = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        cr.setAttribute('cx', headR + 1); cr.setAttribute('cy', py + 4); cr.setAttribute('r', 3.5);
+        cr.setAttribute('fill','rgba(255,255,255,0.06)'); cr.setAttribute('stroke','rgba(255,255,255,0.18)'); cr.setAttribute('stroke-width', '0.7');
+        svg.appendChild(cr);
+    }
     
     // Draw string labels on top
     for (let i = 0; i < 6; i++) {

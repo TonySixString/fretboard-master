@@ -63,6 +63,27 @@ function recordFromSharedMic(durationMs, callback) {
     processor.connect(sharedAudioContext.destination);
 }
 
+// Server communication guard
+let isWaitingForServer = false;
+let activeAutoNext = null; // track auto-advance timeouts so we can kill them
+
+async function safeFetch(url, options, timeoutMs = 12000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const resp = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timer);
+        if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
+        return await resp.json();
+    } catch (err) {
+        clearTimeout(timer);
+        if (err.name === 'AbortError') {
+            return { result: 'error', message: 'Server took too long to respond. Try again.' };
+        }
+        return { result: 'error', message: 'Could not reach the server. Check your connection and try again.' };
+    }
+}
+
 // Quiz state
 let quizQuestions = [];
 let quizCurrentIndex = 0;
@@ -492,6 +513,7 @@ async function startQuizRecording() {
 async function analyzeQuizAudio(wavBlob) {
     document.getElementById('quizTimer').style.display = 'none';
     document.getElementById('quizStatus').textContent = '⏳ Analyzing...';
+    isWaitingForServer = true;
     
     const formData = new FormData();
     formData.append('audio', wavBlob, 'recording.wav');
@@ -499,10 +521,20 @@ async function analyzeQuizAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
+    const result = await safeFetch('/check_note', { method: 'POST', body: formData });
+    isWaitingForServer = false;
     document.getElementById('quizStatus').textContent = '';
     
     const feedback = document.getElementById('quizFeedback');
+    
+    if (result.result === 'error') {
+        feedback.innerHTML = `<p class="wrong">⚠️ ${result.message}</p>
+            <div style="margin-top:15px;">
+                <button class="btn btn-primary" onclick="startQuizCountdown()">🔄 Try Again</button>
+            </div>`;
+        feedback.classList.remove('hidden');
+        return;
+    }
     
     if (result.result === 'perfect') {
         quizScores[currentChallenge.group]++;
@@ -514,7 +546,7 @@ async function analyzeQuizAudio(wavBlob) {
     feedback.classList.remove('hidden');
     
     quizCurrentIndex++;
-    setTimeout(() => nextQuizQuestion(), 2000);
+    activeAutoNext = setTimeout(() => nextQuizQuestion(), 2000);
 }
 
 function finishQuiz() {
@@ -691,6 +723,8 @@ async function startLearningRecording() {
 
 async function analyzeLearningAudio(wavBlob) {
     document.getElementById('levelTimer').style.display = 'none';
+    document.getElementById('levelStatus').textContent = '⏳ Analyzing...';
+    isWaitingForServer = true;
     
     const formData = new FormData();
     formData.append('audio', wavBlob, 'recording.wav');
@@ -698,15 +732,27 @@ async function analyzeLearningAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
+    const result = await safeFetch('/check_note', { method: 'POST', body: formData });
+    isWaitingForServer = false;
+    document.getElementById('levelStatus').textContent = '';
     
     const feedback = document.getElementById('levelFeedback');
+    
+    if (result.result === 'error') {
+        feedback.innerHTML = `<p class="wrong">⚠️ ${result.message}</p>
+            <div style="margin-top:15px;">
+                <button class="btn btn-primary" onclick="retryLearningNote()">🔄 Try Again</button>
+                <button class="btn btn-skip" onclick="skipLearningNote()">Skip This Note →</button>
+            </div>`;
+        feedback.classList.remove('hidden');
+        return;
+    }
     
     if (result.result === 'perfect') {
         feedback.innerHTML = '<p class="perfect">✅ Good!</p>';
         feedback.classList.remove('hidden');
         learningIndex++;
-        setTimeout(() => nextLearningNote(), 1500);
+        activeAutoNext = setTimeout(() => nextLearningNote(), 1500);
     } else {
         feedback.innerHTML = `
             <p class="wrong">❌ ${result.message}</p>
@@ -856,9 +902,10 @@ async function startLevelQuizRecording() {
 
 async function analyzeLevelQuizAudio(wavBlob) {
     document.getElementById('levelTimer').style.display = 'none';
+    document.getElementById('levelStatus').textContent = '⏳ Analyzing...';
+    isWaitingForServer = true;
     
     const feedback = document.getElementById('levelFeedback');
-    quizTotal++;
     
     const formData = new FormData();
     formData.append('audio', wavBlob, 'recording.wav');
@@ -866,7 +913,21 @@ async function analyzeLevelQuizAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
+    const result = await safeFetch('/check_note', { method: 'POST', body: formData });
+    isWaitingForServer = false;
+    document.getElementById('levelStatus').textContent = '';
+    
+    if (result.result === 'error') {
+        feedback.innerHTML = `<p class="wrong">⚠️ ${result.message}</p>
+            <div style="margin-top:15px;">
+                <button class="btn btn-primary" onclick="startLevelQuizCountdown()">🔄 Try Again</button>
+                <button class="btn btn-skip" onclick="skipQuizQuestion()">Skip →</button>
+            </div>`;
+        feedback.classList.remove('hidden');
+        return;
+    }
+    
+    quizTotal++;
     
     if (result.result === 'perfect') {
         quizCorrect++;
@@ -879,7 +940,14 @@ async function analyzeLevelQuizAudio(wavBlob) {
     }
     
     feedback.classList.remove('hidden');
-    setTimeout(() => nextLevelQuizQuestion(), 2000);
+    document.getElementById('levelTitle').textContent = `Quiz: ${currentLevel.name} • ${currentLevel.group} (${Math.min(quizTotal + 1, 10)}/10)`;
+    activeAutoNext = setTimeout(() => nextLevelQuizQuestion(), 2000);
+}
+
+function skipQuizQuestion() {
+    document.getElementById('levelFeedback').classList.add('hidden');
+    quizTotal++;
+    activeAutoNext = setTimeout(() => nextLevelQuizQuestion(), 500);
 }
 
 function finishLevelQuiz() {
@@ -928,6 +996,9 @@ function skipLevel() {
 function exitLevel() {
     if (countdownInterval) clearInterval(countdownInterval);
     if (autoNextTimeout) clearTimeout(autoNextTimeout);
+    if (activeAutoNext) clearTimeout(activeAutoNext);
+    isWaitingForServer = false;
+    isPlaying = false;
     showScreen('screen-dashboard');
 }
 
@@ -954,6 +1025,7 @@ function toggleFreePlay() {
         document.getElementById('freeplayBtn').classList.add('btn-primary');
         
         if (autoNextTimeout) clearTimeout(autoNextTimeout);
+        if (activeAutoNext) clearTimeout(activeAutoNext);
         if (countdownInterval) clearInterval(countdownInterval);
         
         document.getElementById('freeplayTimer').style.display = 'none';
@@ -967,8 +1039,17 @@ async function fetchFreePlayChallenge() {
     document.getElementById('freeplayFeedback').classList.add('hidden');
     document.getElementById('freeplayStatus').textContent = '';
     
-    const response = await fetch('/get_challenge');
-    currentChallenge = await response.json();
+    try {
+        const response = await fetch('/get_challenge');
+        if (!response.ok) throw new Error('Server error');
+        currentChallenge = await response.json();
+    } catch (err) {
+        document.getElementById('freeplayStatus').textContent = '⚠️ Could not load challenge. Retrying...';
+        if (freePlayActive) {
+            activeAutoNext = setTimeout(() => fetchFreePlayChallenge(), 3000);
+        }
+        return;
+    }
     
     document.getElementById('freeplayInstruction').textContent = currentChallenge.instruction;
     startFreePlayCountdown();
@@ -1043,6 +1124,7 @@ async function startFreePlayRecording() {
 async function analyzeFreePlayAudio(wavBlob) {
     document.getElementById('freeplayTimer').style.display = 'none';
     document.getElementById('freeplayStatus').textContent = '⏳ Analyzing...';
+    isWaitingForServer = true;
     
     const feedback = document.getElementById('freeplayFeedback');
     freePlaySessionAttempts++;
@@ -1053,8 +1135,23 @@ async function analyzeFreePlayAudio(wavBlob) {
     formData.append('note_name', currentChallenge.note_name);
     formData.append('fret', currentChallenge.fret);
     
-    const result = await (await fetch('/check_note', { method: 'POST', body: formData })).json();
+    const result = await safeFetch('/check_note', { method: 'POST', body: formData });
+    isWaitingForServer = false;
     document.getElementById('freeplayStatus').textContent = '';
+    
+    if (result.result === 'error') {
+        feedback.innerHTML = `<p class="wrong">⚠️ ${result.message}</p>
+            <div style="margin-top:15px;">
+                <button class="btn btn-primary" onclick="retryFreePlayNote()">🔄 Try Again</button>
+                <button class="btn btn-skip" onclick="skipFreePlayNote()">Skip This Note →</button>
+            </div>`;
+        feedback.classList.remove('hidden');
+        freePlayActive = false;
+        document.getElementById('freeplayBtn').textContent = '▶ Play';
+        document.getElementById('freeplayBtn').classList.remove('btn-pause');
+        document.getElementById('freeplayBtn').classList.add('btn-primary');
+        return;
+    }
     
     if (result.result === 'perfect') {
         freePlayStreak++;
@@ -1067,7 +1164,7 @@ async function analyzeFreePlayAudio(wavBlob) {
         feedback.classList.remove('hidden');
         
         if (freePlayActive) {
-            autoNextTimeout = setTimeout(() => fetchFreePlayChallenge(), 3000);
+            activeAutoNext = setTimeout(() => fetchFreePlayChallenge(), 3000);
         }
     } else {
         freePlayStreak = 0;
@@ -1110,6 +1207,7 @@ function skipFreePlayNote() {
 function endFreePlay() {
     freePlayActive = false;
     if (autoNextTimeout) clearTimeout(autoNextTimeout);
+    if (activeAutoNext) clearTimeout(activeAutoNext);
     if (countdownInterval) clearInterval(countdownInterval);
     
     // Track final streak

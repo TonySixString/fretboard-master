@@ -147,7 +147,7 @@ const CHORD_FAMILIES = {
             fullName: 'E Minor',
             notes: ['E', 'G', 'B'],
             frets: [0, 2, 2, 0, 0, 0],
-            fingers: [0, 2, 3, 0, 0, 0],
+            fingers: [0, 1, 2, 0, 0, 0],
             noteNames: ['E', 'B', 'E', 'G', 'B', 'E'],
             strings: {
                 6: { note: 'E', interval: 'Root' },
@@ -165,7 +165,7 @@ const CHORD_FAMILIES = {
                 description: 'Notice how similar this shape is to your G and Cadd9? The ring and pinky fingers stay in the same place — only the lower fingers change. These shared fingerings are why switching between G, Cadd9, and Em7 feels so natural.',
                 whyItWorks: 'We\'re adding a D note (the minor 7th) to the Em chord. That D note keeps showing up — it\'s in the G chord, we added it to C, and now it\'s in Em7. That\'s why these chords all sound great together.',
                 frets: [0, 2, 2, 0, 3, 3],
-                fingers: [0, 1, 2, 0, 3, 3],
+                fingers: [0, 1, 2, 0, 3, 4],
                 noteNames: ['E', 'B', 'E', 'G', 'D', 'G']
             }
         ],
@@ -173,17 +173,104 @@ const CHORD_FAMILIES = {
     }
 };
 
+// ============================================================
+// DRILL PROGRESSIONS
+// ============================================================
+
+const DRILL_PROGRESSIONS = [
+    {
+        id: 'drill-d-variations',
+        title: 'D Chord Variations',
+        subtitle: 'Now watch how some of these variations work together.',
+        insight: 'Notice that only one note is changing each time.',
+        chords: [
+            { ref: 'Dsus2', type: 'core' },           // D Major
+            { ref: 'Dsus2', type: 'variation', idx: 1 }, // Dsus4
+            { ref: 'Dsus2', type: 'core' },           // D Major
+            { ref: 'Dsus2', type: 'variation', idx: 0 }  // Dsus2
+        ],
+        getChordData: function() {
+            return [
+                CHORD_FAMILIES['Dsus2'].core,
+                CHORD_FAMILIES['Dsus2'].variations[1], // Dsus4
+                CHORD_FAMILIES['Dsus2'].core,
+                CHORD_FAMILIES['Dsus2'].variations[0]  // Dsus2
+            ];
+        }
+    },
+    {
+        id: 'drill-anchor-fingers',
+        title: 'The Anchor Finger Trick',
+        subtitle: 'This is one of the most useful things you\'ll learn on guitar.',
+        insight: 'Do you see how your 3rd and 4th fingers stay in the same place through this whole progression?',
+        chords: [
+            { ref: 'G', type: 'variation', idx: 0 },    // G (alt)
+            { ref: 'Cadd9', type: 'variation', idx: 0 }, // Cadd9
+            { ref: 'Em7', type: 'variation', idx: 0 },   // Em7
+            { ref: 'Dsus2', type: 'variation', idx: 1 }  // Dsus4
+        ],
+        getChordData: function() {
+            return [
+                CHORD_FAMILIES['G'].variations[0],      // G (alt)
+                CHORD_FAMILIES['Cadd9'].variations[0],   // Cadd9
+                CHORD_FAMILIES['Em7'].variations[0],     // Em7
+                CHORD_FAMILIES['Dsus2'].variations[1]    // Dsus4
+            ];
+        }
+    }
+];
+
+// ============================================================
+// EAR TRAINING — Expanded with variations
+// ============================================================
+
+const EAR_TRAINING = {
+    'G': {
+        questions: [
+            { play: 'G', options: ['G', 'C'], hint: 'Listen for the big, full sound — G uses all 6 strings.' },
+            { play: 'C', options: ['C', 'D'], hint: 'C has a warm, grounded tone. D sounds brighter and thinner.' },
+            { play: 'Em', options: ['Em', 'G'], hint: 'Em sounds sadder and moodier. G sounds happy and full.' },
+            { play: 'D', options: ['D', 'Em'], hint: 'D has a bright, trebly sound. Em is darker and uses more strings.' },
+            { play: 'G', options: ['G', 'D'], hint: 'G has that deep low end from the 6th string. D only uses 4 strings.' },
+            { play: 'C', options: ['C', 'Em'], hint: 'C sounds warm and resolved. Em has that minor, unfinished quality.' },
+            { play: 'Cadd9', options: ['C', 'Cadd9'], hint: 'Cadd9 has a shimmery, open quality. Standard C sounds more compact.' },
+            { play: 'Dsus4', options: ['D', 'Dsus4'], hint: 'Dsus4 has a tension that wants to resolve. D sounds settled.' },
+            { play: 'Em7', options: ['Em', 'Em7'], hint: 'Em7 sounds a little more open and dreamy. Em is darker and tighter.' },
+            { play: 'Dsus2', options: ['D', 'Dsus2'], hint: 'Dsus2 has a bright, airy quality. D sounds more defined.' }
+        ]
+    }
+};
+
+// ============================================================
+// EAR TRAINING CHORD LOOKUP — maps names to playable data
+// ============================================================
+
+const EAR_CHORD_LOOKUP = {
+    'G': CHORD_FAMILIES['G'].core,
+    'C': CHORD_FAMILIES['Cadd9'].core,
+    'D': CHORD_FAMILIES['Dsus2'].core,
+    'Em': CHORD_FAMILIES['Em7'].core,
+    'Cadd9': CHORD_FAMILIES['Cadd9'].variations[0],
+    'C/G': CHORD_FAMILIES['Cadd9'].variations[1],
+    'Dsus2': CHORD_FAMILIES['Dsus2'].variations[0],
+    'Dsus4': CHORD_FAMILIES['Dsus2'].variations[1],
+    'D7': CHORD_FAMILIES['Dsus2'].variations[2],
+    'Em7': CHORD_FAMILIES['Em7'].variations[0],
+    'G (alt)': CHORD_FAMILIES['G'].variations[0],
+    'G (folk)': CHORD_FAMILIES['G'].variations[1],
+    'G (no 3rd)': CHORD_FAMILIES['G'].variations[2]
+};
+
+// ============================================================
+// MODULE & SONG DATA
+// ============================================================
+
 const MODULES = {
     'G': {
         name: 'Key of G',
         subtitle: 'The most popular key in country music',
         chordFamilies: ['G', 'Cadd9', 'Dsus2', 'Em7'],
-        romanNumerals: {
-            'G': 'I',
-            'Cadd9': 'IV',
-            'Dsus2': 'V',
-            'Em7': 'vi'
-        },
+        romanNumerals: { 'G': 'I', 'Cadd9': 'IV', 'Dsus2': 'V', 'Em7': 'vi' },
         description: 'Learn 4 chord families that unlock dozens of songs. You\'ll learn the core shapes, the variations you\'ll actually use, and why they all work together.',
         songs: [
             { title: 'Cruise', artist: 'Florida Georgia Line', chords: 'G - D - Em - C', url: 'https://www.sixstringcountry.com/lessons/4-easy-country-songs-in-g-with-tabscroll' },
@@ -201,33 +288,7 @@ const MODULES = {
     }
 };
 
-const EAR_TRAINING = {
-    'G': {
-        questions: [
-            { play: 'G', options: ['G', 'C'], hint: 'Listen for the big, full sound — G uses all 6 strings.' },
-            { play: 'C', options: ['C', 'D'], hint: 'C has a warm, grounded tone. D sounds brighter and thinner.' },
-            { play: 'Em', options: ['Em', 'G'], hint: 'Em sounds sadder and moodier. G sounds happy and full.' },
-            { play: 'D', options: ['D', 'Em'], hint: 'D has a bright, trebly sound. Em is darker and uses more strings.' },
-            { play: 'G', options: ['G', 'D'], hint: 'G has that deep low end from the 6th string. D only uses 4 strings.' },
-            { play: 'C', options: ['C', 'Em'], hint: 'C sounds warm and resolved. Em has that minor, unfinished quality.' }
-        ]
-    }
-};
-
 const STANDARD_TUNING = {
     6: 82.41, 5: 110.00, 4: 146.83,
     3: 196.00, 2: 246.94, 1: 329.63
-};
-
-const CAPO_CONTENT = {
-    title: 'What\'s a Capo?',
-    diagram: {
-        fret: 2,
-        examples: [
-            { shape: 'G shape', actual: 'A chord' },
-            { shape: 'C shape', actual: 'D chord' },
-            { shape: 'D shape', actual: 'E chord' },
-            { shape: 'Em shape', actual: 'F#m chord' }
-        ]
-    }
 };

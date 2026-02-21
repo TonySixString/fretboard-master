@@ -80,9 +80,23 @@ def game():
 def chords():
     return render_template('chords.html')
 
-@app.route('/chord-trainer')
-def chord_trainer():
-    return render_template('chord-trainer.html')
+@app.route('/scale-trainer')
+def scale_trainer():
+    return render_template('scale-trainer.html')
+
+@app.route('/scale-trainer/download')
+def scale_trainer_download():
+    import zipfile
+    import tempfile
+    from flask import send_file
+    
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        zf.write('static/Scales_and_Melodies_Position_1_Tabs.pdf', 'Scales_and_Melodies_Position_1_Tabs.pdf')
+        zf.write('static/Take_Me_Home_Position_1.mp3', 'Take_Me_Home_Position_1.mp3')
+        zf.write('static/Take_Me_Home_Positon_1_No_Melody.mp3', 'Take_Me_Home_Position_1_No_Melody.mp3')
+    zip_buffer.seek(0)
+    return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name='Scales_and_Melodies_Position_1.zip')
 
 @app.route('/get_challenge', methods=['GET'])
 def get_challenge():

@@ -80,6 +80,10 @@ def game():
 def chords():
     return render_template('chords.html')
 
+@app.route('/chord-trainer')
+def chord_trainer():
+    return render_template('chord-trainer.html')
+
 @app.route('/scale-trainer')
 def scale_trainer():
     return render_template('scale-trainer.html')

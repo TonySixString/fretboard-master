@@ -1,0 +1,2590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Six String Country — Notes & Patterns</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Barlow Condensed', Arial, sans-serif;
+            background: #1a2e35;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 20px 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .header h1 { font-size: 2em; font-weight: 700; letter-spacing: 2px; }
+        .header h1 .orange { color: #e8572a; }
+        .header .sub { color: rgba(255,255,255,0.4); font-size: 0.75em; letter-spacing: 3px; text-transform: uppercase; }
+        .container { width: 100%; max-width: 500px; padding: 0 15px 30px; }
+        .hidden { display: none !important; }
+        .card {
+            background: #243b44;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .section-label {
+            text-align: center; color: #e8572a; font-size: 0.75em;
+            letter-spacing: 3px; text-transform: uppercase;
+            margin-bottom: 8px; font-weight: 600;
+        }
+        .title { text-align: center; font-size: 1.8em; font-weight: 700; margin-bottom: 8px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.9em; margin-bottom: 15px; }
+        .body-text { font-size: 0.95em; line-height: 1.6; color: rgba(255,255,255,0.75); margin-bottom: 15px; }
+        .body-text strong { color: #e0e0e0; }
+        .btn {
+            display: block; width: 100%; padding: 16px;
+            font-family: 'Barlow Condensed', Arial, sans-serif;
+            font-size: 1.1em; font-weight: 700; letter-spacing: 2px;
+            text-transform: uppercase; border: none; border-radius: 12px;
+            cursor: pointer; margin-bottom: 10px;
+        }
+        .btn-primary { background: #e8572a; color: white; }
+        .btn-secondary { background: #2ecc71; color: white; }
+        .btn-outline { background: transparent; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .back-link { color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.85em; display: inline-block; }
+        .nav-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .menu-link { color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.85em; }
+        .fretboard-wrap { display: flex; justify-content: center; margin: 15px 0; }
+        .status-bar { text-align: center; padding: 12px; border-radius: 10px; margin: 10px 0; font-weight: 600; font-size: 1.1em; }
+        .status-listening { background: rgba(232,87,42,0.15); color: #e8572a; }
+        .status-correct { background: rgba(46,204,113,0.15); color: #2ecc71; }
+        .status-wrong { background: rgba(231,76,60,0.15); color: #e74c3c; }
+        .status-idle { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); }
+        .locked-badge {
+            display: inline-block; background: rgba(255,255,255,0.08);
+            padding: 3px 10px; border-radius: 8px; font-size: 0.75em;
+            color: rgba(255,255,255,0.35); margin-top: 5px;
+        }
+        .step-dots { display: flex; gap: 6px; justify-content: center; margin: 12px 0; }
+        .step-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.1); }
+        .step-dot.done { background: #2ecc71; }
+        .step-dot.active { background: #e8572a; box-shadow: 0 0 8px rgba(232,87,42,0.6); }
+        .hint-box {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 15px; margin: 12px 0;
+        }
+        .hint-box .hint-title { font-weight: 600; color: #e8572a; margin-bottom: 5px; font-size: 0.85em; letter-spacing: 1px; text-transform: uppercase; }
+        .score-display { text-align: center; font-size: 1.2em; margin: 10px 0; font-weight: 600; }
+        .score-display .score-num { color: #2ecc71; font-size: 1.5em; }
+        .pattern-rule {
+            background: rgba(232,87,42,0.08); border-left: 3px solid #e8572a;
+            padding: 10px 15px; margin: 12px 0; border-radius: 0 8px 8px 0;
+            font-size: 0.95em; color: rgba(255,255,255,0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span class="orange">SIX STRING</span> COUNTRY</h1>
+        <div class="sub">Notes & Patterns</div>
+    </div>
+    <div class="container">
+
+        <!-- ==================== MAIN MENU ==================== -->
+        <div id="screen-menu">
+            <div class="card" style="cursor:pointer;" onclick="window.location.href='/game'">
+                <div class="section-label">Module 1</div>
+                <div class="title" style="font-size:1.2em;">Strings & Note Names</div>
+                <div class="subtitle">Learn every note on the fretboard</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Guided lessons • Placement quiz • Free play</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="startUnisonOctaves()">
+                <div class="section-label">Module 2</div>
+                <div class="title" style="font-size:1.2em;">Unison & Octaves</div>
+                <div class="subtitle">Find the same note everywhere on the neck</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Unison patterns • Octave shapes • Free Play</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="startIntervals()">
+                <div class="section-label">Module 3</div>
+                <div class="title" style="font-size:1.2em;">Intervals</div>
+                <div class="subtitle">Understand the distance between notes in country guitar riffs</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">12 intervals • Chord building • Double stops</div>
+            </div>
+            <a href="/" class="btn btn-outline" style="text-align:center; text-decoration:none; margin-top:12px;">← Back to Menu</a>
+        </div>
+
+        <!-- ==================== UNISON & OCTAVES LANDING ==================== -->
+        <div id="screen-uo-landing" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Module 2</div>
+                <div class="title">Unison & Octaves</div>
+                <div class="body-text">In this module, you'll learn how to find the same note in different places on the guitar neck. We'll start with <strong>unison</strong> — the same note in the same register — then move to <strong>octaves</strong> — the same note in a higher or lower register.</div>
+            </div>
+            <button class="btn btn-primary" onclick="startUnison()">Start with Unison</button>
+            <a href="https://www.sixstringcountry.com/lessons/octaves:-patterns,-techniques-&-exercises" target="_blank" class="btn btn-outline" style="text-align:center; text-decoration:none;">🎬 Watch Video Lesson</a>
+            <button class="btn btn-outline" id="btnOctavesLocked" onclick="return false;" disabled>🔒 Octaves (Complete Unison First)</button>
+            <button class="btn btn-outline" id="btnFreePlayLocked" onclick="return false;" disabled>🔒 Free Play (Complete Octaves First)</button>
+        </div>
+
+        <!-- ==================== UNISON INTRO ==================== -->
+        <div id="screen-unison-intro" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Unison</div>
+                <div class="title">What is Unison?</div>
+                <div class="body-text"><strong>Unison</strong>, in music, means two notes that are exactly the same pitch — the same note, in the same register. On the guitar, because of the way the strings are tuned, you can play the exact same note in several different positions on the neck.</div>
+                <div class="body-text">Understanding unison patterns helps you navigate the fretboard and gives you options for how to finger melodies and riffs.</div>
+            </div>
+            <button class="btn btn-primary" onclick="startUnisonPattern1()">Let's See It →</button>
+        </div>
+
+        <!-- ==================== UNISON PATTERN 1: ASCENDING STRINGS ==================== -->
+        <div id="screen-unison-p1" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBackUnisonP1()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Unison Pattern 1</div>
+                <div class="title">Same Note, Different String</div>
+                <div id="unisonP1Text" class="body-text"></div>
+                <div class="fretboard-wrap"><canvas id="unisonP1Fretboard" width="400" height="200"></canvas></div>
+                <div id="unisonP1Status" class="status-bar status-idle">Press "Start Listening" when ready</div>
+            </div>
+            <div class="step-dots" id="unisonP1Dots"></div>
+            <button class="btn btn-primary" id="unisonP1MicBtn" onclick="toggleUnisonMic('p1')">🎤 Start Listening</button>
+            <button class="btn btn-outline" id="unisonP1SkipBtn" onclick="advanceUnisonP1()" style="font-size:0.85em;">Skip →</button>
+            <button class="btn btn-secondary hidden" id="unisonP1NextBtn" onclick="advanceUnisonP1()">Next →</button>
+        </div>
+
+        <!-- ==================== UNISON PATTERN 2: TUNING PATTERN ==================== -->
+        <div id="screen-unison-p2" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBackUnisonP2()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Unison Pattern 2</div>
+                <div class="title">The Tuning Pattern</div>
+                <div id="unisonP2Text" class="body-text"></div>
+                <div class="fretboard-wrap"><canvas id="unisonP2Fretboard" width="400" height="200"></canvas></div>
+                <div id="unisonP2Status" class="status-bar status-idle">Press "Start Listening" when ready</div>
+            </div>
+            <div class="step-dots" id="unisonP2Dots"></div>
+            <button class="btn btn-primary" id="unisonP2MicBtn" onclick="toggleUnisonMic('p2')">🎤 Start Listening</button>
+            <button class="btn btn-outline" id="unisonP2SkipBtn" onclick="advanceUnisonP2()" style="font-size:0.85em;">Skip →</button>
+            <button class="btn btn-secondary hidden" id="unisonP2NextBtn" onclick="advanceUnisonP2()">Next →</button>
+        </div>
+
+        <!-- ==================== UNISON COMPLETE ==================== -->
+        <div id="screen-unison-complete" class="hidden">
+            <div class="card">
+                <div class="section-label" style="color:#2ecc71;">✓ Complete</div>
+                <div class="title">Unison Mastered!</div>
+                <div class="body-text">You now understand how to find the same note in the same register across different strings. These patterns are the foundation for everything that comes next.</div>
+                <div class="hint-box">
+                    <div class="hint-title">🔓 Octaves Unlocked!</div>
+                    <div style="color:rgba(255,255,255,0.6); font-size:0.9em;">Now let's learn how to find the same note in different registers — one or two octaves apart.</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startOctavesIntro()">Continue to Octaves →</button>
+            <button class="btn btn-outline" onclick="goToMenu()">← Back to Menu</button>
+        </div>
+
+        <!-- ==================== OCTAVES INTRO ==================== -->
+        <div id="screen-octaves-intro" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Octaves</div>
+                <div class="title">What is an Octave?</div>
+                <div class="body-text">An <strong>octave</strong> is the same note name, but in a higher or lower register. It's the distance of 12 half-steps (12 frets on one string). When you play a note and its octave together, they sound like the "same" note — just higher or lower.</div>
+                <div class="body-text">The guitar neck has easily identifiable shapes that help you find octaves quickly. We'll learn five patterns, then see how they all connect.</div>
+            </div>
+            <button class="btn btn-primary" onclick="startOctavePattern(0)">Let's Learn the Patterns →</button>
+        </div>
+
+        <!-- ==================== OCTAVE PATTERN TEACHING ==================== -->
+        <div id="screen-octave-pattern" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBackOctavePattern()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label" id="octavePatternLabel"></div>
+                <div class="title" id="octavePatternTitle"></div>
+                <div id="octavePatternText" class="body-text"></div>
+                <div class="pattern-rule" id="octavePatternRule"></div>
+                <div class="fretboard-wrap"><canvas id="octavePatternFretboard" width="400" height="200"></canvas></div>
+                <div id="octavePatternStatus" class="status-bar status-idle">Press "Start Listening" when ready</div>
+            </div>
+            <div class="step-dots" id="octavePatternDots"></div>
+            <button class="btn btn-primary" id="octavePatternMicBtn" onclick="toggleOctaveMic()">🎤 Start Listening</button>
+            <button class="btn btn-outline" id="octavePatternSkipBtn" onclick="advanceOctavePattern()" style="font-size:0.85em;">Skip →</button>
+            <button class="btn btn-secondary hidden" id="octavePatternNextBtn" onclick="advanceOctavePattern()">Next →</button>
+        </div>
+
+        <!-- ==================== PUTTING IT TOGETHER ==================== -->
+        <div id="screen-putting-together" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBackPit()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Putting It Together</div>
+                <div class="title" id="pitTitle">Finding Every G</div>
+                <div id="pitText" class="body-text"></div>
+                <div class="fretboard-wrap"><canvas id="pitFretboard" width="400" height="230"></canvas></div>
+                <div id="pitStatus" class="status-bar status-idle">Press "Start Listening" when ready</div>
+            </div>
+            <div class="step-dots" id="pitDots"></div>
+            <button class="btn btn-primary" id="pitMicBtn" onclick="togglePitMic()">🎤 Start Listening</button>
+            <button class="btn btn-outline" id="pitSkipBtn" onclick="advancePit()" style="font-size:0.85em;">Skip →</button>
+            <button class="btn btn-secondary hidden" id="pitNextBtn" onclick="advancePit()">Next →</button>
+        </div>
+
+        <!-- ==================== OCTAVES COMPLETE ==================== -->
+        <div id="screen-octaves-complete" class="hidden">
+            <div class="card">
+                <div class="section-label" style="color:#2ecc71;">✓ Complete</div>
+                <div class="title">Octaves Mastered!</div>
+                <div class="body-text">You've learned all five octave patterns and how they connect across the fretboard. You can now find any note in any octave, anywhere on the neck.</div>
+                <div class="hint-box">
+                    <div class="hint-title">🎮 Free Play Unlocked!</div>
+                    <div style="color:rgba(255,255,255,0.6); font-size:0.9em;">Test your skills — we'll show you a note and you find it one octave higher on a different string.</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startFreePlay()">Play the Octave Game →</button>
+            <button class="btn btn-outline" onclick="goToMenu()">← Back to Menu</button>
+        </div>
+
+        <!-- ==================== FREE PLAY ==================== -->
+        <div id="screen-free-play" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Free Play</div>
+                <div class="title">Octave Challenge</div>
+                <div id="fpPrompt" class="body-text" style="text-align:center;"></div>
+                <div class="fretboard-wrap"><canvas id="fpFretboard" width="400" height="230"></canvas></div>
+                <div id="fpStatus" class="status-bar status-idle">Press "Start Listening" to begin</div>
+            </div>
+            <div class="score-display">Score: <span class="score-num" id="fpScore">0</span> / <span id="fpTotal">0</span></div>
+            <button class="btn btn-primary" id="fpMicBtn" onclick="toggleFpMic()">🎤 Start Listening</button>
+            <button class="btn btn-secondary hidden" id="fpNextBtn" onclick="nextFpChallenge()">Next Note →</button>
+            <button class="btn btn-outline hidden" id="fpTryAgainBtn" onclick="retryFpChallenge()">Try Again</button>
+            <button class="btn btn-outline" id="fpEndBtn" onclick="endFreePlay()" style="margin-top:5px;">End Game</button>
+        </div>
+
+        <!-- ==================== FREE PLAY RESULTS ==================== -->
+        <div id="screen-fp-results" class="hidden">
+            <div class="card">
+                <div class="section-label" style="color:#2ecc71;">Game Over</div>
+                <div class="title">Octave Challenge Results</div>
+                <div style="text-align:center; margin: 20px 0;">
+                    <div style="font-size:3em; font-weight:700; color:#2ecc71;" id="fpResultScore">0</div>
+                    <div style="color:rgba(255,255,255,0.5); font-size:0.9em;">octaves found</div>
+                </div>
+                <div style="display:flex; justify-content:center; gap:30px; margin:15px 0;">
+                    <div style="text-align:center;">
+                        <div style="font-size:2em; font-weight:700; color:#e8572a;" id="fpResultStreak">0</div>
+                        <div style="color:rgba(255,255,255,0.5); font-size:0.85em;">best streak</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:2em; font-weight:700; color:rgba(255,255,255,0.7);" id="fpResultTotal">0</div>
+                        <div style="color:rgba(255,255,255,0.5); font-size:0.85em;">total attempts</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:2em; font-weight:700; color:rgba(255,255,255,0.7);" id="fpResultPct">0%</div>
+                        <div style="color:rgba(255,255,255,0.5); font-size:0.85em;">accuracy</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startFreePlay()">Play Again</button>
+            <button class="btn btn-outline" onclick="goToMenu()">← Back to Menu</button>
+        </div>
+
+        <!-- ==================== INTERVALS LANDING ==================== -->
+        <div id="screen-int-landing" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Module 3</div>
+                <div class="title">Intervals</div>
+                <div class="body-text">An <strong>interval</strong> is the distance between two notes. Understanding intervals is the key to understanding chords, scales, and how to create the sounds you hear in country guitar.</div>
+                <div class="body-text">This module has three parts:</div>
+                <div class="hint-box">
+                    <div class="hint-title">Part 1: The 12 Intervals</div>
+                    <div style="color:rgba(255,255,255,0.6); font-size:0.9em;">Learn every interval from unison to octave</div>
+                </div>
+                <div class="hint-box">
+                    <div class="hint-title">Part 2: Building Chords</div>
+                    <div style="color:rgba(255,255,255,0.6); font-size:0.9em;">How intervals create major and minor chords</div>
+                </div>
+                <div class="hint-box">
+                    <div class="hint-title">Part 3: Country Double Stops</div>
+                    <div style="color:rgba(255,255,255,0.6); font-size:0.9em;">Play 3rds and 6ths — the classic country sound</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="showScreen('screen-int-p1-intro')">Start Part 1 →</button>
+            <button class="btn btn-outline" id="btnIntP2" onclick="showScreen('screen-int-p2-intro')" disabled style="opacity:0.4;">🔒 Part 2: Building Chords</button>
+            <button class="btn btn-outline" id="btnIntP3" onclick="showScreen('screen-int-p3-intro')" disabled style="opacity:0.4;">🔒 Part 3: Double Stops</button>
+            <a href="https://www.sixstringcountry.com/lessons/musical-intervals-on-guitar-introduction.3258206" target="_blank" class="btn btn-outline" style="text-align:center; text-decoration:none;">🎬 Watch Video Lesson</a>
+        </div>
+
+        <div id="screen-int-p1-intro" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Part 1</div>
+                <div class="title">The 12 Intervals</div>
+                <div class="body-text">On the guitar, intervals are easy to visualize. A <strong>half step</strong> is one fret up. A <strong>whole step</strong> is two frets up. Every interval is just a specific number of half steps from a starting note (the <strong>root</strong>).</div>
+                <div class="body-text">We'll walk through all 12 intervals starting from <strong>G</strong> on the 6th string (fret 3). Play each note when prompted.</div>
+            </div>
+            <button class="btn btn-primary" onclick="startIntP1()">Let's Go →</button>
+        </div>
+
+        <div id="screen-int-p1" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBackIntP1()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label" id="intP1Label">Interval 1 of 13</div>
+                <div class="title" id="intP1Title"></div>
+                <div id="intP1Text" class="body-text"></div>
+                <div id="intP1Rule" class="hint-box" style="display:none;"></div>
+                <div class="fretboard-wrap"><canvas id="intP1Fretboard" width="400" height="130"></canvas></div>
+                <div id="intP1Status" class="status-bar status-idle">Press "Start Listening" when ready</div>
+            </div>
+            <div class="step-dots" id="intP1Dots"></div>
+            <button class="btn btn-primary" id="intP1MicBtn" onclick="toggleIntP1Mic()">🎤 Start Listening</button>
+            <button class="btn btn-outline" id="intP1SkipBtn" onclick="advanceIntP1()">Skip →</button>
+            <button class="btn btn-secondary hidden" id="intP1NextBtn" onclick="advanceIntP1()">Next →</button>
+        </div>
+
+        <div id="screen-int-p1-complete" class="hidden">
+            <div class="card">
+                <div class="section-label" style="color:#2ecc71;">✓ Part 1 Complete</div>
+                <div class="title">All 12 Intervals!</div>
+                <div class="body-text">You've played every interval from unison to octave. These 12 distances are the building blocks of all chords and scales.</div>
+                <div class="hint-box">
+                    <div class="hint-title">🔓 Part 2 Unlocked!</div>
+                    <div style="color:rgba(255,255,255,0.6); font-size:0.9em;">Now let's use intervals to build major and minor chords.</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="showScreen('screen-int-p2-intro')">Continue to Part 2 →</button>
+            <button class="btn btn-outline" onclick="goToMenu()">← Back to Menu</button>
+        </div>
+
+        <div id="screen-int-p2-intro" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Part 2</div>
+                <div class="title">Building Chords</div>
+                <div class="body-text">Chords are built by <strong>stacking intervals</strong>. A major chord and a minor chord use the exact same three notes — root, 3rd, and 5th — but the order of stacking is what gives each chord its sound.</div>
+            </div>
+            <button class="btn btn-primary" onclick="startIntP2()">Let's Build a Chord →</button>
+        </div>
+
+        <div id="screen-int-p2" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBackIntP2()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label" id="intP2Label"></div>
+                <div class="title" id="intP2Title"></div>
+                <div id="intP2Text" class="body-text"></div>
+                <div id="intP2Rule" class="hint-box" style="display:none;"></div>
+                <div class="fretboard-wrap"><canvas id="intP2Fretboard" width="400" height="230"></canvas></div>
+            </div>
+            <button class="btn btn-primary" id="intP2NextBtn" onclick="advanceIntP2()">Next →</button>
+        </div>
+
+        <div id="screen-int-p2-complete" class="hidden">
+            <div class="card">
+                <div class="section-label" style="color:#2ecc71;">✓ Part 2 Complete</div>
+                <div class="title">Chords Decoded!</div>
+                <div class="body-text">You now understand how major and minor chords are built from stacked intervals. Major = major 3rd + minor 3rd. Minor = minor 3rd + major 3rd. The order makes the difference.</div>
+                <div class="hint-box">
+                    <div class="hint-title">🔓 Part 3 Unlocked!</div>
+                    <div style="color:rgba(255,255,255,0.6); font-size:0.9em;">Time to put intervals to work with country double stops.</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="showScreen('screen-int-p3-intro')">Continue to Part 3 →</button>
+            <button class="btn btn-outline" onclick="goToMenu()">← Back to Menu</button>
+        </div>
+
+        <div id="screen-int-p3-intro" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBack()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Part 3</div>
+                <div class="title">Country Double Stops</div>
+                <div class="body-text">A <strong>double stop</strong> is two notes played at the same time. In country guitar, double stops in <strong>3rds</strong> and <strong>6ths</strong> are everywhere — they're the sound of pedal steel licks, harmonized melodies, and classic country fills.</div>
+                <div class="body-text">We'll build them step by step in the key of G: first learn each scale line alone, then combine them.</div>
+            </div>
+            <button class="btn btn-primary" onclick="startIntP3()">Let's Play →</button>
+        </div>
+
+        <div id="screen-int-p3" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="goBackIntP3()">← Back</span>
+                <span class="menu-link" onclick="goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label" id="intP3Label"></div>
+                <div class="title" id="intP3Title"></div>
+                <div id="intP3Text" class="body-text"></div>
+                <div id="intP3Rule" class="hint-box" style="display:none;"></div>
+                <div class="fretboard-wrap"><canvas id="intP3Fretboard" width="400" height="200"></canvas></div>
+                <div id="intP3Status" class="status-bar status-idle">Press "Start Listening" when ready</div>
+            </div>
+            <div class="step-dots" id="intP3Dots"></div>
+            <button class="btn btn-primary" id="intP3MicBtn" onclick="toggleIntP3Mic()">🎤 Start Listening</button>
+            <button class="btn btn-outline" id="intP3SkipBtn" onclick="advanceIntP3()">Skip →</button>
+            <button class="btn btn-secondary hidden" id="intP3NextBtn" onclick="advanceIntP3()">Next →</button>
+        </div>
+
+        <!-- ==================== PLAY-ALONG: 3RDS ==================== -->
+        <div id="screen-playalong-3rds" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="stopPlayAlong(); goBack()">← Back</span>
+                <span class="menu-link" onclick="stopPlayAlong(); goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Double Stops in 3rds</div>
+                <div class="title">Play Along</div>
+                <div class="subtitle">Play each double stop together as it lights up. 45 BPM.</div>
+                <div id="pa3rdsStatus" class="status-bar status-idle">Tap Play to begin</div>
+                <div class="fretboard-wrap"><canvas id="pa3rdsFretboard" width="500" height="200"></canvas></div>
+                <div class="step-dots" id="pa3rdsDots"></div>
+            </div>
+            <button class="btn btn-secondary" id="pa3rdsPlayBtn" onclick="startPlayAlong3rds()">▶ &ensp; PLAY</button>
+            <button class="btn btn-secondary hidden" id="pa3rdsReplayBtn" onclick="replayPlayAlong3rds()">🔄 &ensp; REPLAY</button>
+            <button class="btn btn-primary hidden" id="pa3rdsNextBtn" onclick="stopPlayAlong(); resumeIntP3At6ths()">NEXT →</button>
+        </div>
+
+        <!-- ==================== PLAY-ALONG: 6THS ==================== -->
+        <div id="screen-playalong-6ths" class="hidden">
+            <div class="nav-row">
+                <span class="back-link" onclick="stopPlayAlong(); goBack()">← Back</span>
+                <span class="menu-link" onclick="stopPlayAlong(); goToMenu()">Menu</span>
+            </div>
+            <div class="card">
+                <div class="section-label">Double Stops in 6ths</div>
+                <div class="title">Play Along</div>
+                <div class="subtitle">Play each double stop together as it lights up. 45 BPM.</div>
+                <div id="pa6thsStatus" class="status-bar status-idle">Tap Play to begin</div>
+                <div class="fretboard-wrap"><canvas id="pa6thsFretboard" width="500" height="200"></canvas></div>
+                <div class="step-dots" id="pa6thsDots"></div>
+            </div>
+            <button class="btn btn-secondary" id="pa6thsPlayBtn" onclick="startPlayAlong6ths()">▶ &ensp; PLAY</button>
+            <button class="btn btn-secondary hidden" id="pa6thsReplayBtn" onclick="replayPlayAlong6ths()">🔄 &ensp; REPLAY</button>
+            <button class="btn btn-primary hidden" id="pa6thsNextBtn" onclick="stopPlayAlong(); showScreen('screen-int-p3-complete')">NEXT →</button>
+        </div>
+
+        <div id="screen-int-p3-complete" class="hidden">
+            <div class="card">
+                <div class="section-label" style="color:#2ecc71;">✓ Module Complete</div>
+                <div class="title">Intervals Mastered!</div>
+                <div class="body-text">You've learned all 12 intervals, how they build chords, and how to play country double stops in 3rds and 6ths. These patterns work in every key — just shift the starting position.</div>
+            </div>
+            <button class="btn btn-primary" onclick="goToMenu()">← Back to Menu</button>
+        </div>
+
+    </div>
+
+<script>
+// ============================================================
+// UTILITIES
+// ============================================================
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const STRING_NOTES_OPEN = { 6:'E', 5:'A', 4:'D', 3:'G', 2:'B', 1:'E' };
+const STRING_MIDI_OPEN = { 6:40, 5:45, 4:50, 3:55, 2:59, 1:64 };
+
+function midiToNote(midi) { return NOTE_NAMES[((midi % 12) + 12) % 12]; }
+function fretToMidi(string, fret) { return STRING_MIDI_OPEN[string] + fret; }
+function fretToNote(string, fret) { return midiToNote(fretToMidi(string, fret)); }
+function fretToFreq(string, fret) { return 440 * Math.pow(2, (fretToMidi(string, fret) - 69) / 12); }
+
+// ============================================================
+// FRETBOARD DRAWING
+// ============================================================
+function drawFretboard(canvasId, opts = {}) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth || 400;
+    const h = canvas.clientHeight || 200;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+
+    const minFret = opts.minFret || 0;
+    const maxFret = opts.maxFret || 15;
+    const numFrets = maxFret - minFret;
+    const padLeft = 35, padRight = 15, padTop = 25, padBottom = 20;
+    const fretW = (w - padLeft - padRight) / numFrets;
+    const stringGap = (h - padTop - padBottom) / 5;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Fret lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    for (let f = 0; f <= numFrets; f++) {
+        const x = padLeft + f * fretW;
+        ctx.beginPath(); ctx.moveTo(x, padTop); ctx.lineTo(x, padTop + 5 * stringGap); ctx.stroke();
+    }
+    // Nut
+    if (minFret === 0) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(padLeft, padTop); ctx.lineTo(padLeft, padTop + 5 * stringGap); ctx.stroke();
+        ctx.lineWidth = 1;
+    }
+
+    // Strings
+    for (let s = 0; s < 6; s++) {
+        const y = padTop + s * stringGap;
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(padLeft, y); ctx.lineTo(w - padRight, y); ctx.stroke();
+    }
+
+    // String labels
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '11px Barlow Condensed';
+    ctx.textAlign = 'right';
+    for (let s = 1; s <= 6; s++) {
+        const y = padTop + (s - 1) * stringGap;
+        const label = STRING_NOTES_OPEN[s];
+        ctx.fillText(label, padLeft - 8, y + 4);
+    }
+
+    // Fret numbers
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.textAlign = 'center';
+    ctx.font = '10px Barlow Condensed';
+    for (let f = 1; f <= numFrets; f++) {
+        const fretNum = minFret + f;
+        if (fretNum % 2 === 1 || fretNum === 12) {
+            const x = padLeft + (f - 0.5) * fretW;
+            ctx.fillText(fretNum, x, h - 5);
+        }
+    }
+
+    // Dot markers
+    const dotFrets = [3, 5, 7, 9, 12, 15];
+    dotFrets.forEach(df => {
+        if (df > minFret && df <= maxFret) {
+            const x = padLeft + (df - minFret - 0.5) * fretW;
+            const yMid = padTop + 2.5 * stringGap;
+            ctx.fillStyle = 'rgba(255,255,255,0.06)';
+            ctx.beginPath();
+            if (df === 12) {
+                ctx.arc(x, padTop + 1.5 * stringGap, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x, padTop + 3.5 * stringGap, 4, 0, Math.PI * 2); ctx.fill();
+            } else {
+                ctx.arc(x, yMid, 4, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+    });
+
+    return { padLeft, padRight, padTop, fretW, stringGap, minFret, maxFret, ctx, w, h };
+}
+
+function drawNoteOnFretboard(canvasId, string, fret, color, label, layout, opts = {}) {
+    if (!layout) return;
+    const { padLeft, fretW, stringGap, padTop, minFret, ctx } = layout;
+    const radius = opts.radius || 14;
+    let x, y;
+    y = padTop + (string - 1) * stringGap;
+    if (fret === 0) {
+        x = padLeft - 2;
+    } else {
+        x = padLeft + (fret - minFret - 0.5) * fretW;
+    }
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    if (label) {
+        ctx.fillStyle = opts.textColor || 'white';
+        ctx.font = (opts.fontSize || '12px') + ' Barlow Condensed';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, x, y + 4);
+    }
+}
+
+// ============================================================
+// SCREEN MANAGEMENT
+// ============================================================
+let screenHistory = ['screen-menu'];
+
+function showScreen(id) {
+    document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    window.scrollTo(0, 0);
+    // Push to history if not already the current screen
+    if (screenHistory[screenHistory.length - 1] !== id) {
+        screenHistory.push(id);
+    }
+}
+
+function goBack() {
+    // Stop any active listening
+    stopUnisonListening();
+    stopOctaveListening();
+    stopPitListening();
+    stopFpListening();
+    // Pop current screen, go to previous
+    if (screenHistory.length > 1) {
+        screenHistory.pop();
+        const prev = screenHistory[screenHistory.length - 1];
+        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
+        document.getElementById(prev).classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+}
+
+function goToMenu() {
+    stopUnisonListening();
+    stopOctaveListening();
+    stopPitListening();
+    stopFpListening();
+    if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+    if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+    intP1Listening = false;
+    intP3Listening = false;
+    screenHistory = ['screen-menu'];
+    document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
+    document.getElementById('screen-menu').classList.remove('hidden');
+    window.scrollTo(0, 0);
+}
+
+// Step-back functions: go back one step within walkthroughs, or exit to previous screen at step 0
+function goBackUnisonP1() {
+    if (unisonP1Step > 0) {
+        unisonP1Step--;
+        renderUnisonP1();
+    } else {
+        goBack();
+    }
+}
+
+function goBackUnisonP2() {
+    if (unisonP2Step > 0) {
+        unisonP2Step--;
+        renderUnisonP2();
+    } else {
+        goBack();
+    }
+}
+
+function goBackOctavePattern() {
+    if (octavePatternStep > 0) {
+        octavePatternStep--;
+        renderOctavePattern();
+    } else {
+        goBack();
+    }
+}
+
+function goBackPit() {
+    if (pitStepIdx > 0) {
+        pitStepIdx--;
+        renderPit();
+    } else {
+        goBack();
+    }
+}
+
+function goBackIntP1() {
+    if (intP1Step > 0) {
+        if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+        intP1Step--;
+        renderIntP1();
+    } else if (intP1Phase === 2) {
+        // Go back to last step of phase 1
+        intP1Phase = 1;
+        intP1Step = INT_P1_STEPS.length - 1;
+        if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+        renderIntP1();
+    } else {
+        if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+        goBack();
+    }
+}
+
+function goBackIntP2() {
+    if (intP2Step > 0) {
+        intP2Step--;
+        renderIntP2();
+    } else {
+        goBack();
+    }
+}
+
+function goBackIntP3() {
+    if (intP3Step > 0) {
+        if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+        intP3Step--;
+        renderIntP3();
+    } else {
+        if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+        goBack();
+    }
+}
+
+function startUnisonOctaves() {
+    showScreen('screen-uo-landing');
+    // Check completion states
+    if (unisonComplete) {
+        document.getElementById('btnOctavesLocked').disabled = false;
+        document.getElementById('btnOctavesLocked').textContent = 'Continue to Octaves →';
+        document.getElementById('btnOctavesLocked').onclick = function() { startOctavesIntro(); };
+        document.getElementById('btnOctavesLocked').classList.remove('btn-outline');
+        document.getElementById('btnOctavesLocked').classList.add('btn-primary');
+    }
+    if (octavesComplete) {
+        document.getElementById('btnFreePlayLocked').disabled = false;
+        document.getElementById('btnFreePlayLocked').textContent = '🎮 Octave Free Play';
+        document.getElementById('btnFreePlayLocked').onclick = function() { startFreePlay(); };
+        document.getElementById('btnFreePlayLocked').classList.remove('btn-outline');
+        document.getElementById('btnFreePlayLocked').classList.add('btn-secondary');
+    }
+}
+
+// ============================================================
+// AUDIO — pitch detection (proven from scale trainer)
+// ============================================================
+let audioContext = null;
+let micStream = null;
+let analyserNode = null;
+let isListening = false;
+
+function getAudioContext() {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    return audioContext;
+}
+
+async function startMic() {
+    const ac = getAudioContext();
+    if (ac.state === 'suspended') await ac.resume();
+    micStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
+    const source = ac.createMediaStreamSource(micStream);
+    analyserNode = ac.createAnalyser();
+    analyserNode.fftSize = 4096;
+    source.connect(analyserNode);
+    isListening = true;
+}
+
+function stopMic() {
+    if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+    analyserNode = null;
+    isListening = false;
+}
+
+function detectPitch() {
+    if (!analyserNode) return null;
+    const buffer = new Float32Array(analyserNode.fftSize);
+    analyserNode.getFloatTimeDomainData(buffer);
+    const freq = autoCorrelate(buffer, getAudioContext().sampleRate);
+    if (!freq) return null;
+    const midi = Math.round(69 + 12 * Math.log2(freq / 440.0));
+    const note = NOTE_NAMES[((midi % 12) + 12) % 12];
+    return { freq, midi, note };
+}
+
+function autoCorrelate(buffer, sampleRate) {
+    let rms = 0;
+    for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+    rms = Math.sqrt(rms / buffer.length);
+    if (rms < 0.008) return null;
+
+    const SIZE = buffer.length;
+    const MAX_SAMPLES = Math.floor(SIZE / 2);
+    const MIN_SAMPLES = Math.floor(sampleRate / 1200);
+    let bestOffset = -1, bestCorrelation = 0, foundGood = false;
+
+    for (let offset = MIN_SAMPLES; offset < MAX_SAMPLES; offset++) {
+        let correlation = 0;
+        for (let i = 0; i < MAX_SAMPLES; i++) {
+            correlation += Math.abs(buffer[i] - buffer[i + offset]);
+        }
+        correlation = 1 - (correlation / MAX_SAMPLES);
+        if (correlation > 0.9 && correlation > bestCorrelation) {
+            bestCorrelation = correlation;
+            bestOffset = offset;
+            foundGood = true;
+        }
+        if (foundGood && correlation < 0.85) break;
+    }
+    if (bestCorrelation > 0.85) return sampleRate / bestOffset;
+    return null;
+}
+
+// ============================================================
+// UNISON PATTERN 1 — Same note ascending strings
+// ============================================================
+let unisonComplete = false;
+let unisonP1Step = 0;
+let unisonP1Listening = false;
+let unisonP1Interval = null;
+
+const UNISON_P1_STEPS = [
+    {
+        text: "Let's start with the open 1st string — <strong>E</strong>. Play it now.",
+        notes: [{ s: 1, f: 0, color: '#e8572a', label: 'E' }],
+        target: { s: 1, f: 0 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "Now play the <strong>same E</strong> on the 2nd string, 5th fret. Same note, same register — that's unison.",
+        notes: [
+            { s: 1, f: 0, color: 'rgba(232,87,42,0.3)', label: 'E' },
+            { s: 2, f: 5, color: '#e8572a', label: 'E' }
+        ],
+        target: { s: 2, f: 5 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "Now the 3rd string, 9th fret. Still the same E, same register.",
+        notes: [
+            { s: 1, f: 0, color: 'rgba(232,87,42,0.2)', label: 'E' },
+            { s: 2, f: 5, color: 'rgba(232,87,42,0.3)', label: 'E' },
+            { s: 3, f: 9, color: '#e8572a', label: 'E' }
+        ],
+        target: { s: 3, f: 9 },
+        fretRange: [0, 12]
+    },
+    {
+        text: "Finally, the 4th string, 14th fret. Same E note in the same register — four different places on the neck!",
+        notes: [
+            { s: 1, f: 0, color: 'rgba(232,87,42,0.15)', label: 'E' },
+            { s: 2, f: 5, color: 'rgba(232,87,42,0.2)', label: 'E' },
+            { s: 3, f: 9, color: 'rgba(232,87,42,0.3)', label: 'E' },
+            { s: 4, f: 14, color: '#e8572a', label: 'E' }
+        ],
+        target: { s: 4, f: 14 },
+        fretRange: [0, 16]
+    },
+    {
+        text: "Here's the pattern: move up one string and go <strong>up 5 frets</strong> — except from the 2nd to 3rd string where you go <strong>up 4 frets</strong> (because of the B string tuning). This works with any note!",
+        notes: [
+            { s: 1, f: 0, color: '#e8572a', label: 'E' },
+            { s: 2, f: 5, color: '#e8572a', label: 'E' },
+            { s: 3, f: 9, color: '#e8572a', label: 'E' },
+            { s: 4, f: 14, color: '#e8572a', label: 'E' }
+        ],
+        target: null,
+        fretRange: [0, 16]
+    }
+];
+
+function startUnison() {
+    showScreen('screen-unison-intro');
+}
+
+function startUnisonPattern1() {
+    unisonP1Step = 0;
+    showScreen('screen-unison-p1');
+    renderUnisonP1();
+}
+
+function renderUnisonP1() {
+    const step = UNISON_P1_STEPS[unisonP1Step];
+    document.getElementById('unisonP1Text').innerHTML = step.text;
+
+    // Dots
+    let dots = '';
+    for (let i = 0; i < UNISON_P1_STEPS.length; i++) {
+        const cls = i < unisonP1Step ? 'done' : (i === unisonP1Step ? 'active' : '');
+        dots += `<div class="step-dot ${cls}"></div>`;
+    }
+    document.getElementById('unisonP1Dots').innerHTML = dots;
+
+    // Fretboard
+    const layout = drawFretboard('unisonP1Fretboard', { minFret: step.fretRange[0], maxFret: step.fretRange[1] });
+    step.notes.forEach(n => drawNoteOnFretboard('unisonP1Fretboard', n.s, n.f, n.color, n.label, layout));
+
+    if (step.target) {
+        document.getElementById('unisonP1MicBtn').classList.remove('hidden');
+        document.getElementById('unisonP1SkipBtn').classList.remove('hidden');
+        document.getElementById('unisonP1NextBtn').classList.add('hidden');
+        // If mic already active, restart listening with new target
+        if (unisonP1Listening) {
+            resumeUnisonListening('p1');
+        } else {
+            document.getElementById('unisonP1MicBtn').textContent = '🎤 Start Listening';
+            document.getElementById('unisonP1Status').textContent = 'Press "Start Listening" when ready';
+            document.getElementById('unisonP1Status').className = 'status-bar status-idle';
+        }
+    } else {
+        // Summary step — no target, show continue button
+        document.getElementById('unisonP1MicBtn').classList.add('hidden');
+        document.getElementById('unisonP1SkipBtn').classList.add('hidden');
+        document.getElementById('unisonP1NextBtn').classList.remove('hidden');
+        document.getElementById('unisonP1NextBtn').textContent = 'Continue to Pattern 2 →';
+        document.getElementById('unisonP1Status').textContent = '';
+        document.getElementById('unisonP1Status').className = 'status-bar';
+        // Stop mic at summary
+        stopUnisonListening();
+    }
+}
+
+function toggleUnisonMic(pattern) {
+    if (unisonP1Listening) {
+        stopUnisonListening();
+        const prefix = pattern === 'p1' ? 'unisonP1' : 'unisonP2';
+        document.getElementById(prefix + 'MicBtn').textContent = '🎤 Start Listening';
+        document.getElementById(prefix + 'Status').textContent = 'Paused';
+        document.getElementById(prefix + 'Status').className = 'status-bar status-idle';
+    } else {
+        startUnisonListening(pattern);
+    }
+}
+
+async function startUnisonListening(pattern) {
+    if (!isListening) await startMic();
+    unisonP1Listening = true;
+    const prefix = pattern === 'p1' ? 'unisonP1' : 'unisonP2';
+    document.getElementById(prefix + 'MicBtn').textContent = '⏸ Pause';
+    resumeUnisonListening(pattern);
+}
+
+function resumeUnisonListening(pattern) {
+    if (unisonP1Interval) { clearInterval(unisonP1Interval); unisonP1Interval = null; }
+    unisonP1Listening = true;
+    const prefix = pattern === 'p1' ? 'unisonP1' : 'unisonP2';
+    const steps = pattern === 'p1' ? UNISON_P1_STEPS : UNISON_P2_STEPS;
+    const stepIdx = pattern === 'p1' ? unisonP1Step : unisonP2Step;
+    const target = steps[stepIdx].target;
+    if (!target) return;
+
+    document.getElementById(prefix + 'MicBtn').textContent = '⏸ Pause';
+    document.getElementById(prefix + 'Status').textContent = '🎤 Listening...';
+    document.getElementById(prefix + 'Status').className = 'status-bar status-listening';
+
+    const expectedMidi = fretToMidi(target.s, target.f);
+    let lastDetectedMidi = null;
+
+    unisonP1Interval = setInterval(() => {
+        const pitch = detectPitch();
+        if (!pitch) { lastDetectedMidi = null; return; }
+        document.getElementById(prefix + 'Status').textContent = `🎤 Hearing: ${pitch.note}`;
+        if (pitch.midi === expectedMidi) {
+            // Require 2 consecutive detections to confirm
+            if (lastDetectedMidi === expectedMidi) {
+                document.getElementById(prefix + 'Status').textContent = `✅ Correct! That's ${pitch.note}`;
+                document.getElementById(prefix + 'Status').className = 'status-bar status-correct';
+                clearInterval(unisonP1Interval); unisonP1Interval = null;
+                setTimeout(() => {
+                    if (prefix === 'unisonP1') advanceUnisonP1();
+                    else advanceUnisonP2();
+                }, 800);
+            }
+            lastDetectedMidi = expectedMidi;
+        } else {
+            lastDetectedMidi = pitch.midi;
+        }
+    }, 100);
+}
+
+function stopUnisonListening() {
+    unisonP1Listening = false;
+    if (unisonP1Interval) { clearInterval(unisonP1Interval); unisonP1Interval = null; }
+    stopMic();
+}
+
+function advanceUnisonP1() {
+    unisonP1Step++;
+    if (unisonP1Step >= UNISON_P1_STEPS.length) {
+        startUnisonPattern2();
+    } else {
+        renderUnisonP1();
+    }
+}
+
+// ============================================================
+// UNISON PATTERN 2 — Tuning Pattern
+// ============================================================
+let unisonP2Step = 0;
+
+const UNISON_P2_STEPS = [
+    {
+        text: "This is the pattern you use to tune a guitar by ear. Start on the <strong>6th string, 5th fret</strong> — that's an <strong>A</strong>. Play it.",
+        notes: [{ s: 6, f: 5, color: '#e8572a', label: 'A' }],
+        target: { s: 6, f: 5 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "Now play the <strong>open 5th string</strong>. Same note — A. This is unison. The pattern: go down one string and <strong>down 5 frets</strong>.",
+        notes: [
+            { s: 6, f: 5, color: 'rgba(232,87,42,0.3)', label: 'A' },
+            { s: 5, f: 0, color: '#e8572a', label: 'A' }
+        ],
+        target: { s: 5, f: 0 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "Same thing: <strong>5th string, 5th fret</strong> is D. Play it.",
+        notes: [{ s: 5, f: 5, color: '#e8572a', label: 'D' }],
+        target: { s: 5, f: 5 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "Now the <strong>open 4th string</strong> — same D note.",
+        notes: [
+            { s: 5, f: 5, color: 'rgba(232,87,42,0.3)', label: 'D' },
+            { s: 4, f: 0, color: '#e8572a', label: 'D' }
+        ],
+        target: { s: 4, f: 0 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "<strong>4th string, 5th fret</strong> is G. Play it.",
+        notes: [{ s: 4, f: 5, color: '#e8572a', label: 'G' }],
+        target: { s: 4, f: 5 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "The <strong>open 3rd string</strong> — same G.",
+        notes: [
+            { s: 4, f: 5, color: 'rgba(232,87,42,0.3)', label: 'G' },
+            { s: 3, f: 0, color: '#e8572a', label: 'G' }
+        ],
+        target: { s: 3, f: 0 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "Here's the exception! From the 3rd string, use the <strong>4th fret</strong> instead of the 5th. <strong>3rd string, 4th fret</strong> is B. Play it.",
+        notes: [{ s: 3, f: 4, color: '#e8572a', label: 'B' }],
+        target: { s: 3, f: 4 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "The <strong>open 2nd string</strong> — same B. This is why the 3rd-to-2nd string is always the exception in guitar patterns.",
+        notes: [
+            { s: 3, f: 4, color: 'rgba(232,87,42,0.3)', label: 'B' },
+            { s: 2, f: 0, color: '#e8572a', label: 'B' }
+        ],
+        target: { s: 2, f: 0 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "Back to normal: <strong>2nd string, 5th fret</strong> is E. Play it.",
+        notes: [{ s: 2, f: 5, color: '#e8572a', label: 'E' }],
+        target: { s: 2, f: 5 },
+        fretRange: [0, 7]
+    },
+    {
+        text: "And the <strong>open 1st string</strong> — same E. You've just tuned a guitar!",
+        notes: [
+            { s: 2, f: 5, color: 'rgba(232,87,42,0.3)', label: 'E' },
+            { s: 1, f: 0, color: '#e8572a', label: 'E' }
+        ],
+        target: { s: 1, f: 0 },
+        fretRange: [0, 7]
+    }
+];
+
+function startUnisonPattern2() {
+    unisonP2Step = 0;
+    showScreen('screen-unison-p2');
+    renderUnisonP2();
+}
+
+function renderUnisonP2() {
+    const step = UNISON_P2_STEPS[unisonP2Step];
+    document.getElementById('unisonP2Text').innerHTML = step.text;
+
+    let dots = '';
+    for (let i = 0; i < UNISON_P2_STEPS.length; i++) {
+        const cls = i < unisonP2Step ? 'done' : (i === unisonP2Step ? 'active' : '');
+        dots += `<div class="step-dot ${cls}"></div>`;
+    }
+    document.getElementById('unisonP2Dots').innerHTML = dots;
+
+    const layout = drawFretboard('unisonP2Fretboard', { minFret: step.fretRange[0], maxFret: step.fretRange[1] });
+    step.notes.forEach(n => drawNoteOnFretboard('unisonP2Fretboard', n.s, n.f, n.color, n.label, layout));
+
+    document.getElementById('unisonP2MicBtn').classList.remove('hidden');
+    document.getElementById('unisonP2SkipBtn').classList.remove('hidden');
+    document.getElementById('unisonP2NextBtn').classList.add('hidden');
+    if (unisonP1Listening) {
+        resumeUnisonListening('p2');
+    } else {
+        document.getElementById('unisonP2MicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('unisonP2Status').textContent = 'Press "Start Listening" when ready';
+        document.getElementById('unisonP2Status').className = 'status-bar status-idle';
+    }
+}
+
+function advanceUnisonP2() {
+    unisonP2Step++;
+    if (unisonP2Step >= UNISON_P2_STEPS.length) {
+        unisonComplete = true;
+        showScreen('screen-unison-complete');
+    } else {
+        renderUnisonP2();
+    }
+}
+
+// ============================================================
+// OCTAVE PATTERNS
+// ============================================================
+let octavesComplete = false;
+let currentOctavePatternIdx = 0;
+let octavePatternStep = 0;
+let octaveListening = false;
+let octaveInterval = null;
+
+const OCTAVE_PATTERNS = [
+    {
+        label: 'Pattern 1 of 5',
+        title: '1 String Over',
+        text: 'The first octave shape moves to the <strong>next string</strong> (one string over) and <strong>up 7 frets</strong>. The exception: from the 3rd string to the 2nd string, go <strong>up 8 frets</strong> (because of the B string tuning).',
+        rule: '↓ 1 string, ↑ 7 frets (3rd→2nd: ↑ 8 frets)',
+        steps: [
+            { text: 'Play <strong>E</strong> on the 6th string, open.', notes: [{ s:6, f:0, color:'#e8572a', label:'E' }], target:{s:6,f:0}, fr:[0,10] },
+            { text: 'Now play <strong>E</strong> one octave up: 5th string, 7th fret.', notes: [{ s:6, f:0, color:'rgba(232,87,42,0.3)', label:'E' }, { s:5, f:7, color:'#e8572a', label:'E' }], target:{s:5,f:7}, fr:[0,10] },
+            { text: 'Play <strong>A</strong> on the 5th string, open.', notes: [{ s:5, f:0, color:'#e8572a', label:'A' }], target:{s:5,f:0}, fr:[0,10] },
+            { text: 'Now <strong>A</strong> one octave up: 4th string, 7th fret.', notes: [{ s:5, f:0, color:'rgba(232,87,42,0.3)', label:'A' }, { s:4, f:7, color:'#e8572a', label:'A' }], target:{s:4,f:7}, fr:[0,10] },
+            { text: 'Play <strong>D</strong> on the 4th string, open.', notes: [{ s:4, f:0, color:'#e8572a', label:'D' }], target:{s:4,f:0}, fr:[0,10] },
+            { text: 'Now <strong>D</strong> one octave up: 3rd string, 7th fret.', notes: [{ s:4, f:0, color:'rgba(232,87,42,0.3)', label:'D' }, { s:3, f:7, color:'#e8572a', label:'D' }], target:{s:3,f:7}, fr:[0,10] },
+            { text: 'Play <strong>G</strong> on the 3rd string, open.', notes: [{ s:3, f:0, color:'#e8572a', label:'G' }], target:{s:3,f:0}, fr:[0,12] },
+            { text: 'Now <strong>G</strong> one octave up: 2nd string, <strong>8th fret</strong> (the B string exception — 8 frets instead of 7!).', notes: [{ s:3, f:0, color:'rgba(232,87,42,0.3)', label:'G' }, { s:2, f:8, color:'#e8572a', label:'G' }], target:{s:2,f:8}, fr:[0,12] },
+            { text: 'Play <strong>B</strong> on the 2nd string, open.', notes: [{ s:2, f:0, color:'#e8572a', label:'B' }], target:{s:2,f:0}, fr:[0,10] },
+            { text: 'Now <strong>B</strong> one octave up: 1st string, 7th fret. Back to the normal +7 pattern.', notes: [{ s:2, f:0, color:'rgba(232,87,42,0.3)', label:'B' }, { s:1, f:7, color:'#e8572a', label:'B' }], target:{s:1,f:7}, fr:[0,10] },
+        ]
+    },
+    {
+        label: 'Pattern 2 of 5',
+        title: '2 Strings Over',
+        text: 'This pattern skips one string. From strings 6 or 5, go <strong>2 strings over</strong> and <strong>up 2 frets</strong>. From strings 4 or 3 (crossing the B string), go <strong>up 3 frets</strong> instead.',
+        rule: '↓ 2 strings, ↑ 2 frets (crossing B string: ↑ 3 frets)',
+        steps: [
+            { text: 'Play <strong>E</strong> on the 6th string, open.', notes: [{ s:6, f:0, color:'#e8572a', label:'E' }], target:{s:6,f:0}, fr:[0,7] },
+            { text: 'Now <strong>E</strong> one octave up: 4th string, 2nd fret. The rule: 2 strings over, up 2 frets.', notes: [{ s:6, f:0, color:'rgba(232,87,42,0.3)', label:'E' }, { s:4, f:2, color:'#e8572a', label:'E' }], target:{s:4,f:2}, fr:[0,7] },
+            { text: 'Play <strong>C</strong> on the 5th string, 3rd fret.', notes: [{ s:5, f:3, color:'#e8572a', label:'C' }], target:{s:5,f:3}, fr:[0,7] },
+            { text: 'Now <strong>C</strong> one octave up: 3rd string, 5th fret. Same rule — up 2 frets.', notes: [{ s:5, f:3, color:'rgba(232,87,42,0.3)', label:'C' }, { s:3, f:5, color:'#e8572a', label:'C' }], target:{s:3,f:5}, fr:[0,7] },
+            { text: 'Play <strong>D</strong> on the 4th string, open.', notes: [{ s:4, f:0, color:'#e8572a', label:'D' }], target:{s:4,f:0}, fr:[0,7] },
+            { text: 'Now <strong>D</strong> one octave up: 2nd string, <strong>3rd fret</strong>. Crossing the B string — up 3 frets instead of 2.', notes: [{ s:4, f:0, color:'rgba(232,87,42,0.3)', label:'D' }, { s:2, f:3, color:'#e8572a', label:'D' }], target:{s:2,f:3}, fr:[0,7] },
+            { text: 'Play <strong>G</strong> on the 3rd string, open.', notes: [{ s:3, f:0, color:'#e8572a', label:'G' }], target:{s:3,f:0}, fr:[0,7] },
+            { text: 'Now <strong>G</strong> one octave up: 1st string, <strong>3rd fret</strong>. Same B string exception — up 3 frets.', notes: [{ s:3, f:0, color:'rgba(232,87,42,0.3)', label:'G' }, { s:1, f:3, color:'#e8572a', label:'G' }], target:{s:1,f:3}, fr:[0,7] },
+        ]
+    },
+    {
+        label: 'Pattern 3 of 5',
+        title: '3 Strings Over',
+        text: 'This pattern jumps three strings. From string 6, go to string 3 and <strong>down 3 frets</strong>. From strings 5 or 4, go 3 strings over and <strong>down 2 frets</strong>.',
+        rule: '↓ 3 strings: from 6th ↓3 frets, from 5th or 4th ↓2 frets',
+        steps: [
+            { text: 'Play <strong>A</strong> on the 6th string, 5th fret.', notes: [{ s:6, f:5, color:'#e8572a', label:'A' }], target:{s:6,f:5}, fr:[0,7] },
+            { text: 'Now <strong>A</strong> one octave up: 3rd string, 2nd fret (down 3 frets from 5).', notes: [{ s:6, f:5, color:'rgba(232,87,42,0.3)', label:'A' }, { s:3, f:2, color:'#e8572a', label:'A' }], target:{s:3,f:2}, fr:[0,7] },
+            { text: 'Play <strong>D</strong> on the 5th string, 5th fret.', notes: [{ s:5, f:5, color:'#e8572a', label:'D' }], target:{s:5,f:5}, fr:[0,7] },
+            { text: 'Now <strong>D</strong> one octave up: 2nd string, 3rd fret (down 2 frets from 5).', notes: [{ s:5, f:5, color:'rgba(232,87,42,0.3)', label:'D' }, { s:2, f:3, color:'#e8572a', label:'D' }], target:{s:2,f:3}, fr:[0,7] },
+            { text: 'Play <strong>G</strong> on the 4th string, 5th fret.', notes: [{ s:4, f:5, color:'#e8572a', label:'G' }], target:{s:4,f:5}, fr:[0,7] },
+            { text: 'Now <strong>G</strong> one octave up: 1st string, 3rd fret (down 2 frets from 5).', notes: [{ s:4, f:5, color:'rgba(232,87,42,0.3)', label:'G' }, { s:1, f:3, color:'#e8572a', label:'G' }], target:{s:1,f:3}, fr:[0,7] },
+        ]
+    },
+    {
+        label: 'Pattern 4 of 5',
+        title: 'Same String',
+        text: 'The simplest octave pattern — stay on the same string and move <strong>12 frets up</strong>. This one is easy to visualize because fret 12 is always marked with double dots.',
+        rule: 'Same string, ↑ 12 frets',
+        steps: [
+            { text: 'Play the <strong>open 6th string</strong> — E.', notes: [{ s:6, f:0, color:'#e8572a', label:'E' }], target:{s:6,f:0}, fr:[0,15] },
+            { text: 'Now <strong>E</strong> one octave up: 6th string, 12th fret.', notes: [{ s:6, f:0, color:'rgba(232,87,42,0.3)', label:'E' }, { s:6, f:12, color:'#e8572a', label:'E' }], target:{s:6,f:12}, fr:[0,15] },
+            { text: 'Play <strong>G</strong> on the 3rd string, open.', notes: [{ s:3, f:0, color:'#e8572a', label:'G' }], target:{s:3,f:0}, fr:[0,15] },
+            { text: 'Now <strong>G</strong> one octave up: 3rd string, 12th fret.', notes: [{ s:3, f:0, color:'rgba(232,87,42,0.3)', label:'G' }, { s:3, f:12, color:'#e8572a', label:'G' }], target:{s:3,f:12}, fr:[0,15] },
+        ]
+    },
+    {
+        label: 'Pattern 5 of 5',
+        title: '2 Octaves (String 6 → String 1)',
+        text: 'The 6th string and 1st string are both tuned to E — two octaves apart. Any fret on string 6 and the <strong>same fret on string 1</strong> is exactly two octaves higher.',
+        rule: 'String 6 → String 1, same fret = 2 octaves up',
+        steps: [
+            { text: 'Play <strong>E</strong> on the 6th string, open.', notes: [{ s:6, f:0, color:'#e8572a', label:'E' }], target:{s:6,f:0}, fr:[0,7] },
+            { text: 'Now <strong>E</strong> two octaves up: 1st string, open.', notes: [{ s:6, f:0, color:'rgba(232,87,42,0.3)', label:'E' }, { s:1, f:0, color:'#e8572a', label:'E' }], target:{s:1,f:0}, fr:[0,7] },
+            { text: 'Play <strong>A</strong> on the 6th string, 5th fret.', notes: [{ s:6, f:5, color:'#e8572a', label:'A' }], target:{s:6,f:5}, fr:[0,7] },
+            { text: 'Now <strong>A</strong> two octaves up: 1st string, 5th fret.', notes: [{ s:6, f:5, color:'rgba(232,87,42,0.3)', label:'A' }, { s:1, f:5, color:'#e8572a', label:'A' }], target:{s:1,f:5}, fr:[0,7] },
+        ]
+    }
+];
+
+function startOctavesIntro() {
+    showScreen('screen-octaves-intro');
+}
+
+function startOctavePattern(idx) {
+    currentOctavePatternIdx = idx;
+    octavePatternStep = 0;
+    showScreen('screen-octave-pattern');
+    renderOctavePattern();
+}
+
+function goBackFromOctavePattern() {
+    if (currentOctavePatternIdx > 0) {
+        startOctavePattern(currentOctavePatternIdx - 1);
+    } else {
+        showScreen('screen-octaves-intro');
+    }
+}
+
+function renderOctavePattern() {
+    const pattern = OCTAVE_PATTERNS[currentOctavePatternIdx];
+    const step = pattern.steps[octavePatternStep];
+
+    document.getElementById('octavePatternLabel').textContent = pattern.label;
+    document.getElementById('octavePatternTitle').textContent = pattern.title;
+    document.getElementById('octavePatternText').innerHTML = octavePatternStep === 0 ? pattern.text : step.text;
+    document.getElementById('octavePatternRule').innerHTML = pattern.rule;
+
+    if (octavePatternStep > 0) {
+        document.getElementById('octavePatternText').innerHTML = step.text;
+    }
+
+    let dots = '';
+    for (let i = 0; i < pattern.steps.length; i++) {
+        const cls = i < octavePatternStep ? 'done' : (i === octavePatternStep ? 'active' : '');
+        dots += `<div class="step-dot ${cls}"></div>`;
+    }
+    document.getElementById('octavePatternDots').innerHTML = dots;
+
+    const layout = drawFretboard('octavePatternFretboard', { minFret: step.fr[0], maxFret: step.fr[1] });
+    step.notes.forEach(n => drawNoteOnFretboard('octavePatternFretboard', n.s, n.f, n.color, n.label, layout));
+
+    document.getElementById('octavePatternMicBtn').classList.remove('hidden');
+    document.getElementById('octavePatternSkipBtn').classList.remove('hidden');
+    document.getElementById('octavePatternNextBtn').classList.add('hidden');
+    if (octaveListening) {
+        resumeOctaveListening();
+    } else {
+        document.getElementById('octavePatternMicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('octavePatternStatus').textContent = 'Press "Start Listening" when ready';
+        document.getElementById('octavePatternStatus').className = 'status-bar status-idle';
+    }
+}
+
+function toggleOctaveMic() {
+    if (octaveListening) {
+        stopOctaveListening();
+        document.getElementById('octavePatternMicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('octavePatternStatus').textContent = 'Paused';
+        document.getElementById('octavePatternStatus').className = 'status-bar status-idle';
+    } else {
+        startOctaveListening();
+    }
+}
+
+async function startOctaveListening() {
+    if (!isListening) await startMic();
+    octaveListening = true;
+    document.getElementById('octavePatternMicBtn').textContent = '⏸ Pause';
+    resumeOctaveListening();
+}
+
+function resumeOctaveListening() {
+    if (octaveInterval) { clearInterval(octaveInterval); octaveInterval = null; }
+    octaveListening = true;
+
+    const pattern = OCTAVE_PATTERNS[currentOctavePatternIdx];
+    const step = pattern.steps[octavePatternStep];
+    const expectedMidi = fretToMidi(step.target.s, step.target.f);
+    let octaveLastMidi = null;
+
+    document.getElementById('octavePatternMicBtn').textContent = '⏸ Pause';
+    document.getElementById('octavePatternStatus').textContent = '🎤 Listening...';
+    document.getElementById('octavePatternStatus').className = 'status-bar status-listening';
+
+    octaveInterval = setInterval(() => {
+        const pitch = detectPitch();
+        if (!pitch) { octaveLastMidi = null; return; }
+        document.getElementById('octavePatternStatus').textContent = `🎤 Hearing: ${pitch.note}`;
+        if (pitch.midi === expectedMidi) {
+            if (octaveLastMidi === expectedMidi) {
+                document.getElementById('octavePatternStatus').textContent = `✅ Correct! That's ${pitch.note}`;
+                document.getElementById('octavePatternStatus').className = 'status-bar status-correct';
+                clearInterval(octaveInterval); octaveInterval = null;
+                setTimeout(() => { advanceOctavePattern(); }, 800);
+            }
+            octaveLastMidi = expectedMidi;
+        } else {
+            octaveLastMidi = pitch.midi;
+        }
+    }, 100);
+}
+
+function stopOctaveListening() {
+    octaveListening = false;
+    if (octaveInterval) { clearInterval(octaveInterval); octaveInterval = null; }
+    stopMic();
+}
+
+function advanceOctavePattern() {
+    octavePatternStep++;
+    const pattern = OCTAVE_PATTERNS[currentOctavePatternIdx];
+    if (octavePatternStep >= pattern.steps.length) {
+        if (currentOctavePatternIdx < OCTAVE_PATTERNS.length - 1) {
+            startOctavePattern(currentOctavePatternIdx + 1);
+        } else {
+            startPuttingItTogether();
+        }
+    } else {
+        renderOctavePattern();
+    }
+}
+
+// ============================================================
+// PUTTING IT TOGETHER
+// ============================================================
+let pitExampleIdx = 0;
+let pitStepIdx = 0;
+let pitListening = false;
+let pitInterval = null;
+
+const PIT_EXAMPLES = [
+    {
+        title: 'Finding Every G',
+        startNote: 'G', startString: 6, startFret: 3,
+        steps: [
+            { text: 'Start with <strong>G</strong> on the 6th string, 3rd fret. Play it.', target:{s:6,f:3}, show:[{s:6,f:3,label:'G',color:'#e8572a'}] },
+            { text: '<strong>1 string over</strong>: 5th string, 10th fret. Play it.', target:{s:5,f:10}, show:[{s:6,f:3,label:'G',color:'rgba(232,87,42,0.3)'},{s:5,f:10,label:'G',color:'#e8572a'}] },
+            { text: '<strong>2 strings over</strong> from the start: 4th string, 5th fret. Play it.', target:{s:4,f:5}, show:[{s:6,f:3,label:'G',color:'rgba(232,87,42,0.3)'},{s:5,f:10,label:'G',color:'rgba(232,87,42,0.3)'},{s:4,f:5,label:'G',color:'#e8572a'}] },
+            { text: '<strong>3 strings over</strong>: 3rd string, open. Play it.', target:{s:3,f:0}, show:[{s:6,f:3,label:'G',color:'rgba(232,87,42,0.2)'},{s:5,f:10,label:'G',color:'rgba(232,87,42,0.2)'},{s:4,f:5,label:'G',color:'rgba(232,87,42,0.3)'},{s:3,f:0,label:'G',color:'#e8572a'}] },
+            { text: 'Now find the remaining Gs! <strong>2nd string</strong>: use 2 strings over from the 4th string (5+3=<strong>8th fret</strong>). Play it.', target:{s:2,f:8}, show:[{s:6,f:3,label:'G',color:'rgba(232,87,42,0.15)'},{s:5,f:10,label:'G',color:'rgba(232,87,42,0.15)'},{s:4,f:5,label:'G',color:'rgba(232,87,42,0.2)'},{s:3,f:0,label:'G',color:'rgba(232,87,42,0.3)'},{s:2,f:8,label:'G',color:'#e8572a'}] },
+            { text: 'And the <strong>1st string, 3rd fret</strong> — same fret as string 6. That\'s 2 octaves! Play it.', target:{s:1,f:3}, show:[{s:6,f:3,label:'G',color:'rgba(232,87,42,0.15)'},{s:5,f:10,label:'G',color:'rgba(232,87,42,0.15)'},{s:4,f:5,label:'G',color:'rgba(232,87,42,0.15)'},{s:3,f:0,label:'G',color:'rgba(232,87,42,0.2)'},{s:2,f:8,label:'G',color:'rgba(232,87,42,0.3)'},{s:1,f:3,label:'G',color:'#e8572a'}] },
+        ],
+        fr: [0, 12]
+    },
+    {
+        title: 'Finding Every C',
+        startNote: 'C', startString: 5, startFret: 3,
+        steps: [
+            { text: 'Start with <strong>C</strong> on the 5th string, 3rd fret. Play it.', target:{s:5,f:3}, show:[{s:5,f:3,label:'C',color:'#e8572a'}] },
+            { text: '<strong>1 string over</strong>: 4th string, 10th fret. Play it.', target:{s:4,f:10}, show:[{s:5,f:3,label:'C',color:'rgba(232,87,42,0.3)'},{s:4,f:10,label:'C',color:'#e8572a'}] },
+            { text: '<strong>2 strings over</strong>: 3rd string, 5th fret. Play it.', target:{s:3,f:5}, show:[{s:5,f:3,label:'C',color:'rgba(232,87,42,0.3)'},{s:4,f:10,label:'C',color:'rgba(232,87,42,0.3)'},{s:3,f:5,label:'C',color:'#e8572a'}] },
+            { text: '<strong>3 strings over</strong>: 2nd string, 1st fret. Play it.', target:{s:2,f:1}, show:[{s:5,f:3,label:'C',color:'rgba(232,87,42,0.2)'},{s:4,f:10,label:'C',color:'rgba(232,87,42,0.2)'},{s:3,f:5,label:'C',color:'rgba(232,87,42,0.3)'},{s:2,f:1,label:'C',color:'#e8572a'}] },
+            { text: 'And the <strong>1st string, 8th fret</strong>. Use 2 strings over from the 3rd string (5+3=8). Play it.', target:{s:1,f:8}, show:[{s:5,f:3,label:'C',color:'rgba(232,87,42,0.15)'},{s:4,f:10,label:'C',color:'rgba(232,87,42,0.15)'},{s:3,f:5,label:'C',color:'rgba(232,87,42,0.2)'},{s:2,f:1,label:'C',color:'rgba(232,87,42,0.3)'},{s:1,f:8,label:'C',color:'#e8572a'}] },
+        ],
+        fr: [0, 12]
+    },
+    {
+        title: 'Finding Every A',
+        startNote: 'A', startString: 6, startFret: 5,
+        steps: [
+            { text: 'Start with <strong>A</strong> on the 6th string, 5th fret. Play it.', target:{s:6,f:5}, show:[{s:6,f:5,label:'A',color:'#e8572a'}] },
+            { text: '<strong>1 string over</strong>: 5th string, 12th fret. Play it.', target:{s:5,f:12}, show:[{s:6,f:5,label:'A',color:'rgba(232,87,42,0.3)'},{s:5,f:12,label:'A',color:'#e8572a'}] },
+            { text: '<strong>2 strings over</strong>: 4th string, 7th fret. Play it.', target:{s:4,f:7}, show:[{s:6,f:5,label:'A',color:'rgba(232,87,42,0.3)'},{s:5,f:12,label:'A',color:'rgba(232,87,42,0.3)'},{s:4,f:7,label:'A',color:'#e8572a'}] },
+            { text: '<strong>3 strings over</strong>: 3rd string, 2nd fret. Play it.', target:{s:3,f:2}, show:[{s:6,f:5,label:'A',color:'rgba(232,87,42,0.2)'},{s:5,f:12,label:'A',color:'rgba(232,87,42,0.2)'},{s:4,f:7,label:'A',color:'rgba(232,87,42,0.3)'},{s:3,f:2,label:'A',color:'#e8572a'}] },
+            { text: '<strong>2nd string, 10th fret</strong> (2 strings over from 4th: 7+3=10). Play it.', target:{s:2,f:10}, show:[{s:6,f:5,label:'A',color:'rgba(232,87,42,0.15)'},{s:5,f:12,label:'A',color:'rgba(232,87,42,0.15)'},{s:4,f:7,label:'A',color:'rgba(232,87,42,0.2)'},{s:3,f:2,label:'A',color:'rgba(232,87,42,0.3)'},{s:2,f:10,label:'A',color:'#e8572a'}] },
+            { text: 'And <strong>1st string, 5th fret</strong> — 2 octaves from string 6, same fret! Play it.', target:{s:1,f:5}, show:[{s:6,f:5,label:'A',color:'rgba(232,87,42,0.15)'},{s:5,f:12,label:'A',color:'rgba(232,87,42,0.15)'},{s:4,f:7,label:'A',color:'rgba(232,87,42,0.15)'},{s:3,f:2,label:'A',color:'rgba(232,87,42,0.2)'},{s:2,f:10,label:'A',color:'rgba(232,87,42,0.3)'},{s:1,f:5,label:'A',color:'#e8572a'}] },
+        ],
+        fr: [0, 14]
+    }
+];
+
+function startPuttingItTogether() {
+    pitExampleIdx = 0;
+    pitStepIdx = 0;
+    showScreen('screen-putting-together');
+    renderPit();
+}
+
+function renderPit() {
+    const ex = PIT_EXAMPLES[pitExampleIdx];
+    const step = ex.steps[pitStepIdx];
+    document.getElementById('pitTitle').textContent = ex.title;
+    document.getElementById('pitText').innerHTML = step.text;
+
+    let dots = '';
+    const totalSteps = ex.steps.length;
+    for (let i = 0; i < totalSteps; i++) {
+        const cls = i < pitStepIdx ? 'done' : (i === pitStepIdx ? 'active' : '');
+        dots += `<div class="step-dot ${cls}"></div>`;
+    }
+    document.getElementById('pitDots').innerHTML = dots;
+
+    const layout = drawFretboard('pitFretboard', { minFret: ex.fr[0], maxFret: ex.fr[1] });
+    step.show.forEach(n => drawNoteOnFretboard('pitFretboard', n.s, n.f, n.color, n.label, layout));
+
+    document.getElementById('pitMicBtn').classList.remove('hidden');
+    document.getElementById('pitSkipBtn').classList.remove('hidden');
+    document.getElementById('pitNextBtn').classList.add('hidden');
+    if (pitListening) {
+        resumePitListening();
+    } else {
+        document.getElementById('pitMicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('pitStatus').textContent = 'Press "Start Listening" when ready';
+        document.getElementById('pitStatus').className = 'status-bar status-idle';
+    }
+    
+}
+
+function togglePitMic() {
+    if (pitListening) {
+        stopPitListening();
+        document.getElementById('pitMicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('pitStatus').textContent = 'Paused';
+        document.getElementById('pitStatus').className = 'status-bar status-idle';
+    } else {
+        startPitListening();
+    }
+}
+
+async function startPitListening() {
+    if (!isListening) await startMic();
+    pitListening = true;
+    document.getElementById('pitMicBtn').textContent = '⏸ Pause';
+    resumePitListening();
+}
+
+function resumePitListening() {
+    if (pitInterval) { clearInterval(pitInterval); pitInterval = null; }
+    pitListening = true;
+
+    const ex = PIT_EXAMPLES[pitExampleIdx];
+    const step = ex.steps[pitStepIdx];
+    const expectedMidi = fretToMidi(step.target.s, step.target.f);
+    let pitLastMidi = null;
+
+    document.getElementById('pitMicBtn').textContent = '⏸ Pause';
+    document.getElementById('pitStatus').textContent = '🎤 Listening...';
+    document.getElementById('pitStatus').className = 'status-bar status-listening';
+
+    pitInterval = setInterval(() => {
+        const pitch = detectPitch();
+        if (!pitch) { pitLastMidi = null; return; }
+        document.getElementById('pitStatus').textContent = `🎤 Hearing: ${pitch.note}`;
+        if (pitch.midi === expectedMidi) {
+            if (pitLastMidi === expectedMidi) {
+                document.getElementById('pitStatus').textContent = `✅ Correct! That's ${pitch.note}`;
+                document.getElementById('pitStatus').className = 'status-bar status-correct';
+                clearInterval(pitInterval); pitInterval = null;
+                setTimeout(() => { advancePit(); }, 800);
+            }
+            pitLastMidi = expectedMidi;
+        } else {
+            pitLastMidi = pitch.midi;
+        }
+    }, 100);
+}
+
+function stopPitListening() {
+    pitListening = false;
+    if (pitInterval) { clearInterval(pitInterval); pitInterval = null; }
+    stopMic();
+}
+
+function advancePit() {
+    pitStepIdx++;
+    const ex = PIT_EXAMPLES[pitExampleIdx];
+    if (pitStepIdx >= ex.steps.length) {
+        pitExampleIdx++;
+        pitStepIdx = 0;
+        if (pitExampleIdx >= PIT_EXAMPLES.length) {
+            octavesComplete = true;
+            showScreen('screen-octaves-complete');
+        } else {
+            renderPit();
+        }
+    } else {
+        renderPit();
+    }
+}
+
+// ============================================================
+// FREE PLAY — OCTAVE GAME
+// ============================================================
+let fpScore = 0, fpTotal = 0;
+let fpStreak = 0, fpBestStreak = 0;
+let fpCurrentChallenge = null;
+let fpListening = false, fpInterval = null;
+
+function getOctaveOptions(string, fret) {
+    const options = [];
+    const note = fretToNote(string, fret);
+    const baseMidi = fretToMidi(string, fret);
+
+    // 1 string over
+    if (string >= 2) {
+        const offset = (string === 3) ? 8 : 7;
+        const targetFret = fret + offset;
+        if (targetFret <= 20) options.push({ s: string - 1, f: targetFret, label: '1 string over' });
+    }
+    // 2 strings over
+    if (string >= 3) {
+        const offset = (string <= 4) ? 3 : 2;
+        const targetFret = fret + offset;
+        if (targetFret <= 20) options.push({ s: string - 2, f: targetFret, label: '2 strings over' });
+    }
+    // 3 strings over
+    if (string >= 4) {
+        let targetFret;
+        if (string === 6) targetFret = fret - 3;
+        else targetFret = fret - 2;
+        if (targetFret >= 0) options.push({ s: string - 3, f: targetFret, label: '3 strings over' });
+    }
+    return options;
+}
+
+function startFreePlay() {
+    fpScore = 0;
+    fpTotal = 0;
+    fpStreak = 0;
+    fpBestStreak = 0;
+    document.getElementById('fpScore').textContent = '0';
+    document.getElementById('fpTotal').textContent = '0';
+    showScreen('screen-free-play');
+    nextFpChallenge();
+}
+
+function stopFreePlay() {
+    stopFpListening();
+}
+
+function nextFpChallenge() {
+    // Clear interval but keep mic alive
+    if (fpInterval) { clearInterval(fpInterval); fpInterval = null; }
+    
+    // Random note on strings 6-4, frets 0-7
+    const string = Math.floor(Math.random() * 3) + 4; // 4,5,6
+    const fret = Math.floor(Math.random() * 8); // 0-7
+    const note = fretToNote(string, fret);
+    const options = getOctaveOptions(string, fret);
+
+    fpCurrentChallenge = { string, fret, note, options };
+    const fretText = fret === 0 ? 'open' : `fret ${fret}`;
+    document.getElementById('fpPrompt').innerHTML = `Play this <strong>${note}</strong> (string ${string}, ${fretText}) <strong>one octave higher on a different string</strong>.`;
+
+    const maxFret = Math.max(fret + 10, 12);
+    const layout = drawFretboard('fpFretboard', { minFret: 0, maxFret: Math.min(maxFret, 16) });
+    drawNoteOnFretboard('fpFretboard', string, fret, '#e8572a', note, layout);
+
+    document.getElementById('fpMicBtn').classList.remove('hidden');
+    document.getElementById('fpNextBtn').classList.add('hidden');
+    document.getElementById('fpTryAgainBtn').classList.add('hidden');
+    
+    // If mic is already active, auto-resume listening
+    if (fpListening) {
+        resumeFpListening();
+    } else {
+        document.getElementById('fpMicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('fpStatus').textContent = 'Press "Start Listening" when ready';
+        document.getElementById('fpStatus').className = 'status-bar status-idle';
+    }
+}
+
+function toggleFpMic() {
+    if (fpListening) {
+        fpListening = false;
+        if (fpInterval) { clearInterval(fpInterval); fpInterval = null; }
+        stopMic();
+        document.getElementById('fpMicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('fpStatus').textContent = 'Paused';
+        document.getElementById('fpStatus').className = 'status-bar status-idle';
+    } else {
+        startFpListening();
+    }
+}
+
+async function startFpListening() {
+    if (!isListening) await startMic();
+    fpListening = true;
+    document.getElementById('fpMicBtn').textContent = '⏸ Pause';
+    resumeFpListening();
+}
+
+function resumeFpListening() {
+    if (fpInterval) { clearInterval(fpInterval); fpInterval = null; }
+    fpListening = true;
+    document.getElementById('fpMicBtn').textContent = '⏸ Pause';
+    document.getElementById('fpStatus').textContent = '🎤 Listening...';
+    document.getElementById('fpStatus').className = 'status-bar status-listening';
+
+    const baseMidi = fretToMidi(fpCurrentChallenge.string, fpCurrentChallenge.fret);
+    const targetMidi = baseMidi + 12; // one octave up
+    let fpLastMidi = null;
+
+    fpInterval = setInterval(() => {
+        const pitch = detectPitch();
+        if (!pitch) { fpLastMidi = null; return; }
+        document.getElementById('fpStatus').textContent = `🎤 Hearing: ${pitch.note}`;
+
+        if (pitch.midi === targetMidi) {
+            if (fpLastMidi === targetMidi) {
+                // Confirmed correct!
+                fpScore++;
+                fpTotal++;
+                fpStreak++;
+                if (fpStreak > fpBestStreak) fpBestStreak = fpStreak;
+                document.getElementById('fpScore').textContent = fpScore;
+                document.getElementById('fpTotal').textContent = fpTotal;
+                document.getElementById('fpStatus').textContent = `✅ That's ${pitch.note} — one octave up!`;
+                document.getElementById('fpStatus').className = 'status-bar status-correct';
+                clearInterval(fpInterval); fpInterval = null;
+                setTimeout(() => { nextFpChallenge(); }, 1000);
+            }
+            fpLastMidi = targetMidi;
+        } else if (Math.abs(pitch.midi - baseMidi) <= 1) {
+            // They played the same note (not octave up) — hint, don't penalize
+            document.getElementById('fpStatus').textContent = `That's the same octave — try playing it higher!`;
+            document.getElementById('fpStatus').className = 'status-bar status-wrong';
+            fpLastMidi = pitch.midi;
+        } else if (pitch.note === fpCurrentChallenge.note && pitch.midi !== targetMidi) {
+            // Right note name but wrong octave — hint, don't penalize
+            document.getElementById('fpStatus').textContent = `Right note name, but not the right octave. Try a different position!`;
+            document.getElementById('fpStatus').className = 'status-bar status-wrong';
+            fpLastMidi = pitch.midi;
+        } else {
+            // Wrong note — require consecutive confirmation before penalizing
+            if (fpLastMidi === pitch.midi) {
+                fpTotal++;
+                fpStreak = 0;
+                document.getElementById('fpTotal').textContent = fpTotal;
+                document.getElementById('fpStatus').textContent = `❌ That was ${pitch.note}. The note is ${fpCurrentChallenge.note}.`;
+                document.getElementById('fpStatus').className = 'status-bar status-wrong';
+                if (fpInterval) { clearInterval(fpInterval); fpInterval = null; }
+                document.getElementById('fpMicBtn').classList.add('hidden');
+                document.getElementById('fpTryAgainBtn').classList.remove('hidden');
+                showFpOptions();
+            }
+            fpLastMidi = pitch.midi;
+        }
+    }, 100);
+}
+
+function showFpOptions() {
+    const ch = fpCurrentChallenge;
+    const maxFret = Math.max(...ch.options.map(o => o.f), ch.fret) + 3;
+    const layout = drawFretboard('fpFretboard', { minFret: 0, maxFret: Math.min(maxFret, 16) });
+    // Original note
+    drawNoteOnFretboard('fpFretboard', ch.string, ch.fret, 'rgba(232,87,42,0.3)', ch.note, layout);
+    // Options
+    const colors = ['#2ecc71', '#3498db', '#9b59b6'];
+    ch.options.forEach((opt, i) => {
+        drawNoteOnFretboard('fpFretboard', opt.s, opt.f, colors[i % colors.length], ch.note, layout);
+    });
+}
+
+function retryFpChallenge() {
+    const ch = fpCurrentChallenge;
+    const fretText = ch.fret === 0 ? 'open' : `fret ${ch.fret}`;
+    document.getElementById('fpPrompt').innerHTML = `Play this <strong>${ch.note}</strong> (string ${ch.string}, ${fretText}) <strong>one octave higher on a different string</strong>.`;
+
+    const maxFret = Math.max(ch.fret + 10, 12);
+    const layout = drawFretboard('fpFretboard', { minFret: 0, maxFret: Math.min(maxFret, 16) });
+    drawNoteOnFretboard('fpFretboard', ch.string, ch.fret, '#e8572a', ch.note, layout);
+
+    document.getElementById('fpMicBtn').classList.remove('hidden');
+    document.getElementById('fpTryAgainBtn').classList.add('hidden');
+    
+    // Auto-start listening
+    startFpListening();
+}
+
+function stopFpListening() {
+    fpListening = false;
+    if (fpInterval) { clearInterval(fpInterval); fpInterval = null; }
+    stopMic();
+}
+
+function endFreePlay() {
+    stopFpListening();
+    document.getElementById('fpResultScore').textContent = fpScore;
+    document.getElementById('fpResultStreak').textContent = fpBestStreak;
+    document.getElementById('fpResultTotal').textContent = fpTotal;
+    const pct = fpTotal > 0 ? Math.round((fpScore / fpTotal) * 100) : 0;
+    document.getElementById('fpResultPct').textContent = pct + '%';
+    showScreen('screen-fp-results');
+}
+
+// ============================================================
+// MODULE 3: INTERVALS
+// ============================================================
+
+let intP1Complete = false, intP2Complete = false, intP3Complete = false;
+
+// --- PART 1: THE 12 INTERVALS ---
+// All on 6th string from G (fret 3)
+const INT_P1_STEPS = [
+    { name: 'Unison', semitones: 0, fret: 3, str: 6, note: 'G', desc: 'Same note, same pitch. Zero distance.', formula: '0 half steps' },
+    { name: 'Minor 2nd', semitones: 1, fret: 4, str: 6, note: 'G#/Ab', desc: 'One half step up — just one fret. This is the smallest interval and creates a tense, dissonant sound.', formula: '1 half step (1 fret)' },
+    { name: 'Major 2nd', semitones: 2, fret: 5, str: 6, note: 'A', desc: 'One whole step up — two frets. This is the distance between most notes in a major scale.', formula: '1 whole step (2 frets)' },
+    { name: 'Minor 3rd', semitones: 3, fret: 6, str: 6, note: 'A#/Bb', desc: 'Three half steps. This interval gives <strong>minor chords</strong> their darker, sadder sound.', formula: '3 half steps (3 frets)' },
+    { name: 'Major 3rd', semitones: 4, fret: 7, str: 6, note: 'B', desc: 'Four half steps — two whole steps. This interval gives <strong>major chords</strong> their bright, happy sound.', formula: '4 half steps (4 frets)' },
+    { name: 'Perfect 4th', semitones: 5, fret: 8, str: 6, note: 'C', desc: 'Five half steps. This is the interval between most adjacent open strings on the guitar (except G to B).', formula: '5 half steps (5 frets)' },
+    { name: 'Tritone', semitones: 6, fret: 9, str: 6, note: 'C#/Db', desc: 'Six half steps — exactly half an octave. Also called a diminished 5th or augmented 4th. It sounds unstable and wants to resolve.', formula: '6 half steps (6 frets)' },
+    { name: 'Perfect 5th', semitones: 7, fret: 10, str: 6, note: 'D', desc: 'Seven half steps. The strongest consonant interval after the octave. Power chords are just a root and a 5th.', formula: '7 half steps (7 frets)' },
+    { name: 'Minor 6th', semitones: 8, fret: 11, str: 6, note: 'D#/Eb', desc: 'Eight half steps. A warm interval often used in jazz and country ballads.', formula: '8 half steps (8 frets)' },
+    { name: 'Major 6th', semitones: 9, fret: 12, str: 6, note: 'E', desc: 'Nine half steps. A bright, open interval. Country double stops in 6ths use this interval constantly.', formula: '9 half steps (9 frets)' },
+    { name: 'Minor 7th', semitones: 10, fret: 13, str: 6, note: 'F', desc: 'Ten half steps. Also called a dominant 7th. It adds a bluesy edge — think dominant 7th chords in country music.', formula: '10 half steps (10 frets)' },
+    { name: 'Major 7th', semitones: 11, fret: 14, str: 6, note: 'F#', desc: 'Eleven half steps — just one fret below the octave. A sophisticated, jazzy sound.', formula: '11 half steps (11 frets)' },
+    { name: 'Octave', semitones: 12, fret: 15, str: 6, note: 'G', desc: 'Twelve half steps — the same note, one register higher. Full circle.', formula: '12 half steps (12 frets)' },
+];
+
+// Same intervals, now across strings in open position (frets 0-4)
+const INT_P1B_STEPS = [
+    { name: 'Unison', semitones: 0, str: 6, fret: 3, note: 'G', desc: 'Same root note — <strong>G</strong> on the 6th string, fret 3. Now we\'ll find the same intervals across strings in open position.', formula: '0 half steps' },
+    { name: 'Minor 2nd', semitones: 1, str: 6, fret: 4, note: 'G#/Ab', desc: 'One fret up from G, still on the 6th string.', formula: '1 half step' },
+    { name: 'Major 2nd', semitones: 2, str: 5, fret: 0, note: 'A', desc: 'The open 5th string — <strong>A</strong>. A whole step up from G, now on a new string.', formula: '2 half steps' },
+    { name: 'Minor 3rd', semitones: 3, str: 5, fret: 1, note: 'A#/Bb', desc: '5th string, fret 1. Three half steps from G.', formula: '3 half steps' },
+    { name: 'Major 3rd', semitones: 4, str: 5, fret: 2, note: 'B', desc: '5th string, fret 2. Four half steps — the major 3rd.', formula: '4 half steps' },
+    { name: 'Perfect 4th', semitones: 5, str: 5, fret: 3, note: 'C', desc: '5th string, fret 3. Same fret as the root, one string over.', formula: '5 half steps' },
+    { name: 'Tritone', semitones: 6, str: 5, fret: 4, note: 'C#/Db', desc: '5th string, fret 4. Exactly halfway to the octave.', formula: '6 half steps' },
+    { name: 'Perfect 5th', semitones: 7, str: 4, fret: 0, note: 'D', desc: 'The open 4th string — <strong>D</strong>. The perfect 5th.', formula: '7 half steps' },
+    { name: 'Minor 6th', semitones: 8, str: 4, fret: 1, note: 'D#/Eb', desc: '4th string, fret 1.', formula: '8 half steps' },
+    { name: 'Major 6th', semitones: 9, str: 4, fret: 2, note: 'E', desc: '4th string, fret 2.', formula: '9 half steps' },
+    { name: 'Minor 7th', semitones: 10, str: 4, fret: 3, note: 'F', desc: '4th string, fret 3. Same fret as the root again, two strings over.', formula: '10 half steps' },
+    { name: 'Major 7th', semitones: 11, str: 4, fret: 4, note: 'F#', desc: '4th string, fret 4. One half step below the octave.', formula: '11 half steps' },
+    { name: 'Octave', semitones: 12, str: 3, fret: 0, note: 'G', desc: 'The open 3rd string — <strong>G</strong>. One full octave above our root. Same interval patterns, compact open position.', formula: '12 half steps' },
+];
+
+let intP1Step = 0;
+let intP1Phase = 1; // 1 = single string, 2 = cross-string
+let intP1Listening = false, intP1Interval = null;
+
+function startIntervals() {
+    showScreen('screen-int-landing');
+    if (intP1Complete) {
+        const btn2 = document.getElementById('btnIntP2');
+        btn2.disabled = false; btn2.style.opacity = '1';
+        btn2.textContent = 'Part 2: Building Chords →';
+    }
+    if (intP2Complete) {
+        const btn3 = document.getElementById('btnIntP3');
+        btn3.disabled = false; btn3.style.opacity = '1';
+        btn3.textContent = 'Part 3: Double Stops →';
+    }
+}
+
+function startIntP1() {
+    intP1Step = 0;
+    intP1Phase = 1;
+    showScreen('screen-int-p1');
+    renderIntP1();
+}
+
+function renderIntP1() {
+    const steps = intP1Phase === 1 ? INT_P1_STEPS : INT_P1B_STEPS;
+    const step = steps[intP1Step];
+    const totalSteps = INT_P1_STEPS.length + INT_P1B_STEPS.length;
+    const globalStep = intP1Phase === 1 ? intP1Step : INT_P1_STEPS.length + intP1Step;
+
+    const phaseLabel = intP1Phase === 1 ? 'One String' : 'Open Position';
+    document.getElementById('intP1Label').textContent = `${phaseLabel} — ${step.name}`;
+    document.getElementById('intP1Title').textContent = step.name;
+    document.getElementById('intP1Text').innerHTML = step.desc;
+    document.getElementById('intP1Rule').style.display = 'block';
+    document.getElementById('intP1Rule').innerHTML = `<div class="hint-title">${step.formula}</div><div style="color:rgba(255,255,255,0.6); font-size:0.9em;">G → ${step.note}</div>`;
+
+    let dots = '';
+    for (let i = 0; i < totalSteps; i++) {
+        const cls = i < globalStep ? 'done' : (i === globalStep ? 'active' : '');
+        dots += `<div class="step-dot ${cls}"></div>`;
+    }
+    document.getElementById('intP1Dots').innerHTML = dots;
+
+    // Fretboard
+    if (intP1Phase === 1) {
+        const maxFret = Math.max(step.fret + 2, 16);
+        const layout = drawFretboard('intP1Fretboard', { minFret: 0, maxFret: maxFret });
+        drawNoteOnFretboard('intP1Fretboard', 6, 3, 'rgba(232,87,42,0.3)', 'G', layout, { minFret: 0, maxFret: maxFret });
+        drawNoteOnFretboard('intP1Fretboard', 6, step.fret, '#e8572a', step.note.split('/')[0], layout, { minFret: 0, maxFret: maxFret });
+    } else {
+        const layout = drawFretboard('intP1Fretboard', { minFret: 0, maxFret: 6 });
+        // Show root G faded
+        drawNoteOnFretboard('intP1Fretboard', 6, 3, 'rgba(232,87,42,0.3)', 'G', layout, { minFret: 0, maxFret: 6 });
+        // Show target
+        drawNoteOnFretboard('intP1Fretboard', step.str, step.fret, '#e8572a', step.note.split('/')[0], layout, { minFret: 0, maxFret: 6 });
+    }
+
+    document.getElementById('intP1MicBtn').classList.remove('hidden');
+    document.getElementById('intP1SkipBtn').classList.remove('hidden');
+    document.getElementById('intP1NextBtn').classList.add('hidden');
+    if (intP1Listening) {
+        resumeIntP1Listening();
+    } else {
+        document.getElementById('intP1MicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('intP1Status').textContent = 'Press "Start Listening" when ready';
+        document.getElementById('intP1Status').className = 'status-bar status-idle';
+    }
+}
+
+function toggleIntP1Mic() {
+    if (intP1Listening) {
+        intP1Listening = false;
+        if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+        stopMic();
+        document.getElementById('intP1MicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('intP1Status').textContent = 'Paused';
+        document.getElementById('intP1Status').className = 'status-bar status-idle';
+    } else {
+        startIntP1Listening();
+    }
+}
+
+async function startIntP1Listening() {
+    if (!isListening) await startMic();
+    intP1Listening = true;
+    document.getElementById('intP1MicBtn').textContent = '⏸ Pause';
+    resumeIntP1Listening();
+}
+
+function resumeIntP1Listening() {
+    if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+    intP1Listening = true;
+    const steps = intP1Phase === 1 ? INT_P1_STEPS : INT_P1B_STEPS;
+    const step = steps[intP1Step];
+    const expectedMidi = fretToMidi(step.str, step.fret);
+    let lastMidi = null;
+
+    document.getElementById('intP1MicBtn').textContent = '⏸ Pause';
+    document.getElementById('intP1Status').textContent = '🎤 Listening...';
+    document.getElementById('intP1Status').className = 'status-bar status-listening';
+
+    intP1Interval = setInterval(() => {
+        const pitch = detectPitch();
+        if (!pitch) { lastMidi = null; return; }
+        document.getElementById('intP1Status').textContent = `🎤 Hearing: ${pitch.note}`;
+        if (pitch.midi === expectedMidi) {
+            if (lastMidi === expectedMidi) {
+                document.getElementById('intP1Status').textContent = `✅ Correct! That's ${step.note}`;
+                document.getElementById('intP1Status').className = 'status-bar status-correct';
+                clearInterval(intP1Interval); intP1Interval = null;
+                setTimeout(() => advanceIntP1(), 800);
+            }
+            lastMidi = expectedMidi;
+        } else {
+            lastMidi = pitch.midi;
+        }
+    }, 100);
+}
+
+function advanceIntP1() {
+    intP1Step++;
+    const steps = intP1Phase === 1 ? INT_P1_STEPS : INT_P1B_STEPS;
+    if (intP1Step >= steps.length) {
+        if (intP1Phase === 1) {
+            // Transition to phase 2
+            intP1Phase = 2;
+            intP1Step = 0;
+            renderIntP1();
+        } else {
+            // Both phases done
+            intP1Complete = true;
+            if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+            stopMic();
+            showScreen('screen-int-p1-complete');
+        }
+    } else {
+        renderIntP1();
+    }
+}
+
+// --- PART 2: BUILDING CHORDS ---
+const INT_P2_STEPS = [
+    {
+        label: 'Building a G Major Chord',
+        title: 'Start with the Root',
+        text: 'Every chord starts with a <strong>root note</strong>. For a G major chord, the root is <strong>G</strong>.',
+        notes: [{ s:6, f:3, color:'#e8572a', label:'G' }],
+        fr: [0, 8]
+    },
+    {
+        label: 'Building a G Major Chord',
+        title: 'Add a Major 3rd',
+        text: 'Stack a <strong>major 3rd</strong> on top of G — that\'s 4 half steps up, giving us <strong>B</strong>. This bright interval is what makes the chord sound <em>major</em>.',
+        rule: 'G → B = Major 3rd (4 half steps)',
+        notes: [{ s:6, f:3, color:'rgba(232,87,42,0.3)', label:'G' }, { s:6, f:7, color:'#3498db', label:'B' }],
+        fr: [0, 10]
+    },
+    {
+        label: 'Building a G Major Chord',
+        title: 'Stack a Minor 3rd',
+        text: 'Now stack a <strong>minor 3rd</strong> on top of B — that\'s 3 half steps up from B, giving us <strong>D</strong>. This note is the <strong>perfect 5th</strong> of the chord (7 half steps from the root G).',
+        rule: 'B → D = Minor 3rd (3 half steps)<br>G → D = Perfect 5th (7 half steps)',
+        notes: [{ s:6, f:3, color:'rgba(232,87,42,0.3)', label:'G' }, { s:6, f:7, color:'rgba(52,152,219,0.4)', label:'B' }, { s:6, f:10, color:'#2ecc71', label:'D' }],
+        fr: [0, 13]
+    },
+    {
+        label: 'Building a G Major Chord',
+        title: 'Complete the Triad',
+        text: 'That\'s a <strong>G major triad</strong>: G, B, D. <strong>Major 3rd + minor 3rd stacked together.</strong> Now, the top note D back to the next G is a <strong>perfect 4th</strong> (5 half steps). And notice: B up to that higher G is a <strong>minor 6th</strong> (8 half steps) — the inversion of the major 3rd you started with.',
+        rule: 'Major chord = Major 3rd + Minor 3rd<br>B → G = Minor 6th (8 half steps)',
+        notes: [{ s:6, f:3, color:'rgba(232,87,42,0.3)', label:'G' }, { s:6, f:7, color:'rgba(52,152,219,0.4)', label:'B' }, { s:6, f:10, color:'rgba(46,204,113,0.4)', label:'D' }, { s:6, f:15, color:'#e8572a', label:'G' }],
+        fr: [0, 17]
+    },
+    {
+        label: 'Building a G Major Chord',
+        title: 'See It as a Chord',
+        text: 'Here\'s how those same notes appear in the open G major chord shape you already know. Every note is a G, B, or D — root, major 3rd, and perfect 5th.',
+        notes: [
+            { s:6, f:3, color:'#e8572a', label:'G' },
+            { s:5, f:2, color:'#3498db', label:'B' },
+            { s:4, f:0, color:'#2ecc71', label:'D' },
+            { s:3, f:0, color:'#e8572a', label:'G' },
+            { s:2, f:0, color:'#3498db', label:'B' },
+            { s:1, f:3, color:'#e8572a', label:'G' },
+        ],
+        fr: [0, 5]
+    },
+    {
+        label: 'Now Build G Minor',
+        title: 'Flip the Stack',
+        text: 'For a <strong>minor chord</strong>, we flip the order: start with a <strong>minor 3rd</strong> instead. G up 3 half steps gives us <strong>Bb</strong> (not B). This darker interval is what makes the chord sound <em>minor</em>.',
+        rule: 'G → Bb = Minor 3rd (3 half steps)',
+        notes: [{ s:6, f:3, color:'rgba(232,87,42,0.3)', label:'G' }, { s:6, f:6, color:'#9b59b6', label:'Bb' }],
+        fr: [0, 10]
+    },
+    {
+        label: 'Now Build G Minor',
+        title: 'Stack a Major 3rd',
+        text: 'Now stack a <strong>major 3rd</strong> on top of Bb — that\'s 4 half steps up from Bb, giving us <strong>D</strong>. Same 5th as the major chord! The only difference is the 3rd.',
+        rule: 'Bb → D = Major 3rd (4 half steps)<br>Minor chord = Minor 3rd + Major 3rd',
+        notes: [{ s:6, f:3, color:'rgba(232,87,42,0.3)', label:'G' }, { s:6, f:6, color:'rgba(155,89,182,0.4)', label:'Bb' }, { s:6, f:10, color:'#2ecc71', label:'D' }],
+        fr: [0, 13]
+    },
+    {
+        label: 'Major vs Minor',
+        title: 'G Minor Chord',
+        text: 'Here\'s a <strong>G minor</strong> chord shape. The notes are G, Bb, and D — root, <strong>minor 3rd</strong>, and perfect 5th. Notice the Bb on the 3rd string, fret 3.',
+        rule: 'Minor chord = Minor 3rd + Major 3rd<br>G – Bb – D',
+        notes: [
+            { s:4, f:5, color:'#e8572a', label:'G' },
+            { s:3, f:3, color:'#9b59b6', label:'Bb' },
+            { s:2, f:3, color:'#2ecc71', label:'D' },
+            { s:1, f:3, color:'#e8572a', label:'G' },
+        ],
+        fr: [0, 5]
+    },
+    {
+        label: 'Major vs Minor',
+        title: 'The Difference: One Note',
+        text: 'Now look at <strong>G major</strong> in the same position. The <em>only</em> change is the 3rd string: <strong>Bb moves up one fret to B</strong>. That one half step — minor 3rd to major 3rd — changes the entire sound of the chord.',
+        rule: 'Major chord = Major 3rd + Minor 3rd<br>G – B – D<br><br>The 3rd is the ONLY difference between major and minor.',
+        notes: [
+            { s:4, f:5, color:'#e8572a', label:'G' },
+            { s:3, f:4, color:'#3498db', label:'B' },
+            { s:2, f:3, color:'#2ecc71', label:'D' },
+            { s:1, f:3, color:'#e8572a', label:'G' },
+        ],
+        fr: [0, 7]
+    },
+];
+
+let intP2Step = 0;
+
+function startIntP2() {
+    intP2Step = 0;
+    showScreen('screen-int-p2');
+    renderIntP2();
+}
+
+function renderIntP2() {
+    const step = INT_P2_STEPS[intP2Step];
+    document.getElementById('intP2Label').textContent = step.label;
+    document.getElementById('intP2Title').textContent = step.title;
+    document.getElementById('intP2Text').innerHTML = step.text;
+
+    if (step.rule) {
+        document.getElementById('intP2Rule').style.display = 'block';
+        document.getElementById('intP2Rule').innerHTML = `<div style="color:rgba(255,255,255,0.8); font-size:0.9em;">${step.rule}</div>`;
+    } else {
+        document.getElementById('intP2Rule').style.display = 'none';
+    }
+
+    const layout = drawFretboard('intP2Fretboard', { minFret: step.fr[0], maxFret: step.fr[1] });
+    step.notes.forEach(n => drawNoteOnFretboard('intP2Fretboard', n.s, n.f, n.color, n.label, layout, { minFret: step.fr[0], maxFret: step.fr[1] }));
+
+    document.getElementById('intP2NextBtn').textContent = intP2Step < INT_P2_STEPS.length - 1 ? 'Next →' : 'Continue →';
+}
+
+function advanceIntP2() {
+    intP2Step++;
+    if (intP2Step >= INT_P2_STEPS.length) {
+        intP2Complete = true;
+        showScreen('screen-int-p2-complete');
+    } else {
+        renderIntP2();
+    }
+}
+
+// --- PART 3: DOUBLE STOPS ---
+// G scale on string 3 (B starting fret 4)
+const SCALE_STR3 = [
+    { note: 'B', fret: 4 }, { note: 'C', fret: 5 }, { note: 'D', fret: 7 }, { note: 'E', fret: 9 },
+    { note: 'F#', fret: 11 }, { note: 'G', fret: 12 }, { note: 'A', fret: 14 }, { note: 'B', fret: 16 },
+];
+// G scale on string 2 (D starting fret 3) — for 3rds
+const SCALE_STR2 = [
+    { note: 'D', fret: 3 }, { note: 'E', fret: 5 }, { note: 'F#', fret: 7 }, { note: 'G', fret: 8 },
+    { note: 'A', fret: 10 }, { note: 'B', fret: 12 }, { note: 'C', fret: 13 }, { note: 'D', fret: 15 },
+];
+// G scale on string 1 (G starting fret 3) — for 6ths
+const SCALE_STR1 = [
+    { note: 'G', fret: 3 }, { note: 'A', fret: 5 }, { note: 'B', fret: 7 }, { note: 'C', fret: 8 },
+    { note: 'D', fret: 10 }, { note: 'E', fret: 12 }, { note: 'F#', fret: 14 }, { note: 'G', fret: 15 },
+];
+
+const THIRDS_INTERVALS = ['m3','M3','M3','m3','m3','M3','m3','m3'];
+const SIXTHS_INTERVALS = ['m6','M6','M6','m6','m6','M6','M6','m6'];
+
+function buildP3Steps() {
+    const steps = [];
+    // Section A: Scale on string 3 intro
+    steps.push({
+        label: 'Double Stops in 3rds',
+        title: 'G Scale on String 3',
+        text: 'First, let\'s learn the G major scale starting on the <strong>B note</strong> (3rd of G) on string 3. This line starts at fret 4 and walks all the way up.',
+        notes: SCALE_STR3.map((n,i) => ({ s:3, f:n.fret, color: i===0 ? '#e8572a' : 'rgba(232,87,42,0.5)', label:n.note })),
+        target: null, fr: [2, 17], noMic: true
+    });
+    // Play each note on string 3
+    SCALE_STR3.forEach((n, i) => {
+        steps.push({
+            label: 'Double Stops in 3rds',
+            title: 'G Scale on String 3',
+            text: `Play <strong>${n.note}</strong> on the 3rd string, fret ${n.fret}.`,
+            notes: SCALE_STR3.map((sn, si) => ({
+                s: 3, f: sn.fret,
+                color: si < i ? 'rgba(46,204,113,0.3)' : (si === i ? '#e8572a' : 'rgba(255,255,255,0.15)'),
+                label: sn.note
+            })),
+            target: { s:3, f:n.fret }, fr: [2, 17]
+        });
+    });
+    // Section B: Scale on string 2 intro
+    steps.push({
+        label: 'Double Stops in 3rds',
+        title: 'G Scale on String 2',
+        text: 'Now the same G major scale, but starting on the <strong>D note</strong> (5th of G) on string 2. This line starts at fret 3 — one 3rd interval higher than the string 3 line.',
+        notes: SCALE_STR2.map((n,i) => ({ s:2, f:n.fret, color: i===0 ? '#3498db' : 'rgba(52,152,219,0.5)', label:n.note })),
+        target: null, fr: [0, 16], noMic: true
+    });
+    // Play each note on string 2
+    SCALE_STR2.forEach((n, i) => {
+        steps.push({
+            label: 'Double Stops in 3rds',
+            title: 'G Scale on String 2',
+            text: `Play <strong>${n.note}</strong> on the 2nd string, fret ${n.fret}.`,
+            notes: SCALE_STR2.map((sn, si) => ({
+                s: 2, f: sn.fret,
+                color: si < i ? 'rgba(46,204,113,0.3)' : (si === i ? '#3498db' : 'rgba(255,255,255,0.15)'),
+                label: sn.note
+            })),
+            target: { s:2, f:n.fret }, fr: [0, 16]
+        });
+    });
+    // Section C: Combined 3rds intro
+    steps.push({
+        label: 'Double Stops in 3rds',
+        title: 'Combine: 3rds!',
+        text: 'Now we\'ll combine both lines. For each pair, play the <strong>lower note</strong> (string 3), then the <strong>upper note</strong> (string 2), then <strong>both together</strong>. Each pair is a 3rd interval.',
+        notes: SCALE_STR3.map((n,i) => [
+            { s:3, f:n.fret, color:'#e8572a', label:n.note },
+            { s:2, f:SCALE_STR2[i].fret, color:'#3498db', label:SCALE_STR2[i].note },
+        ]).flat(),
+        target: null, fr: [2, 16], noMic: true
+    });
+    // Play each double stop in 3rds: lower → upper → both
+    for (let i = 0; i < 8; i++) {
+        const lo = SCALE_STR3[i], hi = SCALE_STR2[i], intName = THIRDS_INTERVALS[i];
+        const isMajor = intName === 'M3';
+        const dimNotes3 = SCALE_STR3.map((sn, si) => ({ s:3, f:sn.fret, color: 'rgba(255,255,255,0.1)', label:'' }));
+        const dimNotes2 = SCALE_STR2.map((sn, si) => ({ s:2, f:sn.fret, color: 'rgba(255,255,255,0.1)', label:'' }));
+        // Step A: Play lower note
+        steps.push({
+            label: 'Double Stops in 3rds',
+            title: `${lo.note} + ${hi.note}`,
+            text: `Play <strong>${lo.note}</strong> on string 3, fret ${lo.fret}.`,
+            notes: [
+                ...dimNotes3.map((n, si) => si === i ? { s:3, f:lo.fret, color:'#e8572a', label:lo.note } : n),
+                ...dimNotes2,
+            ],
+            target: { s:3, f:lo.fret }, fr: [2, 16]
+        });
+        // Step B: Play upper note
+        steps.push({
+            label: 'Double Stops in 3rds',
+            title: `${lo.note} + ${hi.note}`,
+            text: `Now play <strong>${hi.note}</strong> on string 2, fret ${hi.fret}.`,
+            notes: [
+                ...dimNotes3.map((n, si) => si === i ? { s:3, f:lo.fret, color:'rgba(232,87,42,0.3)', label:lo.note } : n),
+                ...dimNotes2.map((n, si) => si === i ? { s:2, f:hi.fret, color:'#3498db', label:hi.note } : n),
+            ],
+            target: { s:2, f:hi.fret }, fr: [2, 16]
+        });
+        // Step C: Both together (no mic)
+        steps.push({
+            label: 'Double Stops in 3rds',
+            title: `${lo.note} + ${hi.note} — ${isMajor ? 'Major' : 'Minor'} 3rd`,
+            text: `Play both together! <strong>${lo.note}</strong> + <strong>${hi.note}</strong> = <strong>${isMajor ? 'major' : 'minor'} 3rd</strong> (${isMajor ? '4' : '3'} half steps).`,
+            rule: `${lo.note} → ${hi.note} = ${isMajor ? 'Major' : 'Minor'} 3rd`,
+            notes: [
+                ...dimNotes3.map((n, si) => si === i ? { s:3, f:lo.fret, color:'#e8572a', label:lo.note } : n),
+                ...dimNotes2.map((n, si) => si === i ? { s:2, f:hi.fret, color:'#3498db', label:hi.note } : n),
+            ],
+            target: null, fr: [2, 16], noMic: true
+        });
+    }
+
+    // Section D: Scale on string 1 intro for 6ths
+    steps.push({
+        label: 'Double Stops in 6ths',
+        title: 'G Scale on String 1',
+        text: 'For 6ths, we\'ll use strings 3 and 1 (skipping string 2). Here\'s the G major scale on string 1, starting on <strong>G</strong> at fret 3.',
+        notes: SCALE_STR1.map((n,i) => ({ s:1, f:n.fret, color: i===0 ? '#2ecc71' : 'rgba(46,204,113,0.5)', label:n.note })),
+        target: null, fr: [0, 16], noMic: true
+    });
+    // Play each note on string 1
+    SCALE_STR1.forEach((n, i) => {
+        steps.push({
+            label: 'Double Stops in 6ths',
+            title: 'G Scale on String 1',
+            text: `Play <strong>${n.note}</strong> on the 1st string, fret ${n.fret}.`,
+            notes: SCALE_STR1.map((sn, si) => ({
+                s: 1, f: sn.fret,
+                color: si < i ? 'rgba(46,204,113,0.3)' : (si === i ? '#2ecc71' : 'rgba(255,255,255,0.15)'),
+                label: sn.note
+            })),
+            target: { s:1, f:n.fret }, fr: [0, 16]
+        });
+    });
+    // Section E: Combined 6ths intro
+    steps.push({
+        label: 'Double Stops in 6ths',
+        title: 'Combine: 6ths!',
+        text: 'Now combine strings 3 and 1 — skip string 2 in between. Same pattern: lower note, upper note, then both together. Notice these are the <strong>inversions</strong> of the 3rds you just played!',
+        notes: SCALE_STR3.map((n,i) => [
+            { s:3, f:n.fret, color:'#e8572a', label:n.note },
+            { s:1, f:SCALE_STR1[i].fret, color:'#2ecc71', label:SCALE_STR1[i].note },
+        ]).flat(),
+        target: null, fr: [2, 16], noMic: true
+    });
+    // Play each double stop in 6ths: lower → upper → both
+    for (let i = 0; i < 8; i++) {
+        const lo = SCALE_STR3[i], hi = SCALE_STR1[i], intName = SIXTHS_INTERVALS[i];
+        const isMajor = intName === 'M6';
+        const dimNotes3 = SCALE_STR3.map((sn, si) => ({ s:3, f:sn.fret, color: 'rgba(255,255,255,0.1)', label:'' }));
+        const dimNotes1 = SCALE_STR1.map((sn, si) => ({ s:1, f:sn.fret, color: 'rgba(255,255,255,0.1)', label:'' }));
+        // Step A: Play lower note
+        steps.push({
+            label: 'Double Stops in 6ths',
+            title: `${lo.note} + ${hi.note}`,
+            text: `Play <strong>${lo.note}</strong> on string 3, fret ${lo.fret}.`,
+            notes: [
+                ...dimNotes3.map((n, si) => si === i ? { s:3, f:lo.fret, color:'#e8572a', label:lo.note } : n),
+                ...dimNotes1,
+            ],
+            target: { s:3, f:lo.fret }, fr: [2, 16]
+        });
+        // Step B: Play upper note
+        steps.push({
+            label: 'Double Stops in 6ths',
+            title: `${lo.note} + ${hi.note}`,
+            text: `Now play <strong>${hi.note}</strong> on string 1, fret ${hi.fret}.`,
+            notes: [
+                ...dimNotes3.map((n, si) => si === i ? { s:3, f:lo.fret, color:'rgba(232,87,42,0.3)', label:lo.note } : n),
+                ...dimNotes1.map((n, si) => si === i ? { s:1, f:hi.fret, color:'#2ecc71', label:hi.note } : n),
+            ],
+            target: { s:1, f:hi.fret }, fr: [2, 16]
+        });
+        // Step C: Both together (no mic)
+        steps.push({
+            label: 'Double Stops in 6ths',
+            title: `${lo.note} + ${hi.note} — ${isMajor ? 'Major' : 'Minor'} 6th`,
+            text: `Play both together! <strong>${lo.note}</strong> + <strong>${hi.note}</strong> = <strong>${isMajor ? 'major' : 'minor'} 6th</strong> (${isMajor ? '9' : '8'} half steps).`,
+            rule: `${lo.note} → ${hi.note} = ${isMajor ? 'Major' : 'Minor'} 6th`,
+            notes: [
+                ...dimNotes3.map((n, si) => si === i ? { s:3, f:lo.fret, color:'#e8572a', label:lo.note } : n),
+                ...dimNotes1.map((n, si) => si === i ? { s:1, f:hi.fret, color:'#2ecc71', label:hi.note } : n),
+            ],
+            target: null, fr: [2, 16], noMic: true
+        });
+    }
+
+    return steps;
+}
+
+let intP3Steps = [];
+let intP3Step = 0;
+let intP3Listening = false, intP3Interval = null;
+
+function startIntP3() {
+    intP3Steps = buildP3Steps();
+    intP3Step = 0;
+    showScreen('screen-int-p3');
+    renderIntP3();
+}
+
+function renderIntP3() {
+    const step = intP3Steps[intP3Step];
+    document.getElementById('intP3Label').textContent = step.label;
+    document.getElementById('intP3Title').textContent = step.title;
+    document.getElementById('intP3Text').innerHTML = step.text;
+
+    if (step.rule) {
+        document.getElementById('intP3Rule').style.display = 'block';
+        document.getElementById('intP3Rule').innerHTML = `<div style="color:rgba(255,255,255,0.8); font-size:0.9em;">${step.rule}</div>`;
+    } else {
+        document.getElementById('intP3Rule').style.display = 'none';
+    }
+
+    let dots = '';
+    for (let i = 0; i < intP3Steps.length; i++) {
+        const cls = i < intP3Step ? 'done' : (i === intP3Step ? 'active' : '');
+        dots += `<div class="step-dot ${cls}"></div>`;
+    }
+    document.getElementById('intP3Dots').innerHTML = dots;
+
+    const layout = drawFretboard('intP3Fretboard', { minFret: step.fr[0], maxFret: step.fr[1] });
+    step.notes.forEach(n => {
+        if (n.label || n.color !== 'rgba(255,255,255,0.1)') {
+            drawNoteOnFretboard('intP3Fretboard', n.s, n.f, n.color, n.label, layout, { minFret: step.fr[0], maxFret: step.fr[1] });
+        }
+    });
+
+    if (step.target && !step.noMic) {
+        document.getElementById('intP3MicBtn').classList.remove('hidden');
+        document.getElementById('intP3SkipBtn').classList.remove('hidden');
+        document.getElementById('intP3NextBtn').classList.add('hidden');
+        if (intP3Listening) {
+            resumeIntP3Listening();
+        } else {
+            document.getElementById('intP3MicBtn').textContent = '🎤 Start Listening';
+            document.getElementById('intP3Status').textContent = 'Press "Start Listening" when ready';
+            document.getElementById('intP3Status').className = 'status-bar status-idle';
+        }
+    } else {
+        // Info/intro screen — no mic, just Next
+        document.getElementById('intP3MicBtn').classList.add('hidden');
+        document.getElementById('intP3SkipBtn').classList.add('hidden');
+        document.getElementById('intP3NextBtn').classList.remove('hidden');
+        document.getElementById('intP3Status').textContent = '';
+        document.getElementById('intP3Status').className = 'status-bar';
+        if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+    }
+}
+
+function toggleIntP3Mic() {
+    if (intP3Listening) {
+        intP3Listening = false;
+        if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+        stopMic();
+        document.getElementById('intP3MicBtn').textContent = '🎤 Start Listening';
+        document.getElementById('intP3Status').textContent = 'Paused';
+        document.getElementById('intP3Status').className = 'status-bar status-idle';
+    } else {
+        startIntP3Listening();
+    }
+}
+
+async function startIntP3Listening() {
+    if (!isListening) await startMic();
+    intP3Listening = true;
+    document.getElementById('intP3MicBtn').textContent = '⏸ Pause';
+    resumeIntP3Listening();
+}
+
+function resumeIntP3Listening() {
+    if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+    intP3Listening = true;
+
+    const step = intP3Steps[intP3Step];
+    if (!step.target) return;
+    const expectedMidi = fretToMidi(step.target.s, step.target.f);
+    let lastMidi = null;
+
+    document.getElementById('intP3MicBtn').textContent = '⏸ Pause';
+    document.getElementById('intP3Status').textContent = '🎤 Listening...';
+    document.getElementById('intP3Status').className = 'status-bar status-listening';
+
+    intP3Interval = setInterval(() => {
+        const pitch = detectPitch();
+        if (!pitch) { lastMidi = null; return; }
+        document.getElementById('intP3Status').textContent = `🎤 Hearing: ${pitch.note}`;
+        if (pitch.midi === expectedMidi) {
+            if (lastMidi === expectedMidi) {
+                document.getElementById('intP3Status').textContent = `✅ Correct! That's ${pitch.note}`;
+                document.getElementById('intP3Status').className = 'status-bar status-correct';
+                clearInterval(intP3Interval); intP3Interval = null;
+                setTimeout(() => advanceIntP3(), 800);
+            }
+            lastMidi = expectedMidi;
+        } else {
+            lastMidi = pitch.midi;
+        }
+    }, 100);
+}
+
+// Track where 3rds end and 6ths begin
+// Sections A(9) + B(9) + C(25) = 43 steps for 3rds
+// Sections D(9) + E(25) = 34 steps for 6ths
+const THIRDS_LAST_STEP = 42; // index of last 3rds step (0-based)
+
+function advanceIntP3() {
+    intP3Step++;
+    if (intP3Step === THIRDS_LAST_STEP + 1) {
+        // Just finished 3rds — go to 3rds play-along
+        if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+        stopMic();
+        showScreen('screen-playalong-3rds');
+    } else if (intP3Step >= intP3Steps.length) {
+        // Finished 6ths — go to 6ths play-along
+        intP3Complete = true;
+        if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+        stopMic();
+        showScreen('screen-playalong-6ths');
+    } else {
+        renderIntP3();
+    }
+}
+
+function resumeIntP3At6ths() {
+    // Resume from the first 6ths step after the 3rds play-along
+    intP3Step = THIRDS_LAST_STEP + 1;
+    showScreen('screen-int-p3');
+    renderIntP3();
+}
+
+// Add interval stop functions to goBack and goToMenu
+const _origGoBack = goBack;
+goBack = function() {
+    if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+    if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+    intP1Listening = false; intP3Listening = false;
+    _origGoBack();
+};
+const _origGoToMenu = goToMenu;
+goToMenu = function() {
+    if (intP1Interval) { clearInterval(intP1Interval); intP1Interval = null; }
+    if (intP3Interval) { clearInterval(intP3Interval); intP3Interval = null; }
+    intP1Listening = false; intP3Listening = false;
+    _origGoToMenu();
+};
+
+// ============================================================
+// PLAY-ALONG ENGINE — 3rds and 6ths
+// ============================================================
+let paAudioCtx = null;
+let paAnimFrame = null;
+let paStartTime = 0;
+
+const PA_BPM = 45;
+const PA_BEAT_DUR = 60 / PA_BPM;
+const PA_INTRO_BEATS = 4;
+const PA_INTRO_DUR = PA_INTRO_BEATS * PA_BEAT_DUR;
+const PA_BEATS_PER_STOP = 2;
+
+function paCreateCtx() {
+    if (paAudioCtx && paAudioCtx.state !== 'closed') paAudioCtx.close();
+    paAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return paAudioCtx;
+}
+
+function paPlayClick(ctx, time, downbeat) {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    g.connect(ctx.destination);
+    osc.connect(g);
+    osc.frequency.value = downbeat ? 1200 : 800;
+    osc.type = 'sine';
+    g.gain.setValueAtTime(0.12, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+    osc.start(time);
+    osc.stop(time + 0.06);
+}
+
+function paPlayNote(ctx, freq, time, dur) {
+    const gain = ctx.createGain();
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.13, time + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
+    [1, 2, 3, 4, 5].forEach((h, i) => {
+        const amps = [1.0, 0.5, 0.25, 0.1, 0.05];
+        const osc = ctx.createOscillator();
+        const hg = ctx.createGain();
+        hg.gain.value = amps[i];
+        hg.connect(gain);
+        osc.connect(hg);
+        osc.frequency.value = freq * h;
+        osc.type = 'triangle';
+        osc.start(time);
+        osc.stop(time + dur);
+    });
+}
+
+function paFretFreq(stringNum, fret) {
+    const open = { 1: 329.63, 2: 246.94, 3: 196.0, 4: 146.83, 5: 110.0, 6: 82.41 };
+    return open[stringNum] * Math.pow(2, fret / 12);
+}
+
+function stopPlayAlong() {
+    if (paAnimFrame) { cancelAnimationFrame(paAnimFrame); paAnimFrame = null; }
+    if (paAudioCtx && paAudioCtx.state !== 'closed') { paAudioCtx.close(); }
+    paAudioCtx = null;
+}
+
+// --- Generic play-along runner ---
+function runPlayAlong(stops, lowerStr, upperStr, canvasId, statusId, dotsId, playBtnId, replayBtnId, nextBtnId, lowerColor, upperColor) {
+    const ctx = paCreateCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime + 0.1;
+    paStartTime = now;
+    const totalStops = stops.length;
+    const playDur = totalStops * PA_BEATS_PER_STOP * PA_BEAT_DUR;
+    const totalBeats = PA_INTRO_BEATS + totalStops * PA_BEATS_PER_STOP;
+
+    // Schedule clicks
+    for (let i = 0; i < totalBeats; i++) {
+        paPlayClick(ctx, now + i * PA_BEAT_DUR, i % PA_BEATS_PER_STOP === 0);
+    }
+    // Schedule notes
+    stops.forEach((ds, idx) => {
+        const t = now + PA_INTRO_DUR + idx * PA_BEATS_PER_STOP * PA_BEAT_DUR;
+        const dur = PA_BEATS_PER_STOP * PA_BEAT_DUR * 0.9;
+        paPlayNote(ctx, paFretFreq(lowerStr, ds.lowerFret), t, dur);
+        paPlayNote(ctx, paFretFreq(upperStr, ds.upperFret), t, dur);
+    });
+
+    document.getElementById(playBtnId).classList.add('hidden');
+    document.getElementById(replayBtnId).classList.add('hidden');
+    document.getElementById(nextBtnId).classList.add('hidden');
+
+    function tick() {
+        const elapsed = ctx.currentTime - paStartTime;
+        const statusEl = document.getElementById(statusId);
+
+        if (elapsed < PA_INTRO_DUR) {
+            const beat = Math.floor(elapsed / PA_BEAT_DUR) + 1;
+            statusEl.textContent = beat;
+            statusEl.className = 'status-bar status-listening';
+            statusEl.style.fontSize = '2.5em';
+            drawPAFretboard(canvasId, stops, null, lowerStr, upperStr, lowerColor, upperColor);
+            updatePADots(dotsId, stops.length, -1);
+        } else if (elapsed < PA_INTRO_DUR + playDur) {
+            statusEl.style.fontSize = '';
+            const idx = Math.min(Math.floor((elapsed - PA_INTRO_DUR) / (PA_BEATS_PER_STOP * PA_BEAT_DUR)), totalStops - 1);
+            const lo = stops[idx];
+            statusEl.textContent = lo.lowerNote + ' + ' + lo.upperNote + ' — ' + lo.interval;
+            statusEl.className = 'status-bar status-listening';
+            drawPAFretboard(canvasId, stops, idx, lowerStr, upperStr, lowerColor, upperColor);
+            updatePADots(dotsId, stops.length, idx);
+        } else {
+            statusEl.style.fontSize = '';
+            statusEl.textContent = '🎸 Nice work!';
+            statusEl.className = 'status-bar status-correct';
+            drawPAFretboard(canvasId, stops, null, lowerStr, upperStr, lowerColor, upperColor, true);
+            updatePADots(dotsId, stops.length, stops.length);
+            document.getElementById(replayBtnId).classList.remove('hidden');
+            document.getElementById(nextBtnId).classList.remove('hidden');
+            return;
+        }
+        paAnimFrame = requestAnimationFrame(tick);
+    }
+    paAnimFrame = requestAnimationFrame(tick);
+}
+
+function updatePADots(dotsId, total, activeIdx) {
+    let html = '';
+    for (let i = 0; i < total; i++) {
+        const cls = activeIdx >= total ? 'done' : (i < activeIdx ? 'done' : (i === activeIdx ? 'active' : ''));
+        html += '<div class="step-dot ' + cls + '"></div>';
+    }
+    document.getElementById(dotsId).innerHTML = html;
+}
+
+function drawPAFretboard(canvasId, stops, activeIdx, lowerStr, upperStr, lowerColor, upperColor, allDone) {
+    const canvas = document.getElementById(canvasId);
+    const layout = drawFretboard(canvasId, { minFret: 0, maxFret: 17 });
+    const opts = { minFret: 0, maxFret: 17 };
+
+    // Dim all positions
+    stops.forEach((ds, i) => {
+        const isActive = activeIdx !== null && i === activeIdx;
+        const isDone = activeIdx !== null && i < activeIdx;
+        if (!isActive) {
+            const lc = isDone || allDone ? lowerColor + '4D' : 'rgba(255,255,255,0.12)';
+            const uc = isDone || allDone ? upperColor + '4D' : 'rgba(255,255,255,0.12)';
+            drawNoteOnFretboard(canvasId, lowerStr, ds.lowerFret, lc, isDone || allDone ? ds.lowerNote : '', layout, opts);
+            drawNoteOnFretboard(canvasId, upperStr, ds.upperFret, uc, isDone || allDone ? ds.upperNote : '', layout, opts);
+        }
+    });
+
+    // Active pair bright
+    if (activeIdx !== null && activeIdx >= 0 && activeIdx < stops.length) {
+        const ds = stops[activeIdx];
+        drawNoteOnFretboard(canvasId, lowerStr, ds.lowerFret, lowerColor, ds.lowerNote, layout, opts);
+        drawNoteOnFretboard(canvasId, upperStr, ds.upperFret, upperColor, ds.upperNote, layout, opts);
+    }
+}
+
+// Build stops arrays from existing scale data
+const PA_THIRDS = SCALE_STR3.map((lo, i) => ({
+    lowerFret: lo.fret, upperFret: SCALE_STR2[i].fret,
+    lowerNote: lo.note, upperNote: SCALE_STR2[i].note,
+    interval: THIRDS_INTERVALS[i] === 'M3' ? 'Major 3rd' : 'Minor 3rd'
+}));
+
+const PA_SIXTHS = SCALE_STR3.map((lo, i) => ({
+    lowerFret: lo.fret, upperFret: SCALE_STR1[i].fret,
+    lowerNote: lo.note, upperNote: SCALE_STR1[i].note,
+    interval: SIXTHS_INTERVALS[i] === 'M6' ? 'Major 6th' : 'Minor 6th'
+}));
+
+function startPlayAlong3rds() {
+    runPlayAlong(PA_THIRDS, 3, 2, 'pa3rdsFretboard', 'pa3rdsStatus', 'pa3rdsDots', 'pa3rdsPlayBtn', 'pa3rdsReplayBtn', 'pa3rdsNextBtn', '#e8572a', '#3498db');
+}
+function replayPlayAlong3rds() {
+    stopPlayAlong();
+    setTimeout(() => startPlayAlong3rds(), 150);
+}
+function startPlayAlong6ths() {
+    runPlayAlong(PA_SIXTHS, 3, 1, 'pa6thsFretboard', 'pa6thsStatus', 'pa6thsDots', 'pa6thsPlayBtn', 'pa6thsReplayBtn', 'pa6thsNextBtn', '#e8572a', '#2ecc71');
+}
+function replayPlayAlong6ths() {
+    stopPlayAlong();
+    setTimeout(() => startPlayAlong6ths(), 150);
+}
+
+</script>
+</body>
+</html>

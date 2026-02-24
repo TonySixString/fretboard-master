@@ -104,7 +104,8 @@
     <div class="container">
 
         <!-- WELCOME -->
-        <div id="screen-welcome">
+        <!-- POSITION MENU -->
+        <div id="screen-menu">
             <div class="card">
                 <div class="section-label">Scales & Melodies</div>
                 <div class="title">Learn by Playing</div>
@@ -112,16 +113,51 @@
                     Forget memorizing scale patterns. Instead, you're going to <strong>play a melody you already know</strong> — then discover the scale it comes from.
                 </div>
             </div>
-            <div class="card">
-                <div class="section-label">Your First Melody</div>
-                <div class="title" style="font-size:1.4em;">Take Me Home, Country Roads</div>
+            <div class="card" style="cursor:pointer;" onclick="loadPosition(1)">
+                <div class="section-label">Position 1</div>
+                <div class="title" style="font-size:1.2em;">Take Me Home, Country Roads</div>
                 <div class="subtitle">John Denver — simplified for Position 1</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 1–5 • G Major Pentatonic</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="loadPosition(2)">
+                <div class="section-label">Position 2</div>
+                <div class="title" style="font-size:1.2em;">Gone Country</div>
+                <div class="subtitle">Alan Jackson — simplified for Position 2</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 4–8 • G Major Pentatonic</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="loadPosition(3)">
+                <div class="section-label">Position 3</div>
+                <div class="title" style="font-size:1.2em;">Tennessee Whiskey</div>
+                <div class="subtitle">Chris Stapleton — simplified for Position 3</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 7–10 • G Major Pentatonic</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="loadPosition(4)">
+                <div class="section-label">Position 4</div>
+                <div class="title" style="font-size:1.2em;">Have You Ever Seen the Rain</div>
+                <div class="subtitle">CCR — simplified for Position 4</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 9–12 • G Major Pentatonic</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="loadPosition(5)">
+                <div class="section-label">Position 5</div>
+                <div class="title" style="font-size:1.2em;">Friends In Low Places</div>
+                <div class="subtitle">Garth Brooks — simplified for Position 5</div>
+                <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 12–15 • G Major Pentatonic</div>
+            </div>
+            <a href="/" class="btn btn-outline" style="text-align:center; text-decoration:none;">← Back to Menu</a>
+        </div>
+
+        <!-- WELCOME (position selected) -->
+        <div id="screen-welcome" class="hidden">
+            <div class="card">
+                <div class="section-label" id="welcomePositionLabel">Position 1</div>
+                <div class="title" style="font-size:1.4em;" id="welcomeSongTitle">Take Me Home, Country Roads</div>
+                <div class="subtitle" id="welcomeSongArtist">John Denver — simplified for Position 1</div>
                 <div class="body-text">
-                    We've simplified the chorus melody so every note fits inside one small area of the fretboard. You'll see and hear each note light up, then play it yourself.
+                    We've simplified the melody so every note fits inside one small area of the fretboard. You'll see and hear each note light up, then play it yourself.
                 </div>
             </div>
             <button class="btn btn-primary" onclick="startMelodyDemo()">Let's Get Started! →</button>
-            <a href="/chord-trainer" class="btn btn-outline" style="text-align:center; text-decoration:none;">← Back to Chord Trainer</a>
+            <button class="btn btn-outline" onclick="showScreen('screen-menu')">← Choose Position</button>
         </div>
 
         <!-- MELODY DEMO — watch & listen -->
@@ -132,7 +168,7 @@
             </div>
             <div class="card">
                 <div class="section-label">Watch & Listen</div>
-                <div class="title" style="font-size:1.3em;">Country Roads — Chorus</div>
+                <div class="title" style="font-size:1.3em;" id="demoSongTitle">Country Roads — Chorus</div>
                 <div class="fretboard-wrap">
                     <svg id="demoFretboard" width="260" height="360"></svg>
                 </div>
@@ -178,7 +214,7 @@
                 <div class="section-label">The Secret</div>
                 <div class="title">Here's Where That Melody Comes From</div>
                 <div class="body-text">
-                    Every note you just played lives inside one simple pattern: the <strong>G Major Pentatonic Scale, Position 1</strong>.
+                    Every note you just played lives inside one simple pattern: the <strong id="revealPositionName">G Major Pentatonic Scale, Position 1</strong>.
                 </div>
                 <div class="body-text">
                     "Pentatonic" means 5 notes — <strong>G, A, B, D, E</strong>. That's it. These 5 notes are behind countless country, rock, and blues melodies.
@@ -207,7 +243,7 @@
                 <span class="menu-link" id="scaleCounter">Note 1 of --</span>
             </div>
             <div class="card">
-                <div class="section-label">G Major Pentatonic — Position 1</div>
+                <div class="section-label" id="scaleLearnLabel">G Major Pentatonic — Position 1</div>
                 <div class="title" style="font-size:1.3em;">Play Each Note</div>
                 <div class="fretboard-wrap">
                     <svg id="scaleFretboard" width="260" height="360"></svg>
@@ -259,21 +295,21 @@
         <div id="screen-complete" class="hidden">
             <div class="card">
                 <div class="section-label">Nice Work!</div>
-                <div class="title">You Just Learned Your First Scale</div>
-                <div class="body-text">
-                    You now know the <strong>G Major Pentatonic Scale — Position 1</strong>. This one pattern unlocks melodies, improvisation, and lead guitar in the key of G.
+                <div class="title" id="completeTitle">You Just Learned a Scale</div>
+                <div class="body-text" id="completeBody">
+                    You now know the <strong>G Major Pentatonic Scale</strong>. This pattern unlocks melodies, improvisation, and lead guitar in the key of G.
                 </div>
                 <div class="highlight-box">
                     <div style="font-weight:600; margin-bottom:8px;">💡 What's next?</div>
                     <div class="body-text" style="margin-bottom:0;">
-                        There are 4 more positions of this scale up the neck. Each one unlocks new melodies and connects to the positions around it. Soon you'll have the whole fretboard covered.
+                        <span id="completeWhatsNext">There are 4 more positions of this scale up the neck. Each one unlocks new melodies and connects to the positions around it. Soon you'll have the whole fretboard covered.</span>
                     </div>
                 </div>
             </div>
-            <a href="https://www.sixstringcountry.com/lessons/the-pentatonic-scale---position-1-in-g" target="_blank" class="btn btn-primary" style="text-align:center; text-decoration:none;">🎬 Watch the Video Lesson</a>
-            <a href="/scale-trainer/download" class="btn btn-secondary" style="text-align:center; text-decoration:none;">📥 Download Tabs & Track</a>
+            <a id="videoLink" href="#" target="_blank" class="btn btn-primary" style="text-align:center; text-decoration:none;">🎬 Watch the Video Lesson</a>
+            <a id="downloadLink" href="#" class="btn btn-secondary" style="text-align:center; text-decoration:none;">📥 Download Tabs & Track</a>
             <button class="btn btn-outline" onclick="showScreen('screen-play-along')">← Play Along Again</button>
-            <button class="btn btn-outline" onclick="showScreen('screen-welcome')">← Start Over</button>
+            <button class="btn btn-outline" onclick="showScreen('screen-menu')">← Choose Another Position</button>
         </div>
 
     </div>
@@ -368,7 +404,7 @@
         // ============================================================
         function playPreview() {
             if (melodyAudio) { melodyAudio.pause(); melodyAudio = null; }
-            melodyAudio = new Audio("{{ url_for('static', filename='Take_Me_Home_Position_1.mp3') }}");
+            melodyAudio = new Audio('/static/' + MELODY_AUDIO_FILE);
             melodyAudio.play();
         }
 
@@ -384,7 +420,7 @@
                 drawPlayAlongFretboard(); // reset to static
             } else {
                 if (!backingAudio) {
-                    backingAudio = new Audio("{{ url_for('static', filename='Take_Me_Home_Positon_1_No_Melody.mp3') }}");
+                    backingAudio = new Audio('/static/' + BACKING_AUDIO_FILE);
                     backingAudio.addEventListener('ended', () => {
                         btn.textContent = '▶ Play Along';
                         btn.classList.remove('active');
@@ -414,9 +450,47 @@
                 backingAudio.pause();
                 backingAudio.currentTime = 0;
             }
+            // Reset backing audio when changing positions
+            if (id === 'screen-menu' || id === 'screen-welcome') {
+                if (backingAudio) { backingAudio.pause(); backingAudio = null; }
+                if (demoAudio) { demoAudio.pause(); demoAudio = null; }
+                if (melodyAudio) { melodyAudio.pause(); melodyAudio = null; }
+            }
             document.querySelectorAll('[id^="screen-"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadPosition(pos) {
+            setPosition(pos);
+            // Reset audio objects for new position
+            backingAudio = null;
+            demoAudio = null;
+            melodyAudio = null;
+            // Update welcome screen
+            document.getElementById('welcomePositionLabel').textContent = POSITION_LABEL;
+            document.getElementById('welcomeSongTitle').textContent = SONG_TITLE;
+            document.getElementById('welcomeSongArtist').textContent = SONG_ARTIST + ' — simplified for ' + POSITION_LABEL;
+            // Update complete screen
+            document.getElementById('completeTitle').textContent = 'You Learned ' + POSITION_LABEL + '!';
+            document.getElementById('completeBody').innerHTML = 'You now know the <strong>G Major Pentatonic Scale — ' + POSITION_LABEL + '</strong>. This pattern unlocks melodies, improvisation, and lead guitar in the key of G.';
+            document.getElementById('videoLink').href = VIDEO_URL;
+            document.getElementById('downloadLink').href = DOWNLOAD_URL;
+            // Update reveal and scale learn screens
+            document.getElementById('revealPositionName').textContent = 'G Major Pentatonic Scale, ' + POSITION_LABEL;
+            document.getElementById('scaleLearnLabel').textContent = 'G Major Pentatonic — ' + POSITION_LABEL;
+            const remaining = 5 - pos;
+            if (remaining > 1) {
+                document.getElementById('completeWhatsNext').textContent = 'There are ' + remaining + ' more positions of this scale up the neck. Each one unlocks new melodies and connects to the positions around it. Soon you\'ll have the whole fretboard covered.';
+            } else if (remaining === 1) {
+                document.getElementById('completeWhatsNext').textContent = 'There is 1 more position of this scale up the neck. It unlocks new melodies and connects to the positions around it. Soon you\'ll have the whole fretboard covered.';
+            } else {
+                document.getElementById('completeWhatsNext').textContent = 'You\'ve learned all 5 positions! You now have the entire fretboard covered in the key of G. Try improvising across all positions.';
+            }
+            // Reset indices
+            currentMelodyIndex = 0;
+            currentScaleIndex = 0;
+            showScreen('screen-welcome');
         }
 
         // ============================================================
@@ -431,7 +505,9 @@
             const height = parseInt(svg.getAttribute('height'));
             const startX = 35;
             const startY = 30;
-            const fretCount = 5;
+            const fretMin = FRET_RANGE.min;
+            const fretMax = FRET_RANGE.max;
+            const fretCount = fretMax - fretMin;
             const fretH = (height - startY - 30) / fretCount;
             const strSp = (width - startX - 30) / 5;
             const stringNames = ['E', 'A', 'D', 'G', 'B', 'E'];
@@ -461,11 +537,12 @@
             // Frets
             for (let i = 0; i <= fretCount; i++) {
                 const y = startY + i * fretH;
+                const fretNum = fretMin + i;
                 const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 l.setAttribute('x1', startX); l.setAttribute('y1', y);
                 l.setAttribute('x2', startX + 5 * strSp); l.setAttribute('y2', y);
                 l.setAttribute('stroke', 'rgba(255,255,255,0.3)');
-                l.setAttribute('stroke-width', i === 0 ? '4' : '2');
+                l.setAttribute('stroke-width', (fretMin === 0 && i === 0) ? '4' : '2');
                 svg.appendChild(l);
 
                 if (i < fretCount) {
@@ -475,36 +552,32 @@
                     t.setAttribute('fill', 'rgba(255,255,255,0.3)');
                     t.setAttribute('font-size', '11');
                     t.setAttribute('text-anchor', 'middle');
-                    t.textContent = i + 1;
+                    t.textContent = fretMin + i + 1;
                     svg.appendChild(t);
                 }
             }
 
-            // Fret dots at 3 and 5
-            [3, 5].forEach(f => {
-                const d = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                d.setAttribute('cx', startX + 2.5 * strSp);
-                d.setAttribute('cy', startY + (f - 0.5) * fretH);
-                d.setAttribute('r', '4');
-                d.setAttribute('fill', 'rgba(255,255,255,0.08)');
-                svg.appendChild(d);
+            // Fret dots (standard: 3, 5, 7, 9, 12)
+            [3, 5, 7, 9, 12].forEach(f => {
+                if (f > fretMin && f <= fretMax) {
+                    const d = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    d.setAttribute('cx', startX + 2.5 * strSp);
+                    d.setAttribute('cy', startY + (f - fretMin - 0.5) * fretH);
+                    d.setAttribute('r', '4');
+                    d.setAttribute('fill', 'rgba(255,255,255,0.08)');
+                    svg.appendChild(d);
+                }
             });
 
-            return { startX, startY, fretH, strSp };
+            return { startX, startY, fretH, strSp, fretMin };
         }
 
         function drawNote(svgId, string, fret, color, label, layout) {
             const svg = document.getElementById(svgId);
             if (!svg || !layout) return;
-            // String 6 = leftmost (index 0), string 1 = rightmost (index 5)
-            const x = layout.startX + (string - 1) * layout.strSp;
-            // Wait — string 6 is low E = leftmost in tab layout
-            // But in our stringNames array, index 0 = 'E' (low), index 5 = 'E' (high)
-            // So string 6 -> index 0 -> x = startX + 0
-            // string 1 -> index 5 -> x = startX + 5*strSp
-            // Correction: x = startX + (6 - string) * strSp
             const xPos = layout.startX + (6 - string) * layout.strSp;
-            const yPos = fret === 0 ? layout.startY - 15 : layout.startY + (fret - 0.5) * layout.fretH;
+            const adjustedFret = fret - layout.fretMin;
+            const yPos = adjustedFret === 0 ? layout.startY - 15 : layout.startY + (adjustedFret - 0.5) * layout.fretH;
             const r = 14;
 
             const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -537,6 +610,7 @@
         let currentDemoNoteIdx = -1;
 
         function startMelodyDemo() {
+            document.getElementById('demoSongTitle').textContent = SONG_TITLE;
             showScreen('screen-melody-demo');
             drawDemoFretboard(-1);
         }
@@ -553,16 +627,23 @@
             // If we have an active note, highlight it
             if (activeIdx >= 0 && activeIdx < DEMO_MELODY.length) {
                 const n = DEMO_MELODY[activeIdx];
-                drawNote('demoFretboard', n.string, n.fret, '#e8572a', n.note, layout);
-
-                // Show a couple upcoming notes dimmed
-                for (let i = activeIdx + 1; i < Math.min(activeIdx + 3, DEMO_MELODY.length); i++) {
-                    const u = DEMO_MELODY[i];
-                    drawNote('demoFretboard', u.string, u.fret, 'rgba(232,87,42,0.2)', '', layout);
+                // Chord-only markers have string: 0 — update chord but don't draw note
+                if (n.string > 0) {
+                    drawNote('demoFretboard', n.string, n.fret, '#e8572a', n.note, layout);
+                    document.getElementById('demoNoteName').textContent = n.note;
+                    document.getElementById('demoNoteInfo').textContent = `String ${n.string} • Fret ${n.fret}`;
                 }
 
-                document.getElementById('demoNoteName').textContent = n.note;
-                document.getElementById('demoNoteInfo').textContent = `String ${n.string} • Fret ${n.fret}`;
+                // Show a couple upcoming real notes dimmed
+                let shown = 0;
+                for (let i = activeIdx + 1; i < DEMO_MELODY.length && shown < 3; i++) {
+                    const u = DEMO_MELODY[i];
+                    if (u.string > 0) {
+                        drawNote('demoFretboard', u.string, u.fret, 'rgba(232,87,42,0.2)', '', layout);
+                        shown++;
+                    }
+                }
+
                 document.getElementById('demoChordLabel').textContent = n.chord;
             }
         }
@@ -577,7 +658,7 @@
 
         function playDemo() {
             if (!demoAudio) {
-                demoAudio = new Audio("{{ url_for('static', filename='Take_Me_Home_Position_1.mp3') }}");
+                demoAudio = new Audio('/static/' + MELODY_AUDIO_FILE);
                 demoAudio.addEventListener('ended', () => {
                     demoPlaying = false;
                     document.getElementById('demoPlayBtn').textContent = '▶ Play';
@@ -637,7 +718,16 @@
         }
         function startMelodyLearn() {
             currentMelodyIndex = 0;
+            melodyListenActive = false;
+            lastCorrectTime = 0;
+            waitingForSilence = false;
+            lastCorrectMidi = -1;
+            stopMic();
+            clearInterval(pitchCheckInterval);
             showScreen('screen-melody-learn');
+            document.getElementById('melodyStartBtn').textContent = '🎤 Start Listening';
+            document.getElementById('melodyStatus').className = 'status-bar status-idle';
+            document.getElementById('melodyStatus').textContent = 'Tap "Start Listening" to begin';
             updateMelodyDisplay();
         }
 
@@ -647,7 +737,7 @@
 
             document.getElementById('melodyCounter').textContent = `Note ${currentMelodyIndex + 1} of ${total}`;
             document.getElementById('melodyNoteName').textContent = n.note;
-            const finger = FRET_TO_FINGER[n.fret] || '';
+            const finger = getFingerForNote(n.string, n.fret);
             const fingerNames = { 1: 'Index', 2: 'Middle', 3: 'Ring', 4: 'Pinky' };
             const fingerLabel = finger ? ` • Finger ${finger} (${fingerNames[finger]})` : '';
             document.getElementById('melodyNoteInfo').textContent = `String ${n.string} • Fret ${n.fret}${fingerLabel}`;
@@ -729,7 +819,7 @@
             const expectedMidi = fretToMidi(n.string, n.fret);
             const detectedMidi = freqToMidi(freq);
 
-            if (detectedMidi === expectedMidi) {
+            if (detectedMidi === expectedMidi || detectedMidi === expectedMidi + 12 || detectedMidi === expectedMidi - 12) {
                 // If same note as last correct one, require a silence gap first
                 if (detectedMidi === lastCorrectMidi) {
                     const elapsed = Date.now() - lastCorrectTime;
@@ -802,7 +892,16 @@
         // ============================================================
         function startScaleLearn() {
             currentScaleIndex = 0;
+            scaleListenActive = false;
+            lastScaleCorrectTime = 0;
+            scaleWaitingForSilence = false;
+            lastScaleCorrectMidi = -1;
+            stopMic();
+            clearInterval(pitchCheckInterval);
             showScreen('screen-scale-learn');
+            document.getElementById('scaleStartBtn').textContent = '🎤 Start Listening';
+            document.getElementById('scaleStatus').className = 'status-bar status-idle';
+            document.getElementById('scaleStatus').textContent = 'Tap "Start Listening" to begin';
             updateScaleDisplay();
         }
 
@@ -891,7 +990,7 @@
             const expectedMidi = fretToMidi(n.string, n.fret);
             const detectedMidi = freqToMidi(freq);
 
-            if (detectedMidi === expectedMidi) {
+            if (detectedMidi === expectedMidi || detectedMidi === expectedMidi + 12 || detectedMidi === expectedMidi - 12) {
                 if (detectedMidi === lastScaleCorrectMidi) {
                     const elapsed = Date.now() - lastScaleCorrectTime;
                     if (elapsed < 400) return;
@@ -959,12 +1058,19 @@
             // If active note, highlight it on top
             if (activeIdx !== undefined && activeIdx >= 0 && activeIdx < DEMO_MELODY.length) {
                 const n = DEMO_MELODY[activeIdx];
-                drawNote('playAlongFretboard', n.string, n.fret, '#2ecc71', n.note, layout);
+                // Chord-only markers have string: 0
+                if (n.string > 0) {
+                    drawNote('playAlongFretboard', n.string, n.fret, '#2ecc71', n.note, layout);
+                }
 
-                // Show upcoming notes slightly brighter
-                for (let i = activeIdx + 1; i < Math.min(activeIdx + 3, DEMO_MELODY.length); i++) {
+                // Show upcoming real notes
+                let shown = 0;
+                for (let i = activeIdx + 1; i < DEMO_MELODY.length && shown < 3; i++) {
                     const u = DEMO_MELODY[i];
-                    drawNote('playAlongFretboard', u.string, u.fret, 'rgba(46,204,113,0.25)', '', layout);
+                    if (u.string > 0) {
+                        drawNote('playAlongFretboard', u.string, u.fret, 'rgba(46,204,113,0.25)', '', layout);
+                        shown++;
+                    }
                 }
 
                 document.getElementById('playAlongChord').textContent = n.chord;

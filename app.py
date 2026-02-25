@@ -69,7 +69,11 @@ def get_chord_semitones(chord_notes):
     return semitones
 
 @app.route('/')
-def index():
+def home():
+    return render_template('home.html')
+
+@app.route('/tuner')
+def tuner():
     return render_template('tuner.html')
 
 @app.route('/game')
@@ -88,19 +92,62 @@ def chord_trainer():
 def scale_trainer():
     return render_template('scale-trainer.html')
 
-@app.route('/scale-trainer/download')
-def scale_trainer_download():
+@app.route('/notes-and-patterns')
+def notes_and_patterns():
+    return render_template('notes-and-patterns.html')
+
+@app.route('/scale-trainer/download/<int:pos>')
+def scale_trainer_download(pos):
     import zipfile
     import tempfile
     from flask import send_file
     
+    files_map = {
+        1: {
+            'pdf': 'static/Scales_and_Melodies_Position_1_Tabs.pdf',
+            'melody': 'static/Take_Me_Home_Position_1.mp3',
+            'backing': 'static/Take_Me_Home_Positon_1_No_Melody.mp3',
+            'name': 'Scales_and_Melodies_Position_1.zip'
+        },
+        2: {
+            'pdf': 'static/Scales_and_Melodies_Position_2_Tabs.pdf',
+            'melody': 'static/Gone_Country_Position_2.mp3',
+            'backing': 'static/Gone_Country_Position_2_No_Melody.mp3',
+            'name': 'Scales_and_Melodies_Position_2.zip'
+        },
+        3: {
+            'pdf': 'static/Scales_and_Melodies_Position_3_Tabs.pdf',
+            'melody': 'static/Tennessee_Whiskey_Position_3.mp3',
+            'backing': 'static/Tennessee_Whiskey_Position_3_No_Melody.mp3',
+            'name': 'Scales_and_Melodies_Position_3.zip'
+        },
+        4: {
+            'pdf': 'static/Scales_and_Melodies_Position_4_Tabs.pdf',
+            'melody': 'static/Have_You_Ever_Seen_the_Rain_Position_4.mp3',
+            'backing': 'static/Have_You_Ever_Seen_the_Rain_Position_4_No_Melody.mp3',
+            'name': 'Scales_and_Melodies_Position_4.zip'
+        },
+        5: {
+            'pdf': 'static/Scales_and_Melodies_Position_5_Tabs.pdf',
+            'melody': 'static/Friends_in_Low_Places_Position_5.mp3',
+            'backing': 'static/Friends_in_Low_Places_Position_5_No_Melody.mp3',
+            'name': 'Scales_and_Melodies_Position_5.zip'
+        }
+    }
+    
+    if pos not in files_map:
+        return 'Position not found', 404
+    
+    f = files_map[pos]
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-        zf.write('static/Scales_and_Melodies_Position_1_Tabs.pdf', 'Scales_and_Melodies_Position_1_Tabs.pdf')
-        zf.write('static/Take_Me_Home_Position_1.mp3', 'Take_Me_Home_Position_1.mp3')
-        zf.write('static/Take_Me_Home_Positon_1_No_Melody.mp3', 'Take_Me_Home_Position_1_No_Melody.mp3')
+        import os
+        for key in ['pdf', 'melody', 'backing']:
+            filepath = f[key]
+            if os.path.exists(filepath):
+                zf.write(filepath, os.path.basename(filepath))
     zip_buffer.seek(0)
-    return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name='Scales_and_Melodies_Position_1.zip')
+    return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name=f['name'])
 
 @app.route('/get_challenge', methods=['GET'])
 def get_challenge():

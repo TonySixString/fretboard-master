@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Six String Country — Fretboard Master</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: #1a2e35;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.4em;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .header h1 .orange { color: #e8572a; }
+        .header .tagline {
+            color: rgba(255,255,255,0.4);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.85em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        .modules {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .module-card {
+            background: #243b44;
+            border-radius: 14px;
+            padding: 22px 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .module-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.4);
+        }
+        .module-card:active {
+            transform: translateY(1px);
+        }
+        .module-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+        .module-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            flex-shrink: 0;
+        }
+        .module-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.35em;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        .module-subtitle {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.88em;
+            line-height: 1.4;
+            padding-left: 58px;
+        }
+        .module-free {
+            display: inline-block;
+            background: rgba(46,204,113,0.15);
+            color: #2ecc71;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.7em;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+        .divider {
+            width: 100%;
+            max-width: 500px;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+            margin: 8px 0;
+        }
+        .section-label {
+            width: 100%;
+            max-width: 500px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.75em;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+
+        /* Color accents per module */
+        .icon-tuner { background: rgba(46,204,113,0.15); color: #2ecc71; }
+        .icon-chords { background: rgba(232,87,42,0.15); color: #e8572a; }
+        .icon-scales { background: rgba(52,152,219,0.15); color: #3498db; }
+        .icon-notes { background: rgba(155,89,182,0.15); color: #9b59b6; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span class="orange">SIX STRING</span> COUNTRY</h1>
+        <div class="tagline">Fretboard Master</div>
+    </div>
+
+    <div class="modules">
+        <div class="section-label">Get Started</div>
+
+        <a class="module-card" href="/tuner">
+            <div class="module-top">
+                <div class="module-icon icon-tuner">🎵</div>
+                <div class="module-title">Tuner<span class="module-free">Free</span></div>
+            </div>
+            <div class="module-subtitle">Get in tune before you play. Chromatic tuner with real-time pitch detection.</div>
+        </a>
+
+        <div class="divider"></div>
+        <div class="section-label">Learn & Practice</div>
+
+        <a class="module-card" href="/chord-trainer">
+            <div class="module-top">
+                <div class="module-icon icon-chords">🎸</div>
+                <div class="module-title">Chords & Songs</div>
+            </div>
+            <div class="module-subtitle">Learn chord shapes and variations, practice progressions, and unlock real country songs.</div>
+        </a>
+
+        <a class="module-card" href="/scale-trainer">
+            <div class="module-top">
+                <div class="module-icon icon-scales">🎶</div>
+                <div class="module-title">Scales & Melodies</div>
+            </div>
+            <div class="module-subtitle">Play simplified melodies from real songs while learning all 5 pentatonic positions.</div>
+        </a>
+
+        <a class="module-card" href="/notes-and-patterns">
+            <div class="module-top">
+                <div class="module-icon icon-notes">🧠</div>
+                <div class="module-title">Notes & Patterns</div>
+            </div>
+            <div class="module-subtitle">Understand the fretboard — note names, intervals, octaves, and country double stops.</div>
+        </a>
+    </div>
+</body>
+</html>

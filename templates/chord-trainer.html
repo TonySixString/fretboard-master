@@ -36,15 +36,16 @@
         .ct-song-chords { color:#e8572a; font-family:'Barlow Condensed',sans-serif; font-size:0.85em; font-weight:600; letter-spacing:0.5px; text-align:right; white-space:nowrap; }
         .ct-module-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:20px; margin-bottom:12px; cursor:pointer; transition:all 0.2s; }
         .ct-module-card:hover { background:rgba(255,255,255,0.07); border-color:rgba(232,87,42,0.3); }
-        .ct-module-card.locked { opacity:0.4; cursor:not-allowed; }
-        .ct-module-card.locked:hover { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
+        .ct-module-card.locked { position:relative; cursor:pointer; overflow:hidden; }
+        .ct-module-card.locked::after { content:''; position:absolute; inset:0; border-radius:14px; background:rgba(0,0,0,0.55); pointer-events:none; }
+        .ct-module-card.locked:hover { background:rgba(255,255,255,0.06); border-color:rgba(232,87,42,0.2); }
         .ct-module-card .ct-module-number { font-family:'Barlow Condensed',sans-serif; font-size:0.8em; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
         .ct-module-card .ct-module-name { font-family:'Barlow Condensed',sans-serif; font-size:1.4em; font-weight:700; color:white; margin-bottom:4px; }
         .ct-module-card .ct-module-desc { color:rgba(255,255,255,0.5); font-size:0.85em; }
         .ct-module-card .ct-module-status { margin-top:8px; font-size:0.8em; font-weight:600; }
         .ct-module-card .ct-module-status.complete { color:#48bb78; }
         .ct-module-card .ct-module-status.in-progress { color:#e8572a; }
-        .ct-module-card .ct-module-status.locked-text { color:rgba(255,255,255,0.3); }
+        .ct-module-card .ct-module-status.locked-text { position:relative; z-index:1; display:block; text-align:center; background:rgba(232,87,42,0.2); color:#e8572a; font-size:1.05em; font-weight:700; letter-spacing:1.5px; padding:8px 14px; border-radius:8px; margin-top:12px; }
         .ct-ear-options { display:flex; gap:12px; justify-content:center; margin:20px 0; flex-wrap:wrap; }
         .ct-ear-btn { flex:1; min-width:100px; max-width:150px; padding:20px; border-radius:12px; border:2px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:white; font-family:'Barlow Condensed',sans-serif; font-size:1.4em; font-weight:700; cursor:pointer; transition:all 0.2s; text-align:center; }
         .ct-ear-btn:hover { border-color:rgba(232,87,42,0.5); background:rgba(232,87,42,0.1); }
@@ -396,6 +397,13 @@
 
     <script>
         const IS_SUBSCRIBED = {{ 'true' if is_subscribed else 'false' }};
+        function goToPlans() {
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'navigate', url: '/account/plans' }, '*');
+            } else {
+                window.location.href = '/account/plans';
+            }
+        }
     </script>
     {% raw %}
     <script>
@@ -497,11 +505,11 @@
                 const isLocked = !IS_SUBSCRIBED && !FREE_KEYS.includes(key);
                 let statusText = 'Start';
                 let statusClass = '';
-                if (isLocked) { statusText = '🔒 Subscription Required'; statusClass = 'locked-text'; }
+                if (isLocked) { statusText = '🔒 Subscription Required: Guitar Pass'; statusClass = 'locked-text'; }
                 else if (isComplete) { statusText = '✅ Complete'; statusClass = 'complete'; }
                 else if (hasStarted) { statusText = 'In Progress'; statusClass = 'in-progress'; }
 
-                const clickAttr = isLocked ? '' : `onclick="selectModule('${key}')"`;
+                const clickAttr = isLocked ? `onclick="goToPlans()"` : `onclick="selectModule('${key}')"`;
                 const lockedClass = isLocked ? ' locked' : '';
                 html += `<div class="ct-module-card${lockedClass}" ${clickAttr}>
                     <div class="ct-module-number">Module ${i + 1}</div>

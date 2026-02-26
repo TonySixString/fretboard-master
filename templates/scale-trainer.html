@@ -35,11 +35,19 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.07);
         }
-        .card.locked { opacity: 0.4; cursor: not-allowed; }
+        .card.locked {
+            position: relative; cursor: pointer; overflow: hidden;
+        }
+        .card.locked::after {
+            content: ''; position: absolute; inset: 0; border-radius: 16px;
+            background: rgba(0,0,0,0.55); pointer-events: none;
+        }
         .locked-badge-inline {
-            display: inline-block; background: rgba(232,87,42,0.15); color: #e8572a;
-            font-size: 0.75em; font-weight: 600; letter-spacing: 1px;
-            padding: 3px 10px; border-radius: 6px; margin-top: 8px;
+            position: relative; z-index: 1;
+            display: block; text-align: center;
+            background: rgba(232,87,42,0.2); color: #e8572a;
+            font-size: 1.05em; font-weight: 700; letter-spacing: 1.5px;
+            padding: 8px 14px; border-radius: 8px; margin-top: 12px;
         }
         .section-label {
             text-align: center; color: #e8572a; font-size: 0.75em;
@@ -125,33 +133,33 @@
                 <div class="subtitle">John Denver — simplified for Position 1</div>
                 <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 1–5 • G Major Pentatonic</div>
             </div>
-            <div class="card{% if not is_subscribed %} locked{% endif %}" {% if is_subscribed %}style="cursor:pointer;" onclick="loadPosition(2)"{% endif %}>
+            <div class="card{% if not is_subscribed %} locked{% endif %}" style="cursor:pointer;" onclick="{% if is_subscribed %}loadPosition(2){% else %}goToPlans(){% endif %}">
                 <div class="section-label">Position 2</div>
                 <div class="title" style="font-size:1.2em;">Gone Country</div>
                 <div class="subtitle">Alan Jackson — simplified for Position 2</div>
                 <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 4–8 • G Major Pentatonic</div>
-                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required</div>{% endif %}
+                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required: Guitar Pass</div>{% endif %}
             </div>
-            <div class="card{% if not is_subscribed %} locked{% endif %}" {% if is_subscribed %}style="cursor:pointer;" onclick="loadPosition(3)"{% endif %}>
+            <div class="card{% if not is_subscribed %} locked{% endif %}" style="cursor:pointer;" onclick="{% if is_subscribed %}loadPosition(3){% else %}goToPlans(){% endif %}">
                 <div class="section-label">Position 3</div>
                 <div class="title" style="font-size:1.2em;">Tennessee Whiskey</div>
                 <div class="subtitle">Chris Stapleton — simplified for Position 3</div>
                 <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 7–10 • G Major Pentatonic</div>
-                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required</div>{% endif %}
+                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required: Guitar Pass</div>{% endif %}
             </div>
-            <div class="card{% if not is_subscribed %} locked{% endif %}" {% if is_subscribed %}style="cursor:pointer;" onclick="loadPosition(4)"{% endif %}>
+            <div class="card{% if not is_subscribed %} locked{% endif %}" style="cursor:pointer;" onclick="{% if is_subscribed %}loadPosition(4){% else %}goToPlans(){% endif %}">
                 <div class="section-label">Position 4</div>
                 <div class="title" style="font-size:1.2em;">Have You Ever Seen the Rain</div>
                 <div class="subtitle">CCR — simplified for Position 4</div>
                 <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 9–12 • G Major Pentatonic</div>
-                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required</div>{% endif %}
+                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required: Guitar Pass</div>{% endif %}
             </div>
-            <div class="card{% if not is_subscribed %} locked{% endif %}" {% if is_subscribed %}style="cursor:pointer;" onclick="loadPosition(5)"{% endif %}>
+            <div class="card{% if not is_subscribed %} locked{% endif %}" style="cursor:pointer;" onclick="{% if is_subscribed %}loadPosition(5){% else %}goToPlans(){% endif %}">
                 <div class="section-label">Position 5</div>
                 <div class="title" style="font-size:1.2em;">Friends In Low Places</div>
                 <div class="subtitle">Garth Brooks — simplified for Position 5</div>
                 <div class="body-text" style="margin-top:8px; font-size:0.9em; opacity:0.7;">Frets 12–15 • G Major Pentatonic</div>
-                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required</div>{% endif %}
+                {% if not is_subscribed %}<div class="locked-badge-inline">🔒 Subscription Required: Guitar Pass</div>{% endif %}
             </div>
             <a href="/" class="btn btn-outline" style="text-align:center; text-decoration:none;">← Back to Menu</a>
         </div>
@@ -326,6 +334,13 @@
 
     <script>
         const IS_SUBSCRIBED = {{ 'true' if is_subscribed else 'false' }};
+        function goToPlans() {
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'navigate', url: '/account/plans' }, '*');
+            } else {
+                window.location.href = '/account/plans';
+            }
+        }
     </script>
     <script src="{{ url_for('static', filename='scale-trainer.js') }}"></script>
     <script>

@@ -394,6 +394,9 @@
         </div>
     </div>
 
+    <script>
+        const IS_SUBSCRIBED = {{ 'true' if is_subscribed else 'false' }};
+    </script>
     {% raw %}
     <script>
         // ===== STATE =====
@@ -484,18 +487,23 @@
 
         function buildKeyPicker() {
             const moduleKeys = Object.keys(MODULES);
+            const FREE_KEYS = ['G'];
             let html = '';
             moduleKeys.forEach((key, i) => {
                 const mod = MODULES[key];
                 const prog = loadCTProgress(key);
                 const isComplete = prog.allComplete;
                 const hasStarted = prog.chordsComplete.length > 0;
+                const isLocked = !IS_SUBSCRIBED && !FREE_KEYS.includes(key);
                 let statusText = 'Start';
                 let statusClass = '';
-                if (isComplete) { statusText = '✅ Complete'; statusClass = 'complete'; }
+                if (isLocked) { statusText = '🔒 Subscription Required'; statusClass = 'locked-text'; }
+                else if (isComplete) { statusText = '✅ Complete'; statusClass = 'complete'; }
                 else if (hasStarted) { statusText = 'In Progress'; statusClass = 'in-progress'; }
 
-                html += `<div class="ct-module-card" onclick="selectModule('${key}')">
+                const clickAttr = isLocked ? '' : `onclick="selectModule('${key}')"`;
+                const lockedClass = isLocked ? ' locked' : '';
+                html += `<div class="ct-module-card${lockedClass}" ${clickAttr}>
                     <div class="ct-module-number">Module ${i + 1}</div>
                     <div class="ct-module-name">${mod.name}</div>
                     <div class="ct-module-desc">${mod.subtitle}</div>
@@ -1236,5 +1244,7 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
     {% endraw %}
+    <div style="position:fixed;top:12px;right:12px;background:rgba(232,87,42,0.9);color:white;font-family:'Barlow Condensed',sans-serif;font-size:0.7em;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:6px;z-index:9999;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.3);">BETA</div>
+    {% include 'feedback-widget.html' %}
 </body>
 </html>

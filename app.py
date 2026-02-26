@@ -1,13 +1,20 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 from flask_cors import CORS
 import numpy as np
 import librosa
 import random
 import io
+import os
+import json
+import jwt
+import threading
+from datetime import datetime
 from scipy.io import wavfile
 
 app = Flask(__name__)
 CORS(app)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
+JWT_SECRET = os.environ.get('JWT_SECRET', 'dev-jwt-secret')
 
 # Guitar tuning
 STANDARD_TUNING = {
@@ -68,40 +75,97 @@ def get_chord_semitones(chord_notes):
         semitones.add(note_name_to_semitone(note))
     return semitones
 
+@app.before_request
+def check_subscription_token():
+    token = request.args.get('token')
+    if token:
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+            session['is_subscribed'] = payload.get('tier') == 'pro'
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            pass
+
+def get_subscription_status():
+    return session.get('is_subscribed', False)
+
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('home.html', is_subscribed=get_subscription_status())
 
 @app.route('/tuner')
 def tuner():
-    return render_template('tuner.html')
+    return render_template('tuner.html', is_subscribed=get_subscription_status())
 
 @app.route('/game')
 def game():
-    return render_template('index.html')
+    return render_template('index.html', is_subscribed=get_subscription_status())
 
 @app.route('/chords')
 def chords():
-    return render_template('chords.html')
+    return render_template('chords.html', is_subscribed=get_subscription_status())
 
 @app.route('/chord-trainer')
 def chord_trainer():
-    return render_template('chord-trainer.html')
+    return render_template('chord-trainer.html', is_subscribed=get_subscription_status())
 
 @app.route('/scale-trainer')
 def scale_trainer():
-    return render_template('scale-trainer.html')
+    return render_template('scale-trainer.html', is_subscribed=get_subscription_status())
 
 @app.route('/notes-and-patterns')
 def notes_and_patterns():
-    return render_template('notes-and-patterns.html')
+    return render_template('notes-and-patterns.html', is_subscribed=get_subscription_status())
+
+FEEDBACK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'feedback.json')
+feedback_lock = threading.Lock()
+
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    data = request.get_json(silent=True) or {}
+    entry = {
+        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        'section': data.get('section', ''),
+        'category': data.get('category', ''),
+        'message': data.get('message', ''),
+        'user_agent': request.headers.get('User-Agent', '')
+    }
+    with feedback_lock:
+        entries = []
+        if os.path.exists(FEEDBACK_FILE):
+            with open(FEEDBACK_FILE, 'r') as f:
+                entries = json.load(f)
+        entries.append(entry)
+        with open(FEEDBACK_FILE, 'w') as f:
+            json.dump(entries, f, indent=2)
+    return jsonify({'success': True})
+
+@app.route('/feedback/view')
+def feedback_view():
+    if request.args.get('key') != 'ssc2026':
+        return 'Forbidden', 403
+    entries = []
+    if os.path.exists(FEEDBACK_FILE):
+        with open(FEEDBACK_FILE, 'r') as f:
+            entries = json.load(f)
+    entries.reverse()
+    rows = ''
+    for e in entries:
+        rows += f"<tr><td>{e.get('timestamp','')}</td><td>{e.get('section','')}</td><td>{e.get('category','')}</td><td>{e.get('message','')}</td><td style='font-size:0.75em'>{e.get('user_agent','')}</td></tr>"
+    return f"""<!DOCTYPE html><html><head><title>Feedback</title>
+<style>body{{font-family:sans-serif;background:#1a2e35;color:#e0e0e0;padding:20px}}
+table{{border-collapse:collapse;width:100%}}th,td{{border:1px solid rgba(255,255,255,0.15);padding:8px;text-align:left;font-size:0.9em}}
+th{{background:rgba(255,255,255,0.08)}}</style></head>
+<body><h2>Feedback ({len(entries)} entries)</h2>
+<table><tr><th>Time</th><th>Section</th><th>Category</th><th>Message</th><th>User Agent</th></tr>{rows}</table></body></html>"""
 
 @app.route('/scale-trainer/download/<int:pos>')
 def scale_trainer_download(pos):
+    if pos > 1 and not get_subscription_status():
+        return 'Subscription required', 403
     import zipfile
     import tempfile
     from flask import send_file
-    
+
     files_map = {
         1: {
             'pdf': 'static/Scales_and_Melodies_Position_1_Tabs.pdf',

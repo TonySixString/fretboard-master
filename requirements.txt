@@ -13,3 +13,4 @@ numpy==2.4.2
 packaging==26.0
 scipy==1.17.0
 Werkzeug==3.1.5
+PyJWT>=2.8.0

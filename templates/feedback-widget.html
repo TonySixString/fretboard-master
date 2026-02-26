@@ -1,0 +1,158 @@
+<!-- Feedback Widget -->
+<style>
+    #fb-btn {
+        position: fixed; bottom: 20px; right: 20px; z-index: 10000;
+        width: 48px; height: 48px; border-radius: 50%;
+        background: #1A3D3D; border: none; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; transition: transform 0.2s;
+    }
+    #fb-btn:hover { transform: scale(1.1); }
+    #fb-panel {
+        position: fixed; bottom: 80px; right: 20px; z-index: 10000;
+        width: 300px; background: #1e3a42; border-radius: 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+        font-family: 'Barlow Condensed', Arial, sans-serif;
+        color: #e0e0e0; overflow: hidden;
+        transform: translateY(20px); opacity: 0; pointer-events: none;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    #fb-panel.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    #fb-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 16px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    #fb-header span { font-weight: 700; font-size: 1.05em; letter-spacing: 1px; }
+    #fb-close {
+        background: none; border: none; color: rgba(255,255,255,0.5);
+        font-size: 1.3em; cursor: pointer; padding: 0 4px; line-height: 1;
+    }
+    #fb-close:hover { color: white; }
+    #fb-body { padding: 14px 16px 16px; }
+    #fb-section {
+        width: 100%; padding: 8px 10px; border-radius: 8px;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        color: #e0e0e0; font-family: 'Barlow Condensed', Arial, sans-serif;
+        font-size: 0.9em; margin-bottom: 12px; appearance: none;
+        -webkit-appearance: none;
+    }
+    #fb-section option { background: #1e3a42; color: #e0e0e0; }
+    .fb-reactions {
+        display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .fb-react-btn {
+        padding: 6px 12px; border-radius: 20px;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        color: #e0e0e0; font-family: 'Barlow Condensed', Arial, sans-serif;
+        font-size: 0.85em; cursor: pointer; transition: all 0.15s;
+    }
+    .fb-react-btn:hover { background: rgba(255,255,255,0.1); }
+    .fb-react-btn.selected { background: rgba(232,93,69,0.2); border-color: #E85D45; color: white; }
+    #fb-message {
+        width: 100%; height: 80px; padding: 10px; border-radius: 8px;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        color: #e0e0e0; font-family: 'Barlow Condensed', Arial, sans-serif;
+        font-size: 0.9em; resize: vertical; margin-bottom: 12px;
+    }
+    #fb-message::placeholder { color: rgba(255,255,255,0.3); }
+    #fb-submit {
+        width: 100%; padding: 10px; border-radius: 8px; border: none;
+        background: #E85D45; color: white; font-family: 'Barlow Condensed', Arial, sans-serif;
+        font-size: 1em; font-weight: 700; letter-spacing: 1px;
+        cursor: pointer; transition: background 0.2s;
+    }
+    #fb-submit:hover { background: #d04e38; }
+    #fb-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    #fb-status {
+        text-align: center; font-size: 0.85em; margin-top: 8px;
+        min-height: 1.2em;
+    }
+    .fb-success { color: #48bb78; }
+    .fb-error { color: #E85D45; }
+</style>
+
+<button id="fb-btn" onclick="document.getElementById('fb-panel').classList.toggle('open')" aria-label="Send feedback">💬</button>
+
+<div id="fb-panel">
+    <div id="fb-header">
+        <span>Send Feedback</span>
+        <button id="fb-close" onclick="document.getElementById('fb-panel').classList.remove('open')">&times;</button>
+    </div>
+    <div id="fb-body">
+        <select id="fb-section">
+            <option value="Tuner">Tuner</option>
+            <option value="Chords & Songs">Chords & Songs</option>
+            <option value="Scales & Melodies">Scales & Melodies</option>
+            <option value="Notes & Patterns">Notes & Patterns</option>
+            <option value="Strings & Note Names">Strings & Note Names</option>
+            <option value="Other">Other</option>
+        </select>
+        <div class="fb-reactions">
+            <button class="fb-react-btn" data-cat="Bug" onclick="fbSelectCat(this)">🐛 Bug</button>
+            <button class="fb-react-btn" data-cat="Idea" onclick="fbSelectCat(this)">💡 Idea</button>
+            <button class="fb-react-btn" data-cat="Love it" onclick="fbSelectCat(this)">👍 Love it</button>
+            <button class="fb-react-btn" data-cat="Confused" onclick="fbSelectCat(this)">😕 Confused</button>
+        </div>
+        <textarea id="fb-message" placeholder="Tell us what's on your mind..."></textarea>
+        <button id="fb-submit" onclick="fbSubmit()">Submit</button>
+        <div id="fb-status"></div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var sectionMap = {
+        '/': 'Other',
+        '/tuner': 'Tuner',
+        '/game': 'Strings & Note Names',
+        '/chord-trainer': 'Chords & Songs',
+        '/scale-trainer': 'Scales & Melodies',
+        '/notes-and-patterns': 'Notes & Patterns',
+        '/chords': 'Chords & Songs'
+    };
+    var path = window.location.pathname;
+    var sel = document.getElementById('fb-section');
+    var detected = sectionMap[path] || 'Other';
+    for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === detected) { sel.selectedIndex = i; break; }
+    }
+})();
+
+var fbCategory = '';
+function fbSelectCat(btn) {
+    document.querySelectorAll('.fb-react-btn').forEach(function(b) { b.classList.remove('selected'); });
+    if (btn.dataset.cat === fbCategory) { fbCategory = ''; }
+    else { btn.classList.add('selected'); fbCategory = btn.dataset.cat; }
+}
+
+function fbSubmit() {
+    var msg = document.getElementById('fb-message').value.trim();
+    var section = document.getElementById('fb-section').value;
+    var status = document.getElementById('fb-status');
+    var submitBtn = document.getElementById('fb-submit');
+
+    if (!msg && !fbCategory) { status.className = 'fb-error'; status.textContent = 'Please select a reaction or write a message.'; return; }
+
+    submitBtn.disabled = true;
+    fetch('/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ section: section, category: fbCategory, message: msg })
+    }).then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            status.className = 'fb-success'; status.textContent = 'Thanks for your feedback!';
+            document.getElementById('fb-message').value = '';
+            fbCategory = '';
+            document.querySelectorAll('.fb-react-btn').forEach(function(b) { b.classList.remove('selected'); });
+            setTimeout(function() { document.getElementById('fb-panel').classList.remove('open'); status.textContent = ''; }, 1500);
+        } else { status.className = 'fb-error'; status.textContent = 'Something went wrong.'; }
+        submitBtn.disabled = false;
+    }).catch(function() {
+        status.className = 'fb-error'; status.textContent = 'Network error. Try again.';
+        submitBtn.disabled = false;
+    });
+}
+</script>

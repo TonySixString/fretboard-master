@@ -77,7 +77,7 @@ def get_chord_semitones(chord_notes):
 
 @app.before_request
 def check_subscription_token():
-    token = request.args.get('token')
+    token = request.form.get('token') or request.args.get('token')
     if token:
         try:
             payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
@@ -104,15 +104,15 @@ def game():
 def chords():
     return render_template('chords.html', is_subscribed=get_subscription_status())
 
-@app.route('/chord-trainer')
+@app.route('/chord-trainer', methods=['GET', 'POST'])
 def chord_trainer():
     return render_template('chord-trainer.html', is_subscribed=get_subscription_status())
 
-@app.route('/scale-trainer')
+@app.route('/scale-trainer', methods=['GET', 'POST'])
 def scale_trainer():
     return render_template('scale-trainer.html', is_subscribed=get_subscription_status())
 
-@app.route('/notes-and-patterns')
+@app.route('/notes-and-patterns', methods=['GET', 'POST'])
 def notes_and_patterns():
     return render_template('notes-and-patterns.html', is_subscribed=get_subscription_status())
 

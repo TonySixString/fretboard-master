@@ -1,4 +1,9 @@
-feedback.json
+venv/
 __pycache__/
 *.pyc
+*.pyo
 .DS_Store
+.env
+feedback.json
+flask_session/
+*.log
